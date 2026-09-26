@@ -44,6 +44,7 @@ import {
   type KiwiNodeChange
 } from './export/node'
 import { exportTextData, fontVariationToKiwi } from './text-data-export'
+import { toKiwiWindingRule } from './vector-geometry'
 
 function textLines(text: string): NonNullable<NodeChange['textData']>['lines'] {
   const lineCount = Math.max(1, text.split('\n').length)
@@ -408,8 +409,8 @@ function serializeLayoutProps(node: SceneNode, nc: KiwiNodeChange, graph: SceneG
     nc.stackHorizontalPadding = node.paddingLeft
     nc.stackPaddingBottom = node.paddingBottom
     nc.stackPaddingRight = node.paddingRight
-    nc.stackPrimarySizing = node.primaryAxisSizing === 'HUG' ? 'RESIZE_TO_FIT' : 'FIXED'
-    nc.stackCounterSizing = node.counterAxisSizing === 'HUG' ? 'RESIZE_TO_FIT' : 'FIXED'
+    nc.stackPrimarySizing = exportSizing(node.primaryAxisSizing)
+    nc.stackCounterSizing = exportSizing(node.counterAxisSizing)
     nc.stackPrimaryAlignItems = normalizeStackJustify(node.primaryAxisAlign)
     nc.stackCounterAlignItems = normalizeStackCounterAlignItems(node.counterAxisAlign)
     if (node.layoutWrap === 'WRAP') nc.stackWrap = 'WRAP'
@@ -450,14 +451,14 @@ function serializeGeometry(node: SceneNode, nc: KiwiNodeChange, blobs: Uint8Arra
       blobs.push(geometry.commandsBlob)
       if (!geometry.fills || geometry.fills.length === 0) {
         return {
-          windingRule: geometry.windingRule === 'EVENODD' ? 'ODD' : 'NONZERO',
+          windingRule: toKiwiWindingRule(geometry.windingRule),
           commandsBlob: blobIdx
         }
       }
       const styleID = styleOverrides.length + 1
       styleOverrides.push({ styleID, fillPaints: geometry.fills.map(fillToKiwiPaint) })
       return {
-        windingRule: geometry.windingRule === 'EVENODD' ? 'ODD' : 'NONZERO',
+        windingRule: toKiwiWindingRule(geometry.windingRule),
         commandsBlob: blobIdx,
         styleID
       }
@@ -471,7 +472,7 @@ function serializeGeometry(node: SceneNode, nc: KiwiNodeChange, blobs: Uint8Arra
     nc.strokeGeometry = node.strokeGeometry.map((g) => {
       const blobIdx = blobs.length
       blobs.push(g.commandsBlob)
-      return { windingRule: g.windingRule === 'EVENODD' ? 'ODD' : 'NONZERO', commandsBlob: blobIdx }
+      return { windingRule: toKiwiWindingRule(g.windingRule), commandsBlob: blobIdx }
     })
   }
 }

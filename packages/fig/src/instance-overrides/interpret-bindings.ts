@@ -1,5 +1,6 @@
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 
+import { sameGuid } from './source-index'
 import type {
   ComponentPropAssignment,
   ComponentPropDef,
@@ -16,10 +17,6 @@ export interface PropertyBinding {
   rank?: number
   /** Values this binding replaced, innermost first; claims may still address them. */
   superseded?: ComponentPropValue[]
-}
-
-function sameId(a: GUID, b: GUID): boolean {
-  return a.sessionID === b.sessionID && a.localID === b.localID
 }
 
 function assignmentValue(assignment: ComponentPropAssignment): ComponentPropValue | undefined {
@@ -55,7 +52,7 @@ export function instanceBindings(
       origin: 'assignment',
       ...(rank === undefined ? {} : { rank })
     }
-    const index = result.findIndex((entry) => sameId(entry.id, binding.id))
+    const index = result.findIndex((entry) => sameGuid(entry.id, binding.id))
     if (index === -1) {
       result.push(binding)
       continue
@@ -101,7 +98,7 @@ export function bindSourceProperties(
     | undefined
   for (const ref of refs ?? []) {
     if (!ref.defID || ref.isDeleted) continue
-    const binding = bindings.find((entry) => sameId(entry.id, ref.defID as GUID))
+    const binding = bindings.find((entry) => sameGuid(entry.id, ref.defID as GUID))
     if (!binding) continue
     const { value, origin } = binding
     const claim = (field: BoundPropertyClaim['field']): void => {

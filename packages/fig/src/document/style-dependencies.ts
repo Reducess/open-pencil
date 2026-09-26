@@ -3,7 +3,7 @@ import { guidToString } from '@open-pencil/kiwi/fig/guid'
 
 import { forEachOverrideRecord } from '../instance-overrides/types'
 
-const STYLE_REFERENCE_FIELDS = [
+export const STYLE_REFERENCE_FIELDS = [
   'styleIdForFill',
   'styleIdForStrokeFill',
   'styleIdForText',

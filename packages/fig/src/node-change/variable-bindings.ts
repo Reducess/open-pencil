@@ -55,6 +55,17 @@ interface VariableConsumptionSource extends Record<string, unknown> {
 }
 
 /** Modern parameter entries follow legacy entries and can explicitly clear them. */
+/**
+ * A bound opacity is authored as a percentage and stored as a unit fraction, so every
+ * conversion between the two forms goes through this factor.
+ */
+const OPACITY_UNIT_PER_PERCENT = 0.01
+
+/** Only an alias or an expression carries a variable reference worth resolving. */
+export function referencesVariable(dataType: string | undefined): boolean {
+  return dataType === 'ALIAS' || dataType === 'EXPRESSION'
+}
+
 export function variableConsumptionEntries(
   node: VariableConsumptionSource
 ): VariableConsumptionEntry[] {
@@ -87,9 +98,8 @@ export function mergeVariableConsumptionMaps(
     if (index < 0) entries.push(structuredClone(entry))
     else entries[index] = structuredClone(entry)
   }
-  const previous = base.parameterConsumptionMap as object | undefined
-  const next = patch.parameterConsumptionMap as object | undefined
-  return { parameterConsumptionMap: { ...previous, ...next, entries } }
+  // VariableDataMap carries nothing but its entries, so the merged list is the whole map.
+  return { parameterConsumptionMap: { entries } }
 }
 
 export function variableBindingEntry(
@@ -132,7 +142,7 @@ export function variableBindingEntry(
 }
 
 function numericBindingUnit(field: string, distanceScale: number): number {
-  if (field === 'opacity') return 0.01
+  if (field === 'opacity') return OPACITY_UNIT_PER_PERCENT
   if (field === 'rotation') return 1
   return distanceScale
 }
@@ -159,12 +169,14 @@ export function exportedVariableConsumptionEntries(
 ): VariableConsumptionEntry[] {
   const fields = new Set(Object.keys(node.boundVariables))
   for (const entry of variableConsumptionEntries(effectiveFigmaRawNodeFields(node))) {
-    if (!['ALIAS', 'EXPRESSION'].includes(entry.variableData?.dataType ?? '')) continue
+    if (!referencesVariable(entry.variableData?.dataType)) continue
     const field = entry.variableField && VARIABLE_BINDING_FIELDS_INVERSE[entry.variableField]
     if (field) fields.add(field)
   }
   return [...fields].flatMap((field) => {
-    const multiplier = (node.variableBindingScales[field] ?? 1) / (field === 'opacity' ? 0.01 : 1)
+    const multiplier =
+      (node.variableBindingScales[field] ?? 1) /
+      (field === 'opacity' ? OPACITY_UNIT_PER_PERCENT : 1)
     const entry = variableBindingEntry(
       field,
       node.boundVariables[field],
@@ -206,7 +218,8 @@ export function sourceVariableBindingScales(
   for (const entry of variableConsumptionEntries(source)) {
     const binding = resolveVariableConsumptionEntry(entry)
     if (binding && isNumericVariableBindingField(binding.field)) {
-      scales[binding.field] = binding.multiplier * (binding.field === 'opacity' ? 0.01 : 1)
+      scales[binding.field] =
+        binding.multiplier * (binding.field === 'opacity' ? OPACITY_UNIT_PER_PERCENT : 1)
     }
   }
   return scales
@@ -240,6 +253,7 @@ export function resolvedNumericBindingUpdate(
   field: string,
   value: number
 ): Partial<SceneNode> | undefined {
-  if (field === 'opacity') return { opacity: Math.max(0, Math.min(1, value / 100)) }
+  if (field === 'opacity')
+    return { opacity: Math.max(0, Math.min(1, value * OPACITY_UNIT_PER_PERCENT)) }
   return isNumericVariableBindingField(field) ? { [field]: value } : undefined
 }

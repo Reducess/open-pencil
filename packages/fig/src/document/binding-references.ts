@@ -1,11 +1,12 @@
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { stringToGuid } from '@open-pencil/kiwi/fig/guid'
+import { guidToString, stringToGuid } from '@open-pencil/kiwi/fig/guid'
 
 import { symbolOverridesOf, type SymbolOverride } from '../instance-overrides/types'
 import { variableConsumptionEntries } from '../node-change/variable-bindings'
 import { visitVariableReferences } from '../node-change/variable-expression'
 import { normalizeComponentPropertyRecords } from './property-records'
 import { createResourceResolver } from './resource-reference'
+import { STYLE_REFERENCE_FIELDS } from './style-dependencies'
 
 export interface BindingReferenceDiagnostic {
   sourceId: string
@@ -36,7 +37,7 @@ export function resolveDocumentBindingReferences(
   const resolve = createResourceResolver(changes)
   return changes.map((source) => {
     const node = ownership === 'transfer' ? source : structuredClone(source)
-    const sourceId = source.guid ? `${source.guid.sessionID}:${source.guid.localID}` : 'unknown'
+    const sourceId = source.guid ? guidToString(source.guid) : 'unknown'
     const normalize = (
       reference: NodeChange['variableSetID'],
       field: string,
@@ -71,13 +72,7 @@ export function resolveDocumentBindingReferences(
       for (const entry of modeMap?.entries ?? []) {
         normalize(entry.variableSetID, 'variableModeBySetMap', path)
       }
-      for (const field of [
-        'styleIdForText',
-        'styleIdForFill',
-        'styleIdForStrokeFill',
-        'styleIdForEffect',
-        'styleIdForGrid'
-      ] as const) {
+      for (const field of STYLE_REFERENCE_FIELDS) {
         normalize(node[field] as NodeChange['variableSetID'], field, path)
       }
       visitChildren(node, path, visit)

@@ -24,7 +24,7 @@ function normalizeDefaults(node: NodeChange): void {
 
 export function normalizeComponentPropertyRecords(node: NodeChange): void {
   normalizeDefaults(node)
-  const parameters = node.parameterConsumptionMap as { entries?: ParameterEntry[] } | undefined
+  const parameters = node.parameterConsumptionMap
   const refs = structuredClone((node.componentPropRefs as ComponentPropRef[] | undefined) ?? [])
   for (const entry of parameters?.entries ?? []) {
     const id = entry.variableData?.value?.propRefValue?.defId

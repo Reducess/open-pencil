@@ -17,7 +17,8 @@ import { readEffectiveFigmaRawField } from '../source-metadata'
 import {
   resolveVariableConsumptionEntry,
   variableConsumptionEntries,
-  VARIABLE_BINDING_FIELDS_INVERSE
+  VARIABLE_BINDING_FIELDS_INVERSE,
+  referencesVariable
 } from './variable-bindings'
 
 export const OPEN_PENCIL_PLUGIN_ID = 'open-pencil'
@@ -128,10 +129,7 @@ export function extractBoundVariables(nc: NodeChange): Record<string, string> {
   for (const entry of variableConsumptionEntries(nc)) {
     const binding = resolveVariableConsumptionEntry(entry)
     if (binding) bindings[binding.field] = binding.variableId
-    else if (
-      entry.variableField &&
-      !['ALIAS', 'EXPRESSION'].includes(entry.variableData?.dataType ?? '')
-    ) {
+    else if (entry.variableField && !referencesVariable(entry.variableData?.dataType)) {
       const field = VARIABLE_BINDING_FIELDS_INVERSE[entry.variableField]
       if (field) bindings = omit(bindings, [field])
     }

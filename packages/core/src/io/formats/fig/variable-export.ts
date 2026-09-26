@@ -80,7 +80,6 @@ export function assignSharedStyleGuids(
   }
 }
 
-
 function variableValueToKiwi(
   value: VariableValue,
   type: string,

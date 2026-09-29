@@ -5,10 +5,10 @@ import {
   variableConsumptionEntries,
   numericVariableAssignmentScales,
   VARIABLE_BINDING_FIELDS_INVERSE
-} from '../node-change/variable-bindings'
-import { linearVariableExpression } from '../node-change/variable-expression'
-import type { InstanceOccurrence } from './interpret'
-import { uniformScaleOf } from './types'
+} from '#fig/node-change/variable-bindings'
+import { linearVariableExpression } from '#fig/node-change/variable-expression'
+import type { InstanceOccurrence } from '../interpret'
+import { uniformScaleOf } from '../types'
 
 export function occurrenceScale(occurrence: InstanceOccurrence): number {
   return occurrence.layoutScale ?? 1

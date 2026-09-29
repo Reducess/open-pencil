@@ -4,14 +4,14 @@ import { createDefaultSourceMetadata } from '@open-pencil/scene-graph/node-defau
 
 import { nodeChangeToProps } from '../node-change'
 import { numericVariableBindingScales } from '../node-change/variable-bindings'
-import { OVERRIDE_FIELDS, type OverrideField, type RawOverrideField } from './fields'
-import { resolveOccurrencePath, type InstanceOccurrence } from './interpret'
-import { symbolDataOf } from './types'
 import {
   recordVariableBindingClaims,
   occurrenceAssignmentScales,
   occurrenceScale
-} from './variable-bindings'
+} from './bindings/variables'
+import { OVERRIDE_FIELDS, type OverrideField, type RawOverrideField } from './fields'
+import { resolveOccurrencePath, type InstanceOccurrence } from './interpret'
+import { symbolDataOf } from './types'
 
 function occurrenceMetadata(
   current: InstanceOccurrence,

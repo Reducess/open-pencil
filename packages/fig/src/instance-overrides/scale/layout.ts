@@ -1,10 +1,10 @@
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 
-import { LAYOUT_DISTANCE_FIELDS } from './fields'
-import type { InstanceOccurrence } from './interpret'
-import { occurrences } from './occurrence-path'
-import { scaleTextLayout } from './text-scale'
-import { uniformScaleOf } from './types'
+import { LAYOUT_DISTANCE_FIELDS } from '../fields'
+import type { InstanceOccurrence } from '../interpret'
+import { occurrences } from '../occurrence-path'
+import { uniformScaleOf } from '../types'
+import { scaleTextLayout } from './text'
 
 // Distances only: sizing modes, grow factors, and alignment are dimensionless.
 const LAYOUT_DISTANCES = ['stackPadding', ...Object.values(LAYOUT_DISTANCE_FIELDS)] as const

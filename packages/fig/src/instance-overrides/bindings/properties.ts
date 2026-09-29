@@ -1,12 +1,12 @@
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 
-import { sameGuid } from './source-index'
+import { sameGuid } from '../source-index'
 import type {
   ComponentPropAssignment,
   ComponentPropDef,
   ComponentPropRef,
   ComponentPropValue
-} from './types'
+} from '../types'
 
 /** Values belong to one component expansion, never a document-wide property map. */
 export interface PropertyBinding {

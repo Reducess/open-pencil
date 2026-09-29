@@ -1,14 +1,14 @@
 import { expect, test } from 'bun:test'
 
 import { guid } from '#fig-tests/helpers/guid'
-import { materializeComponentClosure } from '#fig/instance-overrides/component-closure'
-import { interpretInstance } from '#fig/instance-overrides/interpret'
 import {
   bindSourceProperties,
   componentBindings,
   instanceBindings,
   type BoundPropertyClaim
-} from '#fig/instance-overrides/interpret-bindings'
+} from '#fig/instance-overrides/bindings/properties'
+import { materializeComponentClosure } from '#fig/instance-overrides/component-closure'
+import { interpretInstance } from '#fig/instance-overrides/interpret'
 import { materializeInstance } from '#fig/instance-overrides/materialize-instance'
 import { mapInstanceSourceChildren } from '#fig/instance-overrides/source-children'
 

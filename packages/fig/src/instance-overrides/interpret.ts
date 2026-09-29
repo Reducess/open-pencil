@@ -3,14 +3,18 @@ import { guidToString } from '@open-pencil/kiwi/fig/guid'
 import type { Vector } from '@open-pencil/scene-graph'
 
 import { mergeVariableConsumptionMaps } from '../node-change/variable-bindings'
-import { applyDerivedEntry } from './derived-symbol-data'
 import {
   bindSourceProperties,
   componentBindings,
   instanceBindings,
   type BoundPropertyClaim,
   type PropertyBinding
-} from './interpret-bindings'
+} from './bindings/properties'
+import {
+  declareVariableBindingUnits,
+  declareSourceVariableBindingUnits
+} from './bindings/variables'
+import { applyDerivedEntry } from './derived-symbol-data'
 import {
   ownLayers,
   type AssignmentGroup,
@@ -18,7 +22,6 @@ import {
   type PropertyLayer,
   type StructuralLayer
 } from './layers'
-import { applyInstanceLayoutScale } from './layout-scale'
 import {
   findSegment,
   isRootGuid,
@@ -27,6 +30,7 @@ import {
   SegmentError
 } from './occurrence-path'
 import { applyPlacedConstraints } from './resize'
+import { applyInstanceLayoutScale } from './scale/layout'
 import {
   createSourceIndex,
   findStaticSegment,
@@ -39,7 +43,6 @@ import {
 } from './source-index'
 import { invalidateInheritedTextData } from './text-provenance'
 import type { ComponentPropAssignment, DerivedSymbolOverride } from './types'
-import { declareVariableBindingUnits, declareSourceVariableBindingUnits } from './variable-bindings'
 
 /**
  * Figma's instance model reduces to three things: an instance expands its component's

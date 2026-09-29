@@ -11,6 +11,7 @@ import {
   variableBindingOwner,
   assignVariableBindingUnits
 } from './variables/bindings'
+import { BOOLEAN_BINDING_FIELDS, STRING_BINDING_FIELDS } from './variables/fields'
 
 export function addVariable(graph: SceneGraph, variable: Variable): void {
   graph.variables.set(variable.id, variable)
@@ -278,10 +279,6 @@ export function getVariablesForCollection(graph: SceneGraph, collectionId: strin
 export function getVariablesByType(graph: SceneGraph, type: VariableType): Variable[] {
   return [...graph.variables.values()].filter((v) => v.type === type)
 }
-
-const STRING_BINDING_FIELDS: ReadonlySet<string> = new Set(['fontFamily'])
-
-const BOOLEAN_BINDING_FIELDS: ReadonlySet<string> = new Set(['visible'])
 
 export function bindVariable(
   graph: SceneGraph,

@@ -47,5 +47,3 @@ export function captureTransferredState(
     )
   }
 }
-
-/** Record image ownership before commit, including when event delivery later throws. */

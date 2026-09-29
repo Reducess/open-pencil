@@ -27,8 +27,8 @@ Figma-authored archive
 | Direct render comparison | New-reader graph renders similarly | Export/reopen fidelity |
 | Figma reopen and interaction | External interpretation and tested editing work | All documents/features work |
 
-**Required invariant:** Figma is the compatibility oracle. Repeated round-trip stability and
-agreement with the old reader are insufficient.
+**Required invariant:** Figma is the compatibility oracle. Round-trip stability through our own
+reader proves only that we are self-consistent.
 
 ## Comparison discipline
 
@@ -37,7 +37,7 @@ agreement with the old reader are insufficient.
 - Capture complete trees, including hidden descendants. Report hidden geometry separately.
 - Match bounds, scale, fonts, and color space before measuring pixels.
 - Use native resolution or increased export scale; do not downsample away differences.
-- Do not export/reimport through the old reader to assess the new interpreter's rendering.
+- Do not judge rendering by exporting and reimporting through our own reader.
 - Separate font availability from exact binary identity.
 - Compare edited output to the same edit in original Figma, not an unchanged original.
 - After mutation, allow dependent state to settle before reading the result.
@@ -77,7 +77,6 @@ a recorded run.
 
 - [Comparison and capture implementation](../../../tools/visual-oracles/src/document/)
 - [Command implementation](../../../tools/visual-oracles/src/operations/compare/interpreted-document.ts)
-- [Direct instance rendering workflow](../../../tools/visual-oracles/INSTANCE-INTERPRETER.md)
 
 ## Gates and regression placement
 
@@ -97,3 +96,21 @@ The complete repository test requirements remain in [AGENTS.md](../../../AGENTS.
 round trips is not yet complete. Corpus acceptance must cover Gold, shadcn, Material 3, and
 nuxtui, with strictness, performance, and page-loading equivalence tracked separately. Counts
 and timings from individual runs belong in result artifacts or the integration PR.
+
+## Render check
+
+`visual-oracles interpret-instance` renders an interpreted instance through Skia and, with
+`--figma-key`, exports the same node from the open Figma document for comparison:
+
+```sh
+bun open-pencil-visual-oracles interpret-instance \
+  --file tests/fixtures/gold-preview.fig --node 1:3503 \
+  --scale 2 --output /tmp/gold-input-comparison
+```
+
+It verifies the active file key and calls `exportAsync` with an explicit scale rather than
+relying on saved export settings. Outputs are `interpreted.png`, `report.json` with font
+status, unresolved paths and node bounds, and with a key `figma.png` and `figma-bounds.json`.
+
+`visual-oracles compare interpreted-document` does the same for a whole archive against the
+document opened in Figma, reporting property and geometry differences per node.

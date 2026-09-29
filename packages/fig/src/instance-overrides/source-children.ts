@@ -44,11 +44,6 @@ export function reconcileOccurrenceStructure(
 }
 
 /**
- * Each instance owner addresses descendants in its own component expansion.
- * A nested instance therefore has both its own correspondence and the outer
- * owner's correspondence; a swap ends the outer owner's descendant scope.
- */
-/**
  * Pair each child of a target occurrence with the child of its source occurrence that has
  * the same source identity. Both sides describe one component's children, so identities
  * are unique on the source side and every target child has a counterpart.
@@ -69,6 +64,11 @@ function* pairSourceChildren(
   }
 }
 
+/**
+ * Each instance owner addresses descendants in its own component expansion. A nested
+ * instance therefore has both its own correspondence and the outer owner's; a swap ends
+ * the outer owner's descendant scope.
+ */
 export function linkInstanceSourceChildren(
   root: InstanceOccurrence,
   materialized: MaterializedInstance,

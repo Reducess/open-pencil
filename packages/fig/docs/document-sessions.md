@@ -62,8 +62,8 @@ sequenceDiagram
 ```
 
 Only an accepted delta advances the receiver's checkpoint. Original archive bytes remain
-available for recovery and are released with session ownership. Recovery does not substitute
-the old importer or replace the edited graph.
+available for recovery and are released with session ownership. Recovery never replaces the
+edited graph.
 
 Checkpoints contain source-to-node mappings, loaded pages, saved-size tracking, and component
 topology addressed by complete source-identity paths. Occurrence property payloads are
@@ -99,7 +99,6 @@ This is load rollback, not an undo command. Existing user history remains intact
 - All frontend lifecycle and cancellation scenarios are not yet accepted. Synchronous work
   cannot be interrupted merely by queuing a cancel message; transport termination is tested.
 - Large-page construction and checkpoint costs still require performance work.
-- Full production migration and removal of old parse paths are pending.
 
 ## Implementation and tests
 

@@ -25,6 +25,11 @@ const main = defineCommand({
       'Bring a Figma desktop tab to the front by title before an oracle capture',
       'tools/visual-oracles/src/operations/activate-tab.ts'
     ),
+    'interpret-instance': operationCommand(
+      'interpret-instance',
+      'Render an interpreted instance through Skia and compare it with Figma',
+      'tools/visual-oracles/src/operations/interpret-instance.ts'
+    ),
     'update-report': operationCommand(
       'update-report',
       'Update the visual comparison report',

@@ -106,7 +106,5 @@ test('page preparation recovers an invalidated replacement worker without replac
   } finally {
     releaseFigPopulationWorker(graph)
   }
-  expect(() => recoverReaderPage(graph, graph.getPages()[2].id)).toThrow(
-    'No replacement reader recovery state'
-  )
+  expect(() => recoverReaderPage(graph, graph.getPages()[2].id)).toThrow('No reader recovery state')
 })

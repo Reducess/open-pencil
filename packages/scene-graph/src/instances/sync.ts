@@ -1,3 +1,4 @@
+// Child cloning and property synchronization shared by instance creation, swap, and sync.
 import { isEqual } from 'es-toolkit/predicate'
 
 import type { SceneGraph, SceneNode } from '../'
@@ -13,7 +14,6 @@ import { scaleNodeChanges } from '../scaling/node'
 import { scaleVariableBindingUnits } from '../variables/units'
 import { INSTANCE_SYNC_FIELDS } from './fields'
 
-/** Child cloning and property synchronization shared by instance creation, swap, and sync. */
 function setSceneProp<K extends keyof SceneNode>(
   target: Partial<SceneNode>,
   key: K,

@@ -4,7 +4,7 @@ import type { FigPageManifestEntry } from '@open-pencil/kiwi/fig'
 import { buildFigPopulationDelta, installFigMutationJournal } from '#core/kiwi/fig/population/delta'
 import { readerSessionOptions, type FigReaderDiagnostic } from '#core/kiwi/fig/session/options'
 
-/** Format-neutral worker transport adapter for the FIG reader session. */
+/** Worker and main-thread transport for the .fig reader session for the FIG reader session. */
 export function openReaderSession(
   bytes: ArrayBuffer,
   populate: 'all' | 'first-page' | 'none' = 'all'

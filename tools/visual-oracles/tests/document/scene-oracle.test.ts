@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 
-import { compareSceneOracle, type SceneOracleNode } from '../src/document/scene-oracle'
+import { compareSceneOracle, type SceneOracleNode } from '#visual/scene-oracle'
 
 const node = (path: number[], visible = true): SceneOracleNode => ({
   path,

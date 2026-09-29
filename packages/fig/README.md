@@ -22,8 +22,7 @@ Current ownership:
 ## Architecture documentation
 
 Start with [the package docs](./docs/README.md) for the source model, instance evaluation,
-materialization, document sessions, export, and validation contracts. The replacement is
-complete only when every consumer is migrated and the old reader is deleted.
+materialization, document sessions, export, and validation contracts.
 
 Planned ownership:
 

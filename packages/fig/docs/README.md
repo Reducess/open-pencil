@@ -31,7 +31,7 @@ archive -> source model -> instance evaluation -> materialization
 - **Implemented:** behavior present in the linked modules and covered by the cited tests.
 - **Known limitation:** a boundary not yet implemented or validated; not a supported fallback.
 
-Every consumer uses this reader and the old reader and repair pipeline are deleted; there is
+Every consumer uses this reader; the previous importer and its repair pipeline are gone, so there is
 one interpretation path, not a legacy mode. Remaining work is fidelity and performance
 acceptance against Figma, tracked per document as known limitations.
 

@@ -225,10 +225,6 @@ function interpretRoot(
     descendant: StructuralLayer[]
   }
 
-  /**
-   * Root layers select the effective component and the complete assignment list, in
-   * inner-to-outer order so later entries win. Everything else addresses a descendant.
-   */
   /** Components an occurrence would have expanded before outer bindings replaced them. */
   const bindingHistory = (
     raw: NodeChange,
@@ -242,6 +238,10 @@ function interpretRoot(
     )
   }
 
+  /**
+   * Root layers select the effective component and the complete assignment list, in
+   * inner-to-outer order so later entries win. Everything else addresses a descendant.
+   */
   const resolveRoot = (
     raw: NodeChange,
     source: NodeChange,
@@ -359,10 +359,6 @@ function interpretRoot(
     }
   }
 
-  /**
-   * Expand one source record. `layers` are structural layers addressed relative to this
-   * expansion: an empty path configures this record itself, a longer path a descendant.
-   */
   /** Bind the record's fields from the enclosing component scope, recording provenance. */
   const bindRecord = (
     raw: NodeChange,

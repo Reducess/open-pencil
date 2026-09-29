@@ -51,7 +51,7 @@ function createReader(
     ownership
   )
   // One index over these records serves inheritance, style lookup, the dependency closure
-  // and component planning; each pass used to build its own over the same array.
+  // and component planning.
   const index = createSourceIndex(changes)
   inheritComponentPropertyDefinitions(changes, index.sources)
   const styles = index.sources
@@ -76,9 +76,8 @@ function createReader(
 }
 
 /**
- * Everything a scoped reader needs that does not depend on which pages are selected.
- * Selecting a page rebuilt both whole-document indexes, so loading N pages indexed the
- * archive 2N times; only the page's own subset actually varies.
+ * Everything a scoped reader needs that does not depend on which pages are selected. Only
+ * the page's own subset varies, so the whole-document work happens once per document.
  */
 interface SharedReaderState {
   index: SourceIndex

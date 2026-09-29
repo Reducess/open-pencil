@@ -5,8 +5,7 @@ import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
  *
  * Only the nodes just materialized are rewritten. Definition types are remembered across
  * page loads, because an assignment on a new node can name a definition an earlier page
- * introduced; seeding that cache is the only pass that has to see the whole graph, and it
- * happens once rather than once per page.
+ * introduced; seeding that cache is the only pass that reads the whole graph.
  */
 export function linkComponentPropertyValues(
   graph: SceneGraph,

@@ -51,7 +51,7 @@ export function serializedSceneGraphTransferList(data: SerializedSceneGraph): Tr
 }
 
 /**
- * Clone the graph state that lazy FIG population may mutate while retaining immutable imported
+ * Clone the graph state that page population may mutate while retaining immutable imported
  * resources by reference. Population replaces node fields and mutates child ID arrays, but only
  * reads image bytes, variables, source changes, GUID mappings, blobs, and schema bytes.
  */

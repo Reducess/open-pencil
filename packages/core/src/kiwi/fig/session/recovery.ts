@@ -65,7 +65,7 @@ export function populateReaderExport(source: SceneGraph, target: SceneGraph): bo
   const state = states.get(source)
   if (!state) return false
   const checkpoint = state.session?.checkpoint() ?? state.checkpoint
-  if (!checkpoint) throw new Error('Missing replacement reader checkpoint')
+  if (!checkpoint) throw new Error('Missing reader checkpoint')
   const session = createFigDocumentSession(state.bytes, readerSessionOptions(state.diagnostics), {
     graph: target,
     checkpoint
@@ -87,9 +87,9 @@ export function releaseReaderRecovery(graph: SceneGraph): void {
 
 export function recoverReaderPage(graph: SceneGraph, pageId: string): boolean {
   const state = states.get(graph)
-  if (!state) throw new Error('No replacement reader recovery state')
+  if (!state) throw new Error('No reader recovery state')
   if (!state.session) {
-    if (!state.checkpoint) throw new Error('Missing replacement reader checkpoint')
+    if (!state.checkpoint) throw new Error('Missing reader checkpoint')
     state.session = createFigDocumentSession(state.bytes, readerSessionOptions(state.diagnostics), {
       graph,
       checkpoint: state.checkpoint

@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 
-import { summarizePathDiagnostics } from '../src/document/path-diagnostics'
+import { summarizePathDiagnostics } from '#visual/path-diagnostics'
 
 test('keeps different effective replacement components in separate groups', () => {
   const diagnostic = {

@@ -30,7 +30,7 @@ export interface MaterializedInstance {
 }
 
 /**
- * Materialize an interpreted tree, without legacy population, sync, or layout.
+ * Materialize an interpreted tree. Population, sync and layout are the caller's to run.
  * Component IDs must refer to existing COMPONENT nodes in the destination graph.
  * Occurrence provenance stays in the returned map, not in fabricated FIG metadata.
  */

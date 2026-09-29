@@ -29,12 +29,12 @@ export interface DocumentAssemblyOptions extends InterpretInstanceOptions {
   /** Restrict scene population to these source pages plus required component ownership. */
   pageIds?: ReadonlySet<string>
   images?: ReadonlyMap<string, Uint8Array>
-  /** Explicit acknowledgement until variable-resource conversion is implemented. */
+  /** A resource record the materializer does not convert; acknowledged rather than dropped. */
   onUnsupportedResource?: (resource: NodeChange) => void
   onUnresolvedBinding?: (diagnostic: BindingReferenceDiagnostic) => void
 }
 
-/** Full-page graph assembly. Styles, variables and lazy loading are not integrated yet. */
+/** Assemble every page of an archive into one graph. */
 export function materializeDocument(
   changes: readonly NodeChange[],
   blobs: Uint8Array[] = [],
@@ -270,8 +270,7 @@ function materializeReader(
       if (id && sources.has(id)) node[field] = sources.get(id) ?? id
     }
   }
-  // These passes used to scan the whole graph and skip what was already there, so loading a
-  // page re-visited every node materialized by the pages before it.
+  // These passes apply to the nodes this page added, not to the whole graph.
   const materialized = [...graph.nodes.values()].filter((node) => !existingNodeIds.has(node.id))
   state.definitionTypes ??= seedDefinitionTypes(graph)
   linkComponentPropertyValues(graph, sources, materialized, state.definitionTypes)

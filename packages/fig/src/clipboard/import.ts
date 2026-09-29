@@ -7,15 +7,6 @@ import { decodeBinarySchema, compileSchema, ByteBuffer } from '@open-pencil/kiwi
 import { parseFigKiwiChunks, decompressFigKiwiDataAsync } from '../node-change'
 import { isFigClipboardVisualType } from '../node-classification'
 
-function decodeBase64(value: string): Uint8Array {
-  if (!isValid(value)) throw new TypeError('Invalid Base64 string')
-  return toUint8Array(value)
-}
-function decodeBase64Text(value: string): string {
-  if (!isValid(value)) throw new TypeError('Invalid Base64 string')
-  return decodeText(value)
-}
-
 interface FigmaClipboardMeta {
   fileKey: string
   pasteID: number
@@ -29,8 +20,10 @@ export async function parseFigmaClipboard(
   const bufMatch = html.match(/\(figma\)(.*?)\(\/figma\)/s)
   if (!metaMatch || !bufMatch) return null
 
-  const meta: FigmaClipboardMeta = JSON.parse(decodeBase64Text(metaMatch[1]))
-  const binary = decodeBase64(bufMatch[1])
+  // Clipboard HTML comes from other applications, so its Base64 is checked first.
+  if (!isValid(metaMatch[1]) || !isValid(bufMatch[1])) throw new TypeError('Invalid Base64 string')
+  const meta: FigmaClipboardMeta = JSON.parse(decodeText(metaMatch[1]))
+  const binary = toUint8Array(bufMatch[1])
 
   try {
     const chunks = parseFigKiwiChunks(binary)

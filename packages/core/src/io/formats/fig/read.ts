@@ -8,9 +8,12 @@ import {
   registerOriginalArchiveRequest
 } from '#core/kiwi/fig/population/client'
 import { createFigSessionWorker } from '#core/kiwi/fig/session/client'
+import {
+  registerReaderRecovery,
+  registerReaderSession
+} from '#core/kiwi/fig/session/document-state'
 import type { FigSessionOpenRequest, FigSessionResponse } from '#core/kiwi/fig/session/protocol'
 import { openReaderSession } from '#core/kiwi/fig/session/reader'
-import { registerReaderRecovery, registerReaderSession } from '#core/kiwi/fig/session/recovery'
 import { randomHex } from '#core/random'
 
 export interface ParseFigFileOptions {

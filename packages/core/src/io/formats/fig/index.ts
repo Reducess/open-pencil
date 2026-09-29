@@ -5,4 +5,4 @@ export {
   populateFigPage,
   populateAllFigPages,
   readerDiagnostics
-} from '#core/kiwi/fig/session/recovery'
+} from '#core/kiwi/fig/session/document-state'

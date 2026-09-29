@@ -1,7 +1,7 @@
 import type { SceneGraph } from '@open-pencil/scene-graph'
 
+import { updateReaderRecovery, releaseReaderRecovery } from '#core/kiwi/fig/session/document-state'
 import type { FigSessionResponse } from '#core/kiwi/fig/session/protocol'
-import { updateReaderRecovery, releaseReaderRecovery } from '#core/kiwi/fig/session/recovery'
 import { randomHex } from '#core/random'
 
 import { applyFigPopulationDelta } from './delta'

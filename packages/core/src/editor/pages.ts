@@ -6,7 +6,7 @@ import {
   canUseFigPopulationWorker,
   createFigPopulationWorker
 } from '#core/kiwi/fig/population/client'
-import { isReaderPagePending, recoverReaderPage } from '#core/kiwi/fig/session/recovery'
+import { isReaderPagePending, recoverReaderPage } from '#core/kiwi/fig/session/document-state'
 import { computeAllLayouts } from '#core/layout'
 import { fontManager } from '#core/text/fonts'
 import { collectGraphFontRequirements } from '#core/text/requirements'

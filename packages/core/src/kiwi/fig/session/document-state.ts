@@ -3,14 +3,18 @@ import type { SceneGraph } from '@open-pencil/scene-graph'
 
 import { readerSessionOptions, type FigReaderDiagnostic } from '#core/kiwi/fig/session/options'
 
-interface RecoveryState {
+/**
+ * Per-graph reader state: the archive bytes, the live session or its checkpoint, and the
+ * records that session skipped. Page population, diagnostics and recovery all read it.
+ */
+interface ReaderState {
   bytes: ArrayBuffer
   checkpoint?: FigSessionCheckpoint
   session?: ReturnType<typeof createFigDocumentSession>
   /** Records skipped by sessions this recovery state has opened. */
   diagnostics: FigReaderDiagnostic[]
 }
-const states = new WeakMap<SceneGraph, RecoveryState>()
+const states = new WeakMap<SceneGraph, ReaderState>()
 
 export function registerReaderRecovery(
   graph: SceneGraph,

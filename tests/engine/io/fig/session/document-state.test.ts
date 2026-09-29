@@ -12,13 +12,13 @@ import {
   releaseFigPopulationWorker
 } from '#core/kiwi/fig/population/client'
 import { applyFigPopulationDelta } from '#core/kiwi/fig/population/delta'
-import type { FigSessionPopulateRequest, FigSessionResponse } from '#core/kiwi/fig/session/protocol'
-import { openReaderSession } from '#core/kiwi/fig/session/reader'
 import {
   registerReaderRecovery,
   updateReaderRecovery,
   recoverReaderPage
-} from '#core/kiwi/fig/session/recovery'
+} from '#core/kiwi/fig/session/document-state'
+import type { FigSessionPopulateRequest, FigSessionResponse } from '#core/kiwi/fig/session/protocol'
+import { openReaderSession } from '#core/kiwi/fig/session/reader'
 
 test('rejected worker response cannot mark an unloaded page loaded in recovery', async () => {
   await initCodec()

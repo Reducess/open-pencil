@@ -3,8 +3,8 @@ import { expect, test } from 'bun:test'
 import { exportFigFile, initCodec, parseFigFile } from '@open-pencil/core'
 import { parseFigBuffer } from '@open-pencil/fig'
 
+import { readerDiagnostics, registerReaderSession } from '#core/kiwi/fig/session/document-state'
 import { openReaderSession } from '#core/kiwi/fig/session/reader'
-import { readerDiagnostics, registerReaderSession } from '#core/kiwi/fig/session/recovery'
 
 import { readFixtureArrayBuffer } from '#tests/helpers/fig/fixtures'
 import { HEAVY_TEST_TIMEOUT_MS, runsHeavyTests } from '#tests/helpers/test-utils'

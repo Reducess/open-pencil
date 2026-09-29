@@ -29,8 +29,8 @@ import {
   makeCanvasNodeChange
 } from '#core/kiwi/fig/node-change/serialize'
 import { cloneSceneGraphForFigExport } from '#core/kiwi/fig/parse/transfer'
+import { populateReaderExport } from '#core/kiwi/fig/session/document-state'
 import { originalFigArchive } from '#core/kiwi/fig/session/original-archive'
-import { populateReaderExport } from '#core/kiwi/fig/session/recovery'
 
 import {
   appendVariableNodeChanges,

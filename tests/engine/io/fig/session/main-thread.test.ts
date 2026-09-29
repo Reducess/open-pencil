@@ -10,7 +10,7 @@ import { initCodec } from '@open-pencil/core/kiwi'
 import { SceneGraph } from '@open-pencil/scene-graph'
 
 import { releaseFigPopulationWorker } from '#core/kiwi/fig/population/client'
-import { hasReaderSession } from '#core/kiwi/fig/session/recovery'
+import { hasReaderSession } from '#core/kiwi/fig/session/document-state'
 
 async function fixture(missingInternalDefault = false) {
   await initCodec()

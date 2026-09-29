@@ -1,4 +1,5 @@
 import { pick } from 'es-toolkit/object'
+import { toUint8Array } from 'js-base64'
 
 import { computeAllLayouts, computeLayout } from '@open-pencil/core/layout'
 import { materializeDocument } from '@open-pencil/fig'
@@ -38,7 +39,7 @@ interface RenderNode {
 function interpretedTree(phase: 'before' | 'edited'): RenderNode {
   const { graph, sources } = materializeDocument(
     [{ guid: { sessionID: 0, localID: 0 }, type: 'DOCUMENT' }, ...fixture[phase]] as NodeChange[],
-    fixture.blobs.map((value) => new Uint8Array(Buffer.from(value, 'base64'))),
+    fixture.blobs.map((value) => toUint8Array(value)),
     { derivedBounds: true }
   )
   computeAllLayouts(graph)
@@ -99,7 +100,7 @@ test('nested scale preserves before and edited padding after layout', async () =
 test('saved inherited expressions follow token edits without double scaling', async () => {
   const { graph, sources } = materializeDocument(
     inheritedNestedBindingRecords(),
-    bindingFixture.blobs.map((value) => new Uint8Array(Buffer.from(value, 'base64'))),
+    bindingFixture.blobs.map((value) => toUint8Array(value)),
     { derivedBounds: true }
   )
   const rootId = sources.get('293733:8')
@@ -125,7 +126,7 @@ test('saved inherited expressions follow token edits without double scaling', as
 test('definition rescale updates existing occurrence geometry', async () => {
   const { graph, sources } = materializeDocument(
     inheritedNestedBindingRecords(),
-    bindingFixture.blobs.map((value) => new Uint8Array(Buffer.from(value, 'base64'))),
+    bindingFixture.blobs.map((value) => toUint8Array(value)),
     { derivedBounds: true }
   )
   const root = sources.get('293733:8'),
@@ -149,7 +150,7 @@ for (const operation of ['component', 'rescale'] as const) {
   test(`${operation} edits preserve scaled geometry and authored bindings`, async () => {
     const { graph, sources } = materializeDocument(
       bindingFixture.nodeChanges as NodeChange[],
-      bindingFixture.blobs.map((value) => new Uint8Array(Buffer.from(value, 'base64'))),
+      bindingFixture.blobs.map((value) => toUint8Array(value)),
       { derivedBounds: true }
     )
     const rootId = sources.get('293733:8'),

@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 
 import { $ } from 'bun'
+import { toUint8Array } from 'js-base64'
 
 import { SkiaRenderer } from '@open-pencil/core/canvas'
 import { initCanvasKit, renderNodesToImage } from '@open-pencil/core/io'
@@ -95,7 +96,7 @@ if (values['figma-key']) {
     png: string
     bounds: unknown
   }
-  await Bun.write(join(values.output, 'figma.png'), Buffer.from(exported.png, 'base64'))
+  await Bun.write(join(values.output, 'figma.png'), toUint8Array(exported.png))
   await Bun.write(
     join(values.output, 'figma-bounds.json'),
     JSON.stringify(exported.bounds, null, 2)

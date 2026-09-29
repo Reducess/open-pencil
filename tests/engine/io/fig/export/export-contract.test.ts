@@ -1,5 +1,7 @@
 import { expect, test } from 'bun:test'
 
+import { toUint8Array } from 'js-base64'
+
 import { exportFigFile } from '@open-pencil/core/io'
 import { initCodec } from '@open-pencil/core/kiwi'
 import { materializeDocument, parseFigBuffer } from '@open-pencil/fig'
@@ -11,7 +13,7 @@ test('Figma-authored minimal contract exports a decodable node stream', async ()
   await initCodec()
   const { graph } = materializeDocument(
     fixture.records as NodeChange[],
-    fixture.blobs.map((value) => new Uint8Array(Buffer.from(value, 'base64')))
+    fixture.blobs.map((value) => toUint8Array(value))
   )
   const bytes = await exportFigFile(graph)
   const { nodeChanges } = parseFigBuffer(bytes.buffer as ArrayBuffer)
@@ -34,7 +36,7 @@ test('Figma-authored minimal contract exports a decodable node stream', async ()
 test('reads Figma-authored modern property defaults and references', () => {
   const { graph, sources } = materializeDocument(
     fixture.records as NodeChange[],
-    fixture.blobs.map((value) => new Uint8Array(Buffer.from(value, 'base64')))
+    fixture.blobs.map((value) => toUint8Array(value))
   )
   const componentId = sources.get(fixture.ids.component)
   const textId = sources.get(fixture.ids.text)

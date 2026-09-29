@@ -16,7 +16,7 @@ scaled binding is absent from that Plugin API projection despite remaining a liv
 The token values are the values supplied to the variable setters immediately before capture.
 The experiment modifies only a disposable imported document, not the original Gold document.
 
-`nested-binding-ownership-records.json` contains the 12 records and three base64 blobs from
+`nested-binding-ownership-records.json` contains the 12 records and three base 64 blobs from
 Figma's local-save canvas payload after the direct token reaches 12. Top-level edit attribution
 is omitted. The binding is a `parameterConsumptionMap` entry on the outer instance's
 `symbolOverrides` path `[1:5]`; the outer record retains `uniformScaleFactor: 0.5`.
@@ -31,7 +31,7 @@ Interpretation uses recorded declarations and paths, not equal values or node na
 The interpreted document is edited, undone, and re-encoded, then reopened in Figma. The nested
 instance retains its explicit variable alias and padding 6, with nested/outer widths 13.5/33.5.
 Changing the token from 12 to 16 in reopened Figma changes padding to 8 and widths to 15.5/35.5.
-The token is restored to 12 before capturing `nested-binding-ownership-figma.png`: a 268×56 PNG
+The token is restored to 12 before capturing `tests/fixtures/nested-binding-ownership-figma.png`: a 268×56 PNG
 at scale 8. A headless raster regression edits the imported token to 16 and back to 12, then
 compares exact decoded sRGB RGBA pixels with this independent image, without fuzz or resampling.
 

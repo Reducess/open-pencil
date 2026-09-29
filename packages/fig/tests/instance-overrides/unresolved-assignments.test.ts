@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
 
+import { expectPathError } from '#fig-tests/helpers/errors'
 import { guid } from '#fig-tests/helpers/guid'
 import {
   interpretInstance,
@@ -31,7 +32,7 @@ test('missing assignment targets require explicit partial-evaluation acknowledge
       }
     }
   ] as NodeChange[]
-  expect(() => interpretInstance(changes, '1:3')).toThrow('found 0')
+  expectPathError(() => interpretInstance(changes, '1:3'), 'missing-target')
   const diagnostics: InstanceAssignmentDiagnostic[] = []
   const result = interpretInstance(changes, '1:3', {
     onUnresolvedAssignment: (d) => diagnostics.push(d)

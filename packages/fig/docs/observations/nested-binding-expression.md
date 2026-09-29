@@ -19,7 +19,7 @@ outer width 42.5, proving the expression remains live. It is restored to 40 befo
 Figma's `boundVariables` projection is empty for this inherited expression; that does not mean
 it is unbound. Captures are in `nested-binding-expression.json`.
 
-`nested-binding-expression-figma.png` is the reopened 8× Figma export (300×56). Headless tests
+`tests/fixtures/nested-binding-expression-figma.png` is the reopened 8× Figma export (300×56). Headless tests
 edit the imported token to 60 and back to 40 and compare exact decoded sRGB RGBA pixels. A
 separate browser snapshot covers the before/after geometry projection. Engine tests cover
 editor history, same-alias rebinding, and local edited re-encoding.

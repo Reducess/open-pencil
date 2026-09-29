@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
 
+import { expectPathError } from '#fig-tests/helpers/errors'
 import { guid } from '#fig-tests/helpers/guid'
 import { interpretInstance, resolveOccurrencePath } from '#fig/instance-overrides/interpret'
 
@@ -172,5 +173,5 @@ test('an outer swap retires an inherited nested swap against the replaced compon
     symbolID: guid(10),
     symbolOverrides: [{ guidPath: { guids: [guid(99)] }, overriddenSymbolID: guid(2) }]
   } as NodeChange['symbolData']
-  expect(() => interpretInstance(broken, '1:40')).toThrow('found 0')
+  expectPathError(() => interpretInstance(broken, '1:40'), 'missing-target')
 })

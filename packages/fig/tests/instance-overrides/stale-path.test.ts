@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
 
+import { expectPathError } from '#fig-tests/helpers/errors'
 import { interpretInstance, type InstancePathDiagnostic } from '#fig/instance-overrides/interpret'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
@@ -37,11 +38,13 @@ test('diagnostic mode still rejects unresolved structural overrides', () => {
     ]
   } as NodeChange['symbolData']
   const diagnostics: InstancePathDiagnostic[] = []
-  expect(() =>
-    interpretInstance(changes, '7:95', {
-      onUnresolvedProperty: (diagnostic) => diagnostics.push(diagnostic)
-    })
-  ).toThrow('found 0')
+  expectPathError(
+    () =>
+      interpretInstance(changes, '7:95', {
+        onUnresolvedProperty: (diagnostic) => diagnostics.push(diagnostic)
+      }),
+    'missing-target'
+  )
   expect(diagnostics).toEqual([])
 })
 

@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
 
+import { expectPathError } from '#fig-tests/helpers/errors'
 import { interpretInstance } from '#fig/instance-overrides/interpret'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
@@ -26,6 +27,6 @@ for (const similarity of ['equal-values', 'equal-fields', 'matching-suffix'] as 
         symbolData: { symbolID: guid(1), symbolOverrides: [common, live] }
       }
     ]
-    expect(() => interpretInstance(records, '1:4')).toThrow('Expected one instance-path target')
+    expectPathError(() => interpretInstance(records, '1:4'), 'missing-target')
   })
 }

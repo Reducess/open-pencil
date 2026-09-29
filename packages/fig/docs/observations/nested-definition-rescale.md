@@ -8,11 +8,11 @@ outer size is 22.5×7 and nested size 12.5×7, with left/right padding 5/2.5.
 OpenPencil imports the inherited-expression variant of `nested-binding-ownership-records.json`,
 halves the placed owner's scale, and doubles the definition child's scale. The editor's queued
 component synchronization updates occurrence coordinate scales as well as numeric properties.
-Export reopened in Figma retains matching geometry. Token20→40 gives nested left10, nested
-width17.5, and outer width27.5. The token is restored20.
+Export reopened in Figma retains matching geometry. Token 20→40 gives nested left 10, nested
+width 17.5, and outer width 27.5. The token is restored to 20.
 
 `nested-definition-rescale.json` records native before/after, reopen, and token observations.
-`nested-definition-rescale-figma.png` is the native after-edit export at8× (180×56). The engine
+`tests/fixtures/nested-definition-rescale-figma.png` is the native after-edit export at 8× (180×56). The engine
 renderer matches exact decoded sRGB RGBA pixels. Engine tests separately exercise editor
 scheduling, local edited re-encoding, token updates, and coordinate metadata.
 

@@ -30,14 +30,14 @@ Figma does not apply those two `size` claims, and the reason is that the edit th
 not exist in Figma. A descendant inside an instance cannot be resized: `resize()` through the
 Plugin API is a silent no-op on any instance descendant, in an imported file and in a component
 the API creates itself, and the handles are unavailable in the UI. Across `gold-preview.fig`,
-`material3.fig` and `nuxtui.fig` not one size claim targets a descendant that is not an
+`material 3.fig` and `nuxtui.fig` not one size claim targets a descendant that is not an
 instance, and of the 100 that target a nested instance and differ from its record, 82 restate
 that instance's own size claim while the rest are hug heights its text produced. A descendant
 `size` claim is therefore a restatement of a nested instance's own size, never a free resize.
 
 Three encodings were tried before that was clear, each suggested by one archive and refuted by
 another, and all three are reverted: addressing path segments by `overrideKey` (`gold-preview`
-is a file of library instances and addresses every segment by key, while `material3` uses a
+is a file of library instances and addresses every segment by key, while `material 3` uses a
 GUID for 51,332 of its segments), `overrideLevel` on descendant claims, and
 `derivedSymbolDataLayoutVersion`.
 
@@ -57,7 +57,7 @@ three Badge instances with distinct avatar swaps, the badge icon visibility, hid
 trailing avatars, the trailing chevron, and placeholder typography. Figma recomputes the hug
 width with its own text metrics (376.34 against 375.75 saved).
 
-**material3 (edited).** Opens with all pages after every page was loaded and exported,
+**material 3 (edited).** Opens with all pages after every page was loaded and exported,
 including the internal canvas that holds instances of deleted components. A List item swapped
 to another variant by its List reopens as that variant; App bar leading icons resolve to the
 icon each owner assigned; icon vectors keep their `On Surface Variant` alias. The Button set
@@ -66,7 +66,7 @@ keeps its 50 variants and axis properties.
 Import was done by hand through Figma's Import dialog; inspection ran through `figma-use eval`
 and then through `tools/visual-oracles … compare/interpreted-document.ts` against each
 imported file (`--file` the exported archive, `--figma-key` the imported file). Property
-differences: synthetic instance 0 of 5 nodes, synthetic Panel instance 0 of 6 nodes, material3
+differences: synthetic instance 0 of 5 nodes, synthetic Panel instance 0 of 6 nodes, material 3
 App bar `Configuration=Small, Elevation=Flat` 0 of 25 nodes, gold-preview Input 0 of 89 nodes.
 The Panel instance has 14 geometry-only differences: four from the unapplied `size` claims, and
 the positions of its auto-layout children, which the fixture saved at the instance origin

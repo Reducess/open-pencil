@@ -12,7 +12,7 @@ Effective widths are 30/10 before and 37.5/14.5 after (outer/inner). The rectang
 
 Only the controlled page and its five scene records are retained. A document root is supplied
 by the tests. Edit attribution is omitted, and referenced geometry blobs are remapped to the
-fixture's base64 table. The temporary page was removed after capture.
+fixture's base 64 table. The temporary page was removed after capture.
 
 Tests cover interpretation, layout recomputation, editor undo/redo, local edited re-encoding,
 and a browser canvas snapshot of the interpreted before/edited trees at 6× zoom. The snapshot
@@ -23,7 +23,7 @@ does not by itself establish exported-file reopening or pixel parity in Figma.
 
 Starting from `before`, the editor changes outer paddingLeft to 13 and nested paddingLeft to 7,
 then exports a new `.fig` archive. Figma reopens that archive with outer/nested widths 37.5/14.5,
-paddingLeft 13/7, and a 5×5 rectangle at nested position (7, 1). `nested-layout-scale-figma.png`
+paddingLeft 13/7, and a 5×5 rectangle at nested position (7, 1). `tests/fixtures/nested-layout-scale-figma.png`
 is the reopened root's 300×56 PNG, exported through Figma's Plugin API at scale 8. The headless
 raster test compares decoded sRGB RGBA pixels at the same size without fuzz or resampling.
 The comparison has zero differing pixels.

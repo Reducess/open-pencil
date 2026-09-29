@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
 
+import { expectPathError } from '#fig-tests/helpers/errors'
 import { guid } from '#fig-tests/helpers/guid'
 import { interpretInstance } from '#fig/instance-overrides/interpret'
 
@@ -60,7 +61,7 @@ test('binding swap ignores known removed-child paint claims without discarding u
     ...malformedSource.symbolData,
     symbolOverrides: [{ guidPath: { guids: [guid(999)] }, fillPaints: [] }]
   } as NodeChange['symbolData']
-  expect(() => interpretInstance(malformed, '1:8')).toThrow('found 0')
+  expectPathError(() => interpretInstance(malformed, '1:8'), 'missing-target')
   const swapped = interpretInstance(changes, '1:8', { derivedBounds: true }).children[0]
   expect(swapped.children[0].derivedSize).toBeUndefined()
   expect(
@@ -70,7 +71,10 @@ test('binding swap ignores known removed-child paint claims without discarding u
   malformedSource.derivedSymbolData = [
     { guidPath: { guids: [guid(999)] }, size: { x: 16, y: 16 } }
   ] as NodeChange['derivedSymbolData']
-  expect(() => interpretInstance(malformed, '1:8', { derivedBounds: true })).toThrow('found 0')
+  expectPathError(
+    () => interpretInstance(malformed, '1:8', { derivedBounds: true }),
+    'missing-target'
+  )
   const ambiguousSource = structuredClone(changes)
   ambiguousSource.push({
     guid: guid(9),
@@ -88,7 +92,10 @@ test('binding swap ignores known removed-child paint claims without discarding u
   outer.derivedSymbolData = [
     { guidPath: { guids: [guid(6), guid(999)] }, size: { x: 24, y: 24 } }
   ] as NodeChange['derivedSymbolData']
-  expect(() => interpretInstance(malformedOuter, '1:8', { derivedBounds: true })).toThrow('found 0')
+  expectPathError(
+    () => interpretInstance(malformedOuter, '1:8', { derivedBounds: true }),
+    'missing-target'
+  )
   expect(swapped.children[0].sourceId).toBe('1:4')
   expect(swapped.children[0].properties.fillPaints?.[0]?.color?.b).toBe(1)
   expect(interpretInstance(changes, '1:7').children[0].children[0].properties.fillPaints).toEqual(

@@ -72,7 +72,7 @@ bun tools/visual-oracles/src/operations/activate-tab.ts --title gold-preview-edi
 
 Property and structural differences are export defects. Geometry differences on hug and fill
 layouts are expected: the reader applies saved derived geometry without a layout pass, while
-Figma recomputes layout with its own text metrics. See `tests/fixtures/reader-reopen.md` for
+Figma recomputes layout with its own text metrics. See [the reopen log](./observations/reader-reopen.md) for
 a recorded run.
 
 - [Comparison and capture implementation](../../../tools/visual-oracles/src/document/)

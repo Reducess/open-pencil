@@ -1,9 +1,9 @@
 # Clipboard transfer external reopen
 
 A captured nested instance is encoded as Figma clipboard HTML, pasted through the real editor
-into a fresh graph, and exported as a document. Reopened Figma reports outer33.5×7, nested
-width13.5, and left padding6 with a direct alias to the remapped variable. Changing token12→16
-gives outer35.5, nested15.5, and left8. The token is restored12.
+into a fresh graph, and exported as a document. Reopened Figma reports outer 33.5×7, nested
+width 13.5, and left padding 6 with a direct alias to the remapped variable. Changing token 12→16
+gives outer 35.5, nested 15.5, and left 8. The token is restored to 12.
 
 `clipboard-transfer-reopen.json` records those native observations. Figma renames the placed
 root to `Outer` on reopen, dropping the custom `Clipboard acceptance` name. This is not name

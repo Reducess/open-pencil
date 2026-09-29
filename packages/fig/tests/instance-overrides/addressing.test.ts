@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
+import { expectPathError } from '#fig-tests/helpers/errors'
 import { interpretInstance } from '#fig/instance-overrides/interpret'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
@@ -98,7 +99,7 @@ describe('instance addressing contracts', () => {
       symbolID: outer,
       symbolOverrides: [{ guidPath: { guids: [alias] }, opacity: 0 }]
     } as NodeChange['symbolData']
-    expect(() => interpretInstance(input, '4:1')).toThrow('found 0')
+    expectPathError(() => interpretInstance(input, '4:1'), 'missing-target')
   })
 
   test('rejects ambiguous overrideKey matches rather than choosing the first', () => {
@@ -109,7 +110,7 @@ describe('instance addressing contracts', () => {
       overrideKey: alias,
       parentIndex: { guid: component, position: '"' }
     })
-    expect(() => interpretInstance(input, '4:1')).toThrow('found 2')
+    expectPathError(() => interpretInstance(input, '4:1'), 'ambiguous-target')
   })
 
   test('rejects missing component sources', () => {

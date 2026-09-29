@@ -7,7 +7,7 @@ Independent Figma Plugin API assignment gives paddingRight 6 on both nodes, nest
 and outer width 33. An OpenPencil Figma API export reopened in Figma retains those values and
 both aliases. Geometry and bound-variable captures are in `nested-binding-authoring.json`.
 
-`nested-binding-authoring-figma.png` is an independent Figma export of the native assignment,
+`tests/fixtures/nested-binding-authoring-figma.png` is an independent Figma export of the native assignment,
 at scale 8 (264×56). The headless authored-binding regression compares exact decoded sRGB RGBA
 pixels, without resampling or tolerance.
 
@@ -17,7 +17,7 @@ On the reopened file, changing the Inner main component's paddingTop from 4 to 8
 nested paddingTop 2 and height 8. Both direct aliases remain live and paddingRight stays 6.
 The source property is restored to 4 after capture. `document/binding/authoring.test.ts` now
 passes the independently captured value 2, preserves the bindings, and covers undo/redo.
-`nested-component-scale-figma.png` is the independent 264×64 Figma raster at 8×; headless pixels
+`tests/fixtures/nested-component-scale-figma.png` is the independent 264×64 Figma raster at 8×; headless pixels
 match exactly. A browser snapshot also covers the before/after geometry projection.
 
 An OpenPencil export after the component edit reopens in Figma with root size 33×8, nested

@@ -10,7 +10,7 @@ in Figma. `nested-owner-rescale.json` records matching geometry. Changing the re
 direct token from 12 to 16 gives outer width 19.5, nested width 10.5, and padding 4.
 The token is restored to 12 afterward.
 
-`nested-owner-rescale-figma.png` is the independent native clone export at 8× (132×28).
+`tests/fixtures/nested-owner-rescale-figma.png` is the independent native clone export at 8× (132×28).
 The reopened Figma export and OpenPencil headless rendering both match its decoded sRGB
 RGBA pixels exactly. A separate browser snapshot covers before/after graph geometry.
 

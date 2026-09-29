@@ -117,7 +117,7 @@ Inherited inner binding:  token 20 × inner 0.5 × outer 0.5 = padding 5
 Outer-owner declaration: token 12             × outer 0.5 = padding 6
 ```
 
-The [captured nested declaration](../../../tests/fixtures/nested-binding-ownership.md) retains its
+The [captured nested declaration](./observations/nested-binding-ownership.md) retains its
 alias through import, token editing, undo, and re-encoding. Independently reopened Figma preserves
 the alias and responds to token edits; an exact raster comparison covers the restored value.
 Export records declarations per field rather than reauthoring unrelated inherited bindings in the
@@ -135,11 +135,11 @@ effective own-record coefficients and owner-relative claim coefficients instead 
 unscaled aliases. Unsupported operators, multiple aliases, constant-only binding expressions,
 and non-finite products fail explicitly.
 
-[Captured expression acceptance](../../../tests/fixtures/nested-binding-expression.md) covers
+[Captured expression acceptance](./observations/nested-binding-expression.md) covers
 import, token edits/history, edited re-encoding, Figma reactivity, and exact pixels. It does not
 establish a general expression engine or arbitrary expression/component-edit interactions.
 
-[Per-field binding inheritance](../../../tests/fixtures/per-field-binding-reopen.md) preserves
+[Per-field binding inheritance](./observations/per-field-binding-reopen.md) preserves
 an explicit placed binding while unrelated definition bindings update and remain live after
 Figma reopen. Protection is normalized within each declaring owner before combining scopes;
 one owner's granular declarations cannot weaken another owner's legacy whole-map protection.
@@ -152,7 +152,7 @@ a component definition. Assignment records per-field claims before notifying obs
 restores prior values, conversions, and claims without reauthoring an inherited binding. Cloning
 and portable transfer retain the assignment units.
 
-[New root and nested assignments](../../../tests/fixtures/nested-binding-authoring.md) now pass
+[New root and nested assignments](./observations/nested-binding-authoring.md) now pass
 editor/API, local re-encoding, independent Figma reopen, and exact raster checks.
 
 SceneGraph's explicit `componentScale` records occurrence coordinate conversion separately from
@@ -162,17 +162,17 @@ fields controlled by protected bindings remain protected. Only changed propertie
 graph, so unchanged text does not lose saved glyph caches. Shared geometry rescaling lives in
 SceneGraph's `scaling/` domain; the Core Figma API delegates there.
 
-[Placed-owner rescaling](../../../tests/fixtures/nested-owner-rescale.md) exports the live
+[Placed-owner rescaling](./observations/nested-owner-rescale.md) exports the live
 `componentScale`, owner-relative numeric claims, and refreshed descendant geometry snapshots.
 Those snapshots do not author new descendant size claims. A captured half-scale operation
 passes independent Figma reopen, continued token reactivity, exact pixels, and browser projection.
 Local tests additionally cover enlargement to unit scale and literal padding claims.
 
-[Native nested rescale probes](../../../tests/fixtures/nested-rescale-restrictions.md) distinguish
+[Native nested rescale probes](./observations/nested-rescale-restrictions.md) distinguish
 placed occurrence descendants from children inside a component definition. Figma's Plugin API
 rejects the former, even at factor one, while permitting the latter. Core's API applies this
 restriction before mutation; the generic SceneGraph scaling primitive remains policy-neutral.
-[A captured definition-level rescale](../../../tests/fixtures/nested-definition-rescale.md)
+[A captured definition-level rescale](./observations/nested-definition-rescale.md)
 now propagates through the editor scheduler, exports/reopens in Figma, retains token reactivity,
 and matches exact native pixels. Existing child occurrence scales derive from the source child
 and source/target parent scales, rather than retaining stale pre-edit coordinate metadata.

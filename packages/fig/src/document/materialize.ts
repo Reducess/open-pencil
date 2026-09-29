@@ -288,5 +288,5 @@ function materializeReader(
     applyDocumentLayoutBindings(graph, savedSizeNodes, materialized, layoutScales)
     applyDocumentPaintBindings(graph, materialized)
   })
-  return { graph, sources, components, componentIds, savedSizeNodes }
+  return state
 }

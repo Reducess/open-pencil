@@ -1,11 +1,6 @@
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 
-import {
-  createSourceIndex,
-  idOf,
-  parentIdOf,
-  type SourceIndex
-} from '../instance-overrides/source-index'
+import { idOf, parentIdOf, type SourceIndex } from '../instance-overrides/source-index'
 import { componentDependencies } from './component/dependencies'
 import { createResourceResolver } from './resource-reference'
 import { styleDependencies } from './style-dependencies'
@@ -60,11 +55,11 @@ function collectAncestors(
 /** Plan reachability without deleting records or expanding unrelated internal siblings. */
 export function collectSceneDependencies(
   changes: readonly NodeChange[],
-  pageIds?: ReadonlySet<string>,
-  index?: SourceIndex
+  pageIds: ReadonlySet<string> | undefined,
+  index: SourceIndex
 ): SceneDependencyClosure {
   const resolveReference = createResourceResolver(changes)
-  const { sources, children } = index ?? createSourceIndex(changes)
+  const { sources, children } = index
   const availableIds = new Set(sources.keys())
   const contentIds = new Set<string>()
   const ancestorIds = new Set<string>()

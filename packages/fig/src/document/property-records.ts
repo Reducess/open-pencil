@@ -6,10 +6,6 @@ interface PropertyDefinition {
   initialValue?: ComponentPropAssignment['value']
   varValue?: ComponentPropAssignment['varValue']
 }
-interface ParameterEntry {
-  variableField?: string
-  variableData?: { dataType?: string; value?: { propRefValue?: { defId?: GUID } } }
-}
 
 /** Adapt current typed property values to the interpreter's common representation. */
 function normalizeDefaults(node: NodeChange): void {

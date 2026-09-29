@@ -1,21 +1,13 @@
-import type { FigSessionCheckpoint } from '@open-pencil/fig'
 import type { SceneGraph } from '@open-pencil/scene-graph'
 
 import type { FigSessionResponse } from '#core/kiwi/fig/session/protocol'
 import { updateReaderRecovery, releaseReaderRecovery } from '#core/kiwi/fig/session/recovery'
 import { randomHex } from '#core/random'
 
-import { applyFigPopulationDelta, type FigPopulationDelta } from './delta'
+import { applyFigPopulationDelta } from './delta'
 
-interface PopulationResult {
-  type: 'population-result'
-  requestId: string
-  baseRevision: number
-  populated: boolean
-  checkpoint?: FigSessionCheckpoint
-  delta: FigPopulationDelta
-}
-type WorkerResult = PopulationResult | { type: 'population-error'; error: string }
+/** The two responses this client acts on, taken from the session protocol itself. */
+type WorkerResult = Extract<FigSessionResponse, { type: 'population-result' | 'population-error' }>
 
 const MAX_FIG_POPULATION_WORKER_NODES = 200_000
 const FIG_POPULATION_WORKER_TIMEOUT_MS = 30_000
@@ -213,8 +205,7 @@ export function createPopulationWorkerClient(
     })
   }
   if (port) {
-    port.onmessage = (event: MessageEvent<FigSessionResponse>) =>
-      receive(event.data as WorkerResult)
+    port.onmessage = (event: MessageEvent<WorkerResult>) => receive(event.data)
     port.start()
   } else {
     worker.onmessage = (event: MessageEvent<WorkerResult>) => receive(event.data)

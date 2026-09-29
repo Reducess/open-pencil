@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test'
 
 import { guid } from '#fig-tests/helpers/guid'
 import { collectSceneDependencies } from '#fig/document/dependency-closure'
+import { createSourceIndex } from '#fig/instance-overrides/source-index'
 
 import { materializeDocument } from '@open-pencil/fig'
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
@@ -25,7 +26,7 @@ test('retains external preferred choices separately from required component depe
     { guid: guid(3), type: 'SYMBOL', key: 'local', parentIndex: { guid: guid(4), position: '!' } },
     { guid: guid(4), type: 'CANVAS', internalOnly: true }
   ] as NodeChange[]
-  const result = collectSceneDependencies(changes)
+  const result = collectSceneDependencies(changes, undefined, createSourceIndex(changes))
   expect(result.contentIds.has('1:3')).toBe(true)
   expect([...result.externalPreferredKeys]).toEqual(['external'])
   expect(result.missingIds.size).toBe(0)
@@ -56,7 +57,7 @@ test('includes component ownership without pulling in unrelated internal definit
       symbolData: { symbolID: guid(5) }
     }
   ]
-  const result = collectSceneDependencies(changes)
+  const result = collectSceneDependencies(changes, undefined, createSourceIndex(changes))
   expect([...result.contentIds].sort()).toEqual(['1:2', '1:5', '1:7'])
   expect(result.ancestorIds.has('1:4')).toBe(true)
   expect(result.missingIds.size).toBe(0)
@@ -66,7 +67,7 @@ test('includes component ownership without pulling in unrelated internal definit
   if (!componentId) throw new Error('Missing required component')
   expect(assembled.graph.getNode(componentId)?.parentId).toBe(assembled.sources.get('1:4'))
   expect(assembled.sources.has('1:6')).toBe(false)
-  const reached = collectSceneDependencies([
+  const closureChanges = [
     ...changes,
     {
       guid: guid(8),
@@ -74,7 +75,12 @@ test('includes component ownership without pulling in unrelated internal definit
       parentIndex: { guid: guid(2), position: '"' },
       symbolData: { symbolID: guid(99) }
     }
-  ])
+  ] as NodeChange[]
+  const reached = collectSceneDependencies(
+    closureChanges,
+    undefined,
+    createSourceIndex(closureChanges)
+  )
   expect([...reached.missingComponentIds]).toEqual(['1:99'])
   expect(reached.missingIds.size).toBe(0)
 })

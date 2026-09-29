@@ -4,6 +4,7 @@ import { guid } from '#fig-tests/helpers/guid'
 import { planComponentConstruction } from '#fig/document/components'
 import { materializeDocument } from '#fig/document/materialize'
 import { createDocumentReader } from '#fig/document/read'
+import { indexRecords } from '#fig/instance-overrides/source-index'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 
@@ -45,9 +46,14 @@ test('reads pages independently through one index with cross-page component expa
   expect(reader.readPage('1:3').children[0].children[0].properties.opacity).toBeUndefined()
   expect(reader.readPage('1:2').children[0].sourceId).toBe('1:4')
   const roots = [page, reader.readPage('1:2')]
-  const reused = planComponentConstruction(changes, roots, () => {
-    throw new Error('Unexpected component re-expansion')
-  })
+  const reused = planComponentConstruction(
+    changes,
+    roots,
+    () => {
+      throw new Error('Unexpected component re-expansion')
+    },
+    indexRecords(changes)
+  )
   expect(reused[0].occurrence).toBe(roots[1].children[0])
   const plan = reader.planComponents([page, reader.readPage('1:2')])
   expect(

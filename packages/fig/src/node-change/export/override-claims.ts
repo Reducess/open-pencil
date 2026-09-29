@@ -1,5 +1,4 @@
 import { SCENE_OVERRIDE_FIELDS } from '#fig/instance-overrides/fields'
-import { effectiveFigmaRawNodeFields } from '#fig/source-metadata'
 
 import { stringToGuid } from '@open-pencil/kiwi/fig/guid'
 import { forEachInstanceOverride, type SceneNode } from '@open-pencil/scene-graph'
@@ -8,33 +7,19 @@ import type { GUID, Vector } from '@open-pencil/scene-graph/primitives'
 import { instanceExportAddress } from '../instance-geometry'
 import { mergeVariableConsumptionMaps, overrideVariableBindingEntry } from '../variable-bindings'
 import {
+  buildStyleReferences,
   createFillPaints,
   createStrokePaints,
   getOrCreateNodeGuid,
   instanceGuidResolver,
   isDescendantOf,
   type KiwiSymbolOverridePayload,
-  type SceneNodeToKiwiContext
+  type SceneNodeToKiwiContext,
+  type StyleReference
 } from './context'
 
-function exportedTextStyleReference(context: SceneNodeToKiwiContext, id: string) {
-  if (!context.styleReferences) {
-    const references = new Map<
-      string,
-      { guid?: GUID; assetRef?: { key: string; version?: string } }
-    >()
-    for (const node of context.graph.getAllNodes()) {
-      if (node.sharedStyleType !== 'TEXT' || !node.source.id) continue
-      const raw = effectiveFigmaRawNodeFields(node)
-      if (typeof raw.key !== 'string') continue
-      const assetRef = {
-        key: raw.key,
-        ...(typeof raw.version === 'string' ? { version: raw.version } : {})
-      }
-      references.set(node.source.id, { assetRef })
-    }
-    context.styleReferences = references
-  }
+function exportedTextStyleReference(context: SceneNodeToKiwiContext, id: string): StyleReference {
+  context.styleReferences ??= buildStyleReferences(context.graph)
   const mapped = context.nodeIdToGuid?.get(id)
   if (mapped) return { guid: mapped }
   return context.styleReferences.get(id) ?? { guid: stringToGuid(id) }

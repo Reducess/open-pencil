@@ -3,7 +3,7 @@ import { guidToString } from '@open-pencil/kiwi/fig/guid'
 
 import type { InstanceOccurrence } from '../instance-overrides/interpret'
 import { occurrences } from '../instance-overrides/occurrence-path'
-import { indexRecords, parentIdOf } from '../instance-overrides/source-index'
+import { parentIdOf } from '../instance-overrides/source-index'
 
 export interface ComponentConstruction {
   sourceId: string
@@ -17,9 +17,9 @@ export function planComponentConstruction(
   changes: readonly NodeChange[],
   roots: readonly InstanceOccurrence[],
   readComponent: (id: string) => InstanceOccurrence,
-  index?: ReadonlyMap<string, NodeChange>
+  index: ReadonlyMap<string, NodeChange>
 ): ComponentConstruction[] {
-  const sources = index ?? indexRecords(changes)
+  const sources = index
   const pageComponents = new Map<string, InstanceOccurrence>()
   const indexPageComponents = (node: InstanceOccurrence): void => {
     if (node.mainComponentId !== null) return

@@ -1,3 +1,5 @@
+import { effectiveFigmaRawNodeFields } from '#fig/source-metadata'
+
 import type { NodeChange, Paint } from '@open-pencil/kiwi/fig/codec'
 import { stringToGuid } from '@open-pencil/kiwi/fig/guid'
 import type { ComponentPropertyDefinition, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
@@ -12,11 +14,31 @@ export interface KiwiSymbolOverridePayload {
   [key: string]: unknown
 }
 
+/** How a record names a shared style: a local GUID, or a published library asset. */
+export interface StyleReference {
+  guid?: GUID
+  assetRef?: { key: string; version?: string }
+}
+
+/** Published text styles by source id, built once with the rest of the context. */
+export function buildStyleReferences(graph: SceneGraph): ReadonlyMap<string, StyleReference> {
+  const references = new Map<string, StyleReference>()
+  for (const node of graph.getAllNodes()) {
+    if (node.sharedStyleType !== 'TEXT' || !node.source.id) continue
+    const raw = effectiveFigmaRawNodeFields(node)
+    if (typeof raw.key !== 'string') continue
+    references.set(node.source.id, {
+      assetRef: {
+        key: raw.key,
+        ...(typeof raw.version === 'string' ? { version: raw.version } : {})
+      }
+    })
+  }
+  return references
+}
+
 export interface SceneNodeToKiwiContext {
-  styleReferences?: ReadonlyMap<
-    string,
-    { guid?: GUID; assetRef?: { key: string; version?: string } }
-  >
+  styleReferences?: ReadonlyMap<string, StyleReference>
   graph: SceneGraph
   blobs: Uint8Array[]
   blobIndexByHex?: Map<string, number>

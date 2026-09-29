@@ -101,13 +101,13 @@ function createSharedReaderState(changes: readonly NodeChange[], index: SourceIn
 function createScopedReader(
   changes: NodeChange[],
   bindingDiagnostics: BindingReferenceDiagnostic[],
-  pageIds?: ReadonlySet<string>,
-  shared?: SharedReaderState
+  pageIds: ReadonlySet<string> | undefined,
+  shared: SharedReaderState
 ) {
   const resources = changes.filter(
     (change) => change.type === 'VARIABLE' || change.type === 'VARIABLE_SET'
   )
-  const closure = collectSceneDependencies(changes, pageIds, shared?.index)
+  const closure = collectSceneDependencies(changes, pageIds, shared.index)
   // Deleted components are interpreted per instance; broken hierarchy is not recoverable.
   if (closure.missingIds.size)
     throw new Error(`Missing reachable sources: ${[...closure.missingIds].join(', ')}`)
@@ -120,11 +120,7 @@ function createScopedReader(
           (closure.contentIds.has(guidToString(change.guid)) ||
             closure.ancestorIds.has(guidToString(change.guid)))))
   )
-  const sourceInterpreter = shared
-    ? shared.sourceInterpreter
-    : createOccurrenceInterpreter(
-        changes.filter((change) => change.type !== 'VARIABLE' && change.type !== 'VARIABLE_SET')
-      )
+  const sourceInterpreter = shared.sourceInterpreter
   const interpreter = createOccurrenceInterpreter(sceneChanges)
   const pages = changes
     .filter((change) => change.type === 'CANVAS')
@@ -167,7 +163,7 @@ function createScopedReader(
         changes,
         roots,
         (id) => sourceInterpreter.component(id, options),
-        shared?.index.sources
+        shared.index.sources
       )
     },
     readComponent: sourceInterpreter.component

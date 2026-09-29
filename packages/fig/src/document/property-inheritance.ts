@@ -1,7 +1,7 @@
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { guidToString } from '@open-pencil/kiwi/fig/guid'
 
-import { indexRecords, parentIdOf } from '../instance-overrides/source-index'
+import { parentIdOf } from '../instance-overrides/source-index'
 
 interface LinkedPropertyDefinition {
   id?: GUID
@@ -12,9 +12,9 @@ interface LinkedPropertyDefinition {
 /** Resolve definition inheritance only within the source node's ancestry. */
 export function inheritComponentPropertyDefinitions(
   changes: readonly NodeChange[],
-  index?: ReadonlyMap<string, NodeChange>
+  index: ReadonlyMap<string, NodeChange>
 ): void {
-  const sources = index ?? indexRecords(changes)
+  const sources = index
   const pending = new Set<NodeChange>()
   const complete = new Set<NodeChange>()
   const resolve = (node: NodeChange): void => {

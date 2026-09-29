@@ -40,19 +40,14 @@ test('derives repeated nested child correspondence from materialized component o
   const components = new Map([['1:1', { occurrence: inner, materialized: innerGraph }]])
   const ids = new Map([['1:1', innerGraph.root.id]])
   const outer = interpretComponent(changes, '1:3')
-  const outerGraph = materializeInstance(
-    graph,
-    page.id,
-    outer,
-    ids,
-    [],
-    mapInstanceSourceChildren(outer, components)
-  )
+  const outerGraph = materializeInstance(graph, page.id, outer, ids, {
+    sourceChildren: mapInstanceSourceChildren(outer, components)
+  })
   components.set('1:3', { occurrence: outer, materialized: outerGraph })
   ids.set('1:3', outerGraph.root.id)
   const occurrence = interpretInstance(changes, '1:6')
   const mapping = mapInstanceSourceChildren(occurrence, components)
-  const result = materializeInstance(graph, page.id, occurrence, ids, [], mapping)
+  const result = materializeInstance(graph, page.id, occurrence, ids, { sourceChildren: mapping })
   const [first, second] = occurrence.children
   expect(mapping.get(first)).not.toBe(mapping.get(second))
   expect(mapping.get(first.children[0])).toBe(mapping.get(second.children[0]))

@@ -36,8 +36,7 @@ test('nested instances retain their outer source-child correspondence during syn
       ['1:1', outer.id],
       ['1:2', inner.id]
     ]),
-    [],
-    new Map([[occurrence.children[0], sourceChild.id]])
+    { sourceChildren: new Map([[occurrence.children[0], sourceChild.id]]) }
   )
   const child = graph.getChildren(result.root.id)[0]
   expect(child.componentId).toBe(inner.id)
@@ -78,8 +77,7 @@ test('swapped nested instances do not regain children from the original componen
       ['1:1', outer.id],
       ['1:2', replacement.id]
     ]),
-    [],
-    new Map([[occurrence.children[0], sourceChild.id]])
+    { sourceChildren: new Map([[occurrence.children[0], sourceChild.id]]) }
   )
   const child = graph.getChildren(result.root.id)[0]
   graph.syncInstances(outer.id)
@@ -106,14 +104,9 @@ test('existing component synchronization updates unedited occurrences and preser
   const label = graph.createNode('TEXT', component.id, { text: 'Default' })
   const create = () => {
     const occurrence = interpretInstance(source, '1:3')
-    return materializeInstance(
-      graph,
-      page.id,
-      occurrence,
-      new Map([['1:1', component.id]]),
-      [],
-      new Map([[occurrence.children[0], label.id]])
-    )
+    return materializeInstance(graph, page.id, occurrence, new Map([['1:1', component.id]]), {
+      sourceChildren: new Map([[occurrence.children[0], label.id]])
+    })
   }
   const first = create()
   const second = create()

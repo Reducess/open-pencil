@@ -34,15 +34,32 @@ export interface MaterializedInstance {
  * Component IDs must refer to existing COMPONENT nodes in the destination graph.
  * Occurrence provenance stays in the returned map, not in fabricated FIG metadata.
  */
+/** What an occurrence tree needs beyond the graph it is written into. */
+export interface MaterializeInstanceOptions {
+  blobs?: Uint8Array[]
+  /** Graph ids for occurrences a component definition already materialized. */
+  sourceChildren?: ReadonlyMap<InstanceOccurrence, string>
+  /** Nodes to update in place rather than create, keyed by occurrence. */
+  existingNodes?: ReadonlyMap<InstanceOccurrence, SceneNode>
+}
+
+/** A document or a variable is a resource record, never a node in an expansion. */
+function assertMaterializableType(
+  nodeType: 'DOCUMENT' | 'VARIABLE' | SceneNode['type']
+): asserts nodeType is SceneNode['type'] {
+  if (nodeType === 'DOCUMENT' || nodeType === 'VARIABLE') {
+    throw new Error(`Cannot materialize ${nodeType} as an instance descendant`)
+  }
+}
+
 export function materializeInstance(
   graph: SceneGraph,
   parentId: string,
   occurrence: InstanceOccurrence,
   components: ReadonlyMap<string, string>,
-  blobs: Uint8Array[] = [],
-  sourceChildren: ReadonlyMap<InstanceOccurrence, string> = new Map(),
-  existingNodes: ReadonlyMap<InstanceOccurrence, SceneNode> = new Map()
+  options: MaterializeInstanceOptions = {}
 ): MaterializedInstance {
+  const { blobs = [], sourceChildren = new Map(), existingNodes = new Map() } = options
   if (!graph.getNode(parentId)) throw new Error('Missing materialization parent')
   const prepared = new Map<InstanceOccurrence, ReturnType<typeof nodeChangeToProps>>()
   const validate = (current: InstanceOccurrence): void => {
@@ -51,9 +68,7 @@ export function materializeInstance(
     if (converted.nodeType === 'TEXT' && current.derivedSize) {
       converted.derivedLayout = { width: current.derivedSize.x, height: current.derivedSize.y }
     }
-    if (converted.nodeType === 'DOCUMENT' || converted.nodeType === 'VARIABLE') {
-      throw new Error(`Cannot materialize ${converted.nodeType} as an instance descendant`)
-    }
+    assertMaterializableType(converted.nodeType)
     const existing = existingNodes.get(current)
     if (
       existing &&
@@ -92,9 +107,7 @@ export function materializeInstance(
     const converted = prepared.get(current)
     if (!converted) throw new Error('Missing prepared occurrence')
     const { nodeType, ...props } = converted
-    if (nodeType === 'DOCUMENT' || nodeType === 'VARIABLE') {
-      throw new Error(`Cannot materialize ${nodeType} as an instance descendant`)
-    }
+    assertMaterializableType(nodeType)
     const metadata = occurrenceMetadata(current, converted)
     const propsWithIdentity = {
       ...props,

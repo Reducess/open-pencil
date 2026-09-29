@@ -216,15 +216,11 @@ function materializeReader(
       if (node.mainComponentId === null) node.children.forEach(collectExisting)
     }
     collectExisting(item.occurrence)
-    const materialized = materializeInstance(
-      graph,
-      parentId,
-      item.occurrence,
-      componentIds,
+    const materialized = materializeInstance(graph, parentId, item.occurrence, componentIds, {
       blobs,
-      mapInstanceSourceChildren(item.occurrence, components),
+      sourceChildren: mapInstanceSourceChildren(item.occurrence, components),
       existingNodes
-    )
+    })
     rememberDerivedSizes(materialized.nodes)
     linkInstanceSourceChildren(item.occurrence, materialized, components)
     components.set(item.sourceId, { occurrence: item.occurrence, materialized })
@@ -239,14 +235,10 @@ function materializeReader(
     for (const child of occurrence.children) {
       if (previous) reconcileOccurrenceStructure(child, graph, components)
       if (child.mainComponentId !== null && !sources.has(child.sourceId)) {
-        const materialized = materializeInstance(
-          graph,
-          parentId,
-          child,
-          componentIds,
+        const materialized = materializeInstance(graph, parentId, child, componentIds, {
           blobs,
-          mapInstanceSourceChildren(child, components)
-        )
+          sourceChildren: mapInstanceSourceChildren(child, components)
+        })
         rememberDerivedSizes(materialized.nodes)
         linkInstanceSourceChildren(child, materialized, components)
         if (previous) {

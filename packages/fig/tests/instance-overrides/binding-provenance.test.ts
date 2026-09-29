@@ -40,14 +40,9 @@ test('materialization preserves explicit equal-to-default text', () => {
   const occurrence = interpretInstance(changes, '3:3')
   const closure = materializeComponentClosure(graph, page.id, changes, occurrence)
   const ids = new Map([...closure].map(([id, value]) => [id, value.materialized.root.id]))
-  const result = materializeInstance(
-    graph,
-    page.id,
-    occurrence,
-    ids,
-    [],
-    mapInstanceSourceChildren(occurrence, closure)
-  )
+  const result = materializeInstance(graph, page.id, occurrence, ids, {
+    sourceChildren: mapInstanceSourceChildren(occurrence, closure)
+  })
   const component = closure.get('3:1')
   if (!component) throw new Error('Missing component')
   graph.updateNode(graph.getChildren(component.materialized.root.id)[0].id, { text: 'Changed' })
@@ -83,14 +78,9 @@ for (const assigned of [false, true]) {
     const occurrence = interpretInstance(changes, '2:3')
     const closure = materializeComponentClosure(graph, page.id, changes, occurrence)
     const ids = new Map([...closure].map(([id, value]) => [id, value.materialized.root.id]))
-    const result = materializeInstance(
-      graph,
-      page.id,
-      occurrence,
-      ids,
-      [],
-      mapInstanceSourceChildren(occurrence, closure)
-    )
+    const result = materializeInstance(graph, page.id, occurrence, ids, {
+      sourceChildren: mapInstanceSourceChildren(occurrence, closure)
+    })
     const child = graph.getChildren(result.root.id)[0]
     expect(child.visible).toBe(false)
     expect(hasInstanceOverride(graph, child.id, 'visible')).toBe(assigned)

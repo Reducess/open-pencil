@@ -59,14 +59,10 @@ export function materializeComponentClosure(
     pending.add(id)
     const occurrence = interpreter.component(id, options)
     visit(occurrence)
-    const materialized = materializeInstance(
-      graph,
-      parentId,
-      occurrence,
-      ids,
+    const materialized = materializeInstance(graph, parentId, occurrence, ids, {
       blobs,
-      mapInstanceSourceChildren(occurrence, components)
-    )
+      sourceChildren: mapInstanceSourceChildren(occurrence, components)
+    })
     linkInstanceSourceChildren(occurrence, materialized, components)
     components.set(id, { occurrence, materialized })
     ids.set(id, materialized.root.id)

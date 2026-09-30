@@ -113,7 +113,9 @@ The library is strict by default: a missing or ambiguous target throws. `Interpr
 lets a caller skip and report instead: `onUnresolvedProperty` and `onUnresolvedAssignment` for
 records that address nodes the archive no longer contains, and `onMissingComponent` for an
 instance of a deleted component, which then stays a childless instance with its saved
-reference. A swap whose replacement is missing is always fatal. Reports retain owner, effective
+reference. A swap reports the same way when its target layer no longer exists, which Figma
+retains as readily as a stale property override; an address that matches more than one record
+is a wrong path rather than a stale one and stays fatal. Reports retain owner, effective
 component context, complete path, and assignment payload where applicable.
 
 Figma retains such records after deletions, so the application reader opts into all three

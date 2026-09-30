@@ -184,10 +184,15 @@ function interpretRoot(
       resolvesInSourceComponent(index, component, boundary.path)
     ) ?? false
 
+  /**
+   * An address that resolves to nothing is a record Figma kept after deleting the node it
+   * named, and a swap is no different: its replacement can be present while the layer it
+   * replaced is gone. An ambiguous address means the path is wrong, which stays fatal.
+   */
   const unresolvedStructural = (layer: StructuralLayer, cause: SegmentError): void => {
     if (cause.count === 0 && isStaleLayer(layer)) return
     const error = pathError(layer.owner.id, layer.owner.mainComponentId, layer.declaredPath, cause)
-    if (layer.swap || cause.count !== 0 || !options.onUnresolvedAssignment) throw error
+    if (cause.count !== 0 || !options.onUnresolvedAssignment) throw error
     layer.owner.unresolved.push({
       ...error.diagnostic,
       assignments: structuredClone(layer.assignments)

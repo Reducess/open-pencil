@@ -12,8 +12,9 @@ export type FigReaderDiagnostic =
 /**
  * Figma retains override and binding records that address nodes it later deleted, and
  * instances of deleted components, and the reader has no replacement to guess at. Opening
- * a file skips those records, keeps such instances childless, and reports both; a swap
- * whose replacement is missing is still a structural failure.
+ * a file skips those records, keeps such instances childless, and reports both, including a
+ * swap whose target layer is gone. An ambiguous address means the path is wrong, not stale,
+ * and still fails.
  */
 export function readerSessionOptions(sink: FigReaderDiagnostic[]): DocumentAssemblyOptions {
   return {

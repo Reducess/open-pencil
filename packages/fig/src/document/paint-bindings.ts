@@ -1,4 +1,20 @@
-import { copyFills, copyStrokes, type SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
+import {
+  copyFills,
+  copyStrokes,
+  type Color,
+  type SceneGraph,
+  type SceneNode
+} from '@open-pencil/scene-graph'
+
+/**
+ * A bound paint takes its whole color from the variable, alpha included. Drawing reads
+ * that alpha from the paint's opacity rather than the color, so the variable owns both
+ * and any opacity the record carried is a stale literal Figma would not apply either.
+ */
+function applyBoundColor(paint: { color: Color; opacity: number }, color: Color): void {
+  paint.color = { ...color, a: 1 }
+  paint.opacity = color.a
+}
 
 /** Resolve bound paint colors only after occurrence hierarchy and modes are available. */
 export function applyDocumentPaintBindings(
@@ -21,10 +37,10 @@ export function applyDocumentPaintBindings(
       changes ??= {}
       if (kind === 'fills') {
         changes.fills ??= copyFills(node.fills)
-        changes.fills[index].color = { ...color }
+        applyBoundColor(changes.fills[index], color)
       } else {
         changes.strokes ??= copyStrokes(node.strokes)
-        changes.strokes[index].color = { ...color }
+        applyBoundColor(changes.strokes[index], color)
       }
     }
     if (changes) graph.updateNode(node.id, changes)

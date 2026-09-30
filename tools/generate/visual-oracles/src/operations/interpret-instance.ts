@@ -59,7 +59,7 @@ function prepare(node: InstanceOccurrence): void {
   node.children.forEach(prepare)
 }
 prepare(occurrence)
-const result = materializeInstance(graph, page.id, occurrence, components, blobs)
+const result = materializeInstance(graph, page.id, occurrence, components, { blobs })
 const bounds = () => [...result.nodes.values()].map((n) => [n.id, n.x, n.y, n.width, n.height])
 const before = JSON.stringify(bounds())
 const ck = await initCanvasKit()

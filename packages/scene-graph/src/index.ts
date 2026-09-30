@@ -60,7 +60,6 @@ import { normalizeVectorNetwork } from './vector-network'
 export type { GUID, Color, Size, Vector } from './primitives'
 export * from './types'
 
-
 import {
   getAbsolutePosition,
   getNodeLocalMatrix,

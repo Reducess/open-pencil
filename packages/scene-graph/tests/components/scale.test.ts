@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test'
 
 import { SceneGraph, rescaleNodeTree } from '@open-pencil/scene-graph'
 
-import { expectDefined } from '#tests/helpers/assert'
+import { expectDefined } from '../helpers/assert'
 
 test('nested synchronization converts between explicit source and occurrence coordinates', () => {
   const graph = new SceneGraph()

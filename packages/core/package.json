@@ -164,6 +164,8 @@
   },
   "scripts": {
     "build": "bunx tsdown --config tsdown.config.ts",
+    "test": "bun test tests",
+    "typecheck": "bunx tsc --noEmit -p tsconfig.test.json",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {

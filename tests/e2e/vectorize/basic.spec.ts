@@ -106,7 +106,10 @@ test('missing key opens Media settings and saves through the credential manager'
   const section = editor.page.locator('[data-vectorize-settings]')
   await expect(section).toBeVisible()
 
-  await section.getByTestId('provider-settings-api-key').fill('test-recraft-key')
+  await section.click()
+  await editor.page.getByRole('textbox', { name: 'API key', exact: true }).fill('test-recraft-key')
+  await editor.page.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(section).toBeVisible()
   await editor.page.getByTestId('app-settings-done').click()
   await expect(editor.page.getByTestId('app-settings-dialog')).toHaveCount(0)
   expect(

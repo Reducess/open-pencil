@@ -238,8 +238,10 @@ test('remembered browser credentials survive reload and clear centrally', async 
 })
 
 test('browser credential preferences live in General, not the footer', async ({ page }) => {
-  await page.goto('/')
-  await page.keyboard.press('ControlOrMeta+,')
+  await page.goto('/?test')
+  await new CanvasHelper(page).waitForInit()
+  await page.getByTestId('app-settings-trigger').click()
+  await page.getByTestId('settings-section-general').click()
   const panel = page.getByTestId('settings-general-panel')
   const remember = panel.getByRole('switch', { name: 'Remember API keys on this device' })
   await expect(remember).toBeVisible()

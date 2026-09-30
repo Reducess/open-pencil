@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { CanvasHelper } from '#tests/helpers/canvas'
 
 test('pages and layers panels scroll inside splitter panes', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/?test')
   const canvas = new CanvasHelper(page)
   await canvas.waitForInit()
   canvas.errors.length = 0
@@ -11,7 +11,7 @@ test('pages and layers panels scroll inside splitter panes', async ({ page }) =>
   await page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
     if (!store) throw new Error('OpenPencil store not initialized')
-    for (let i = 0; i < 40; i++) store.addPage(`Page ${i + 2}`)
+    for (let i = 0; i < 40; i++) store.graph.addPage(`Page ${i + 2}`)
     const pageId = store.state.currentPageId
     for (let i = 0; i < 80; i++) {
       store.graph.createNode('RECTANGLE', pageId, {

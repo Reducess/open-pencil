@@ -149,6 +149,7 @@ test.describe('selection shortcuts', () => {
     await expect(dialog).toBeVisible()
     await dialog.getByLabel('Rename to').fill('Layer $n')
     await dialog.getByRole('button', { name: 'Rename', exact: true }).click()
+    await expect(dialog).toBeHidden()
     const renamed = (await getPageChildren()).filter((node) => ids.includes(node.id))
     expect(renamed.map((node) => node.name)).toEqual(['Layer 1', 'Layer 2'])
   })

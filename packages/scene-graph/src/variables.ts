@@ -268,6 +268,18 @@ export function resolveNumberVariableForNode(
   return typeof value === 'number' ? value : undefined
 }
 
+export function resolveStringVariableForNode(
+  graph: SceneGraph,
+  nodeId: string,
+  variableId: string
+): string | undefined {
+  const variable = graph.variables.get(variableId)
+  if (!variable) return undefined
+  const modeId = getNodeVariableModeId(graph, nodeId, variable.collectionId)
+  const value = resolveVariable(graph, variableId, modeId)
+  return typeof value === 'string' ? value : undefined
+}
+
 export function getVariablesForCollection(graph: SceneGraph, collectionId: string): Variable[] {
   const collection = graph.variableCollections.get(collectionId)
   if (!collection) return []

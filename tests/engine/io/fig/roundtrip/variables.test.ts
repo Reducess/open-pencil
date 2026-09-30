@@ -59,6 +59,25 @@ describe('variable roundtrip', () => {
     expect(Object.values(strVar.valuesByMode)[0]).toBe('Hello')
   })
 
+  test('text bound to a string variable survives export → re-import', async () => {
+    await initCodec()
+    const graph = new SceneGraph()
+    const col = graph.createCollection('Content')
+    const label = graph.createVariable('Badge Count', 'STRING', col.id, '9+')
+    const page = graph.getPages()[0]
+    const text = graph.createNode('TEXT', page.id, { name: 'Label', text: '9+' })
+    graph.bindVariable(text.id, 'text', label.id)
+
+    const exported = await exportFigFile(graph)
+    const reimported = await parseFigFile(exported.buffer as ArrayBuffer)
+    const node = reimported
+      .getAllNodes()
+      .find((candidate) => candidate.type === 'TEXT' && candidate.name === 'Label')
+    const bound = reimported.variables.get(expectDefined(node, 'node').boundVariables.text ?? '')
+    expect(expectDefined(bound, 'bound').name).toBe('Badge Count')
+    expect(node.text).toBe('9+')
+  })
+
   test('an instance fill override keeps its own variable alias across export → re-import', async () => {
     await initCodec()
     const graph = new SceneGraph()

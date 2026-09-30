@@ -256,6 +256,10 @@ export class SceneGraph {
     return Variables.resolveNumberVariableForNode(this, nodeId, variableId)
   }
 
+  resolveStringVariableForNode(nodeId: string, variableId: string): string | undefined {
+    return Variables.resolveStringVariableForNode(this, nodeId, variableId)
+  }
+
   getVariablesForCollection(collectionId: string): Variable[] {
     return Variables.getVariablesForCollection(this, collectionId)
   }

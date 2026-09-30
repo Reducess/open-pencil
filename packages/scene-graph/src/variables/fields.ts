@@ -36,8 +36,8 @@ export function isNumericVariableBindingField(field: string): boolean {
   return NUMERIC_FIELDS.has(field)
 }
 
-/** A font family is the only string-valued binding a node accepts. */
-export const STRING_BINDING_FIELDS: ReadonlySet<string> = new Set(['fontFamily'])
+/** Text content and font family are the string-valued bindings a node accepts. */
+export const STRING_BINDING_FIELDS: ReadonlySet<string> = new Set(['text', 'fontFamily'])
 
 /** Visibility is the only boolean-valued binding a node accepts. */
 export const BOOLEAN_BINDING_FIELDS: ReadonlySet<string> = new Set(['visible'])

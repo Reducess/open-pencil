@@ -23,6 +23,7 @@ import { loadPageTransaction } from './load-transaction'
 import { applyDocumentMetadata } from './metadata'
 import { applyDocumentPaintBindings } from './paint-bindings'
 import { createArchiveDocumentReader, createDocumentReader } from './read'
+import { applyDocumentTextBindings } from './text-bindings'
 import { materializeVariableResources } from './variables'
 
 export interface DocumentAssemblyOptions extends InterpretInstanceOptions {
@@ -278,6 +279,7 @@ function materializeReader(
     resolveVariantPropertyValues(graph, materialized)
     applyDocumentLayoutBindings(graph, savedSizeNodes, materialized, layoutScales)
     applyDocumentPaintBindings(graph, materialized)
+    applyDocumentTextBindings(graph, materialized)
   })
   return state
 }

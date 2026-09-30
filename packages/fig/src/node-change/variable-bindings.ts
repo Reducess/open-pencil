@@ -28,6 +28,7 @@ export const VARIABLE_BINDING_FIELDS: Record<string, string> = {
   counterAxisSpacing: 'STACK_COUNTER_SPACING',
   gridRowGap: 'GRID_ROW_GAP',
   gridColumnGap: 'GRID_COLUMN_GAP',
+  text: 'TEXT_DATA',
   visible: 'VISIBLE',
   opacity: 'OPACITY',
   width: 'WIDTH',

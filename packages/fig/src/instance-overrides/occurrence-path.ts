@@ -52,16 +52,48 @@ export function pathError(
   )
 }
 
-/** Search through ordinary containers, but never cross an instance boundary implicitly. */
-export function findSegment(root: InstanceOccurrence, guid: GUID): InstanceOccurrence {
+/**
+ * Translate a segment that names no layer here into the one it corresponds to, for a
+ * component whose set holds sibling variants. Supplied by the interpreter, which owns the
+ * source index the correspondence is read from.
+ */
+export type SegmentTranslator = (owner: InstanceOccurrence, guid: GUID) => GUID | undefined
+
+function matchSegment(root: InstanceOccurrence, guid: GUID) {
   const id = guidToString(guid)
-  const { count, match } = findWithinBoundary(
+  return findWithinBoundary(
     root.children,
     OCCURRENCE_TREE,
     (node) => sameGuid(node.overrideKey, guid) || node.sourceId === id
   )
-  if (!match) throw new SegmentError(count, guid)
-  return match
+}
+
+/**
+ * Search through ordinary containers, but never cross an instance boundary implicitly.
+ * Returns the segment that found the target, which is the translated one when the
+ * declared segment named a layer only a sibling variant has.
+ */
+function resolveSegment(
+  root: InstanceOccurrence,
+  guid: GUID,
+  translate?: SegmentTranslator
+): { target: InstanceOccurrence; segment: GUID } {
+  const direct = matchSegment(root, guid)
+  if (direct.match) return { target: direct.match, segment: guid }
+  const corresponding = direct.count === 0 ? translate?.(root, guid) : undefined
+  if (corresponding) {
+    const fallback = matchSegment(root, corresponding)
+    if (fallback.match) return { target: fallback.match, segment: corresponding }
+  }
+  throw new SegmentError(direct.count, guid)
+}
+
+export function findSegment(
+  root: InstanceOccurrence,
+  guid: GUID,
+  translate?: SegmentTranslator
+): InstanceOccurrence {
+  return resolveSegment(root, guid, translate).target
 }
 
 export function isRootGuid(owner: InstanceOccurrence, guid: GUID): boolean {
@@ -73,14 +105,33 @@ export function isRootGuid(owner: InstanceOccurrence, guid: GUID): boolean {
   )
 }
 
+/**
+ * Resolve a declared path and report the path that reached the target. Recording the
+ * resolved path keeps the claim addressable later, after translation replaced a segment.
+ */
+export function resolvePathSegments(
+  owner: InstanceOccurrence,
+  path: readonly GUID[],
+  translate?: SegmentTranslator
+): { target: InstanceOccurrence; path: GUID[] } {
+  let target = owner
+  const resolved: GUID[] = []
+  for (const [index, guid] of path.entries()) {
+    if (index === 0 && isRootGuid(owner, guid)) {
+      resolved.push(guid)
+      continue
+    }
+    const step = resolveSegment(target, guid, translate)
+    target = step.target
+    resolved.push(step.segment)
+  }
+  return { target, path: resolved }
+}
+
 export function resolveOccurrencePath(
   owner: InstanceOccurrence,
-  path: readonly GUID[]
+  path: readonly GUID[],
+  translate?: SegmentTranslator
 ): InstanceOccurrence {
-  let target = owner
-  for (const [index, guid] of path.entries()) {
-    if (index === 0 && isRootGuid(owner, guid)) continue
-    target = findSegment(target, guid)
-  }
-  return target
+  return resolvePathSegments(owner, path, translate).target
 }

@@ -26,12 +26,14 @@ import {
   findSegment,
   isRootGuid,
   pathError,
-  resolveOccurrencePath,
+  resolvePathSegments,
+  type SegmentTranslator,
   SegmentError
 } from './occurrence-path'
 import { applyPlacedConstraints } from './resize'
 import { applyInstanceLayoutScale } from './scale/layout'
 import {
+  correspondingSegment,
   createSourceIndex,
   findStaticSegment,
   readOverrideKey,
@@ -286,6 +288,7 @@ function interpretRoot(
     owner: InstanceOccurrence,
     ownerRank: number,
     target: InstanceOccurrence,
+    path: readonly GUID[],
     layer: PropertyLayer
   ): void => {
     // An outer owner's assignment supersedes this owner's explicit value for the same field.
@@ -307,7 +310,7 @@ function interpretRoot(
     if ('name' in retained) target.hasOwnName = true
     owner.propertyClaims.push({
       declaredBy: owner.sourceId,
-      path: structuredClone(layer.path),
+      path: structuredClone(path),
       properties: structuredClone(retained)
     })
   }
@@ -334,13 +337,31 @@ function interpretRoot(
     return false
   }
 
+  /** Segments translated between variants, by effective component and declared segment. */
+  const translations = new Map<string, GUID | undefined>()
+
+  /**
+   * Selecting another variant keeps the instance's overrides, so a segment naming no
+   * layer of the variant an occurrence expands now may name one of its siblings. The
+   * layer at the same position here is the one Figma carries the override onto.
+   */
+  const translateSegment: SegmentTranslator = (owner, guid) => {
+    const componentId = owner.mainComponentId
+    if (!componentId) return undefined
+    const key = `${componentId}|${guidToString(guid)}`
+    if (translations.has(key)) return translations.get(key)
+    const segment = correspondingSegment(index, componentId, guid)
+    translations.set(key, segment)
+    return segment
+  }
+
   /** Resolve an owner's declared path in its built subtree, or decide how to skip it. */
   const resolveClaimTarget = (
     owner: InstanceOccurrence,
     path: readonly GUID[]
-  ): InstanceOccurrence | undefined => {
+  ): { target: InstanceOccurrence; path: GUID[] } | undefined => {
     try {
-      return resolveOccurrencePath(owner, path)
+      return resolvePathSegments(owner, path, translateSegment)
     } catch (cause) {
       if (!(cause instanceof SegmentError)) throw cause
       const error = pathError(owner.sourceId, owner.mainComponentId, path, cause)
@@ -358,9 +379,9 @@ function interpretRoot(
     for (const entry of derived ?? []) {
       const path = entry.guidPath?.guids
       if (!path?.length) continue
-      const target = resolveClaimTarget(owner, path)
-      if (!target || target === owner) continue // Placed root bounds belong to its NodeChange.
-      applyDerivedEntry(target, entry)
+      const resolved = resolveClaimTarget(owner, path)
+      if (!resolved || resolved.target === owner) continue // Placed root bounds belong to its NodeChange.
+      applyDerivedEntry(resolved.target, entry)
     }
   }
 
@@ -573,8 +594,8 @@ function interpretRoot(
     derived: boolean
   ): void => {
     for (const claim of claims) {
-      const target = resolveClaimTarget(occurrence, claim.path)
-      if (target) applyPropertyClaim(occurrence, rank, target, claim)
+      const resolved = resolveClaimTarget(occurrence, claim.path)
+      if (resolved) applyPropertyClaim(occurrence, rank, resolved.target, resolved.path, claim)
     }
     applyInstanceLayoutScale(occurrence, source)
     applyPlacedConstraints(occurrence, base, source)

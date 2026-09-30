@@ -9,17 +9,76 @@ export interface SceneOracleNode {
   height: number
   text: string | null
   main: string | null
+  /** Visible paints as `TYPE r,g,b a%`, so a transparency difference is legible. */
+  fills: string[]
+  strokes: string[]
 }
 
 export interface SceneOracleDifference {
   path: number[]
-  category: 'structure' | 'semantic' | 'visible-geometry' | 'hidden-geometry'
+  category:
+    | 'structure'
+    | 'semantic'
+    | 'visible-geometry'
+    | 'hidden-geometry'
+    | 'visible-paint'
+    | 'hidden-paint'
   field: string
   expected: unknown
   actual: unknown
 }
 
-/** Compare complete ordered trees. Rounded rectangles share Figma's RECTANGLE type. */
+type Push = (
+  field: string,
+  category: SceneOracleDifference['category'],
+  expected: unknown,
+  actual: unknown
+) => void
+
+/** A layer nobody sees, either because it is hidden or because an ancestor is. */
+function hidden(node: SceneOracleNode, nodes: ReadonlyMap<string, SceneOracleNode>): boolean {
+  for (let depth = 0; depth <= node.path.length; depth++) {
+    if (nodes.get(JSON.stringify(node.path.slice(0, depth)))?.visible === false) return true
+  }
+  return false
+}
+
+/** Rounded rectangles share Figma's RECTANGLE type. */
+function compareIdentity(a: SceneOracleNode, b: SceneOracleNode, push: Push): void {
+  for (const field of ['type', 'name', 'visible', 'text', 'main'] as const) {
+    const normalize = (value: unknown) =>
+      field === 'type' && value === 'ROUNDED_RECTANGLE' ? 'RECTANGLE' : value
+    if (normalize(a[field]) !== normalize(b[field])) push(field, 'semantic', a[field], b[field])
+  }
+}
+
+function comparePaint(a: SceneOracleNode, b: SceneOracleNode, isHidden: boolean, push: Push): void {
+  for (const field of ['fills', 'strokes'] as const) {
+    if (a[field].join(' | ') !== b[field].join(' | '))
+      push(field, isHidden ? 'hidden-paint' : 'visible-paint', a[field], b[field])
+  }
+}
+
+function compareGeometry(
+  a: SceneOracleNode,
+  b: SceneOracleNode,
+  isHidden: boolean,
+  tolerance: number,
+  push: Push
+): void {
+  const category = isHidden ? 'hidden-geometry' : 'visible-geometry'
+  for (const field of ['x', 'y', 'width', 'height'] as const) {
+    if (
+      !Number.isFinite(a[field]) ||
+      !Number.isFinite(b[field]) ||
+      Math.abs(a[field] - b[field]) > tolerance
+    ) {
+      push(field, category, a[field], b[field])
+    }
+  }
+}
+
+/** Compare complete ordered trees. */
 export function compareSceneOracle(
   expected: readonly SceneOracleNode[],
   actual: readonly SceneOracleNode[],
@@ -37,12 +96,6 @@ export function compareSceneOracle(
   const left = index(expected)
   const right = index(actual)
   const differences: SceneOracleDifference[] = []
-  const hidden = (node: SceneOracleNode, nodes: Map<string, SceneOracleNode>): boolean => {
-    for (let depth = 0; depth <= node.path.length; depth++) {
-      if (nodes.get(JSON.stringify(node.path.slice(0, depth)))?.visible === false) return true
-    }
-    return false
-  }
   for (const key of new Set([...left.keys(), ...right.keys()])) {
     const a = left.get(key)
     const b = right.get(key)
@@ -56,29 +109,13 @@ export function compareSceneOracle(
       })
       continue
     }
-    const push = (
-      field: string,
-      category: SceneOracleDifference['category'],
-      expected: unknown,
-      actual: unknown
-    ) => {
+    const push: Push = (field, category, expected, actual) => {
       differences.push({ path: a.path, field, category, expected, actual })
     }
-    for (const field of ['type', 'name', 'visible', 'text', 'main'] as const) {
-      const normalize = (value: unknown) =>
-        field === 'type' && value === 'ROUNDED_RECTANGLE' ? 'RECTANGLE' : value
-      if (normalize(a[field]) !== normalize(b[field])) push(field, 'semantic', a[field], b[field])
-    }
-    const category = hidden(a, left) && hidden(b, right) ? 'hidden-geometry' : 'visible-geometry'
-    for (const field of ['x', 'y', 'width', 'height'] as const) {
-      if (
-        !Number.isFinite(a[field]) ||
-        !Number.isFinite(b[field]) ||
-        Math.abs(a[field] - b[field]) > tolerance
-      ) {
-        push(field, category, a[field], b[field])
-      }
-    }
+    const isHidden = hidden(a, left) && hidden(b, right)
+    compareIdentity(a, b, push)
+    comparePaint(a, b, isHidden, push)
+    compareGeometry(a, b, isHidden, tolerance, push)
   }
   return differences
 }

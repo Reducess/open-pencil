@@ -12,7 +12,9 @@ const node = (path: number[], visible = true): SceneOracleNode => ({
   width: 10,
   height: 10,
   text: null,
-  main: null
+  main: null,
+  fills: [],
+  strokes: []
 })
 
 test('separates hidden descendant geometry and detects extra nodes', () => {
@@ -23,6 +25,17 @@ test('separates hidden descendant geometry and detects extra nodes', () => {
   expect(compareSceneOracle(expected, actual).map((d) => d.category)).toEqual([
     'hidden-geometry',
     'structure'
+  ])
+})
+
+test('reports a paint difference, and hides it with the layer that carries it', () => {
+  const expected = [node([]), node([0], false), node([0, 0])]
+  const actual = structuredClone(expected)
+  actual[0].fills = ['SOLID 255,255,255 50%']
+  actual[2].fills = ['SOLID 255,255,255 50%']
+  expect(compareSceneOracle(expected, actual).map((d) => d.category)).toEqual([
+    'visible-paint',
+    'hidden-paint'
   ])
 })
 

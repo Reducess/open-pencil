@@ -9,6 +9,7 @@ import type {
   VariableType,
   VariableValue
 } from '@open-pencil/scene-graph'
+import { getAxisAlignedBoundsInParent } from '@open-pencil/scene-graph/coordinate'
 import { copyFills, copyStrokes, copyEffects } from '@open-pencil/scene-graph/copy'
 import { computeBounds } from '@open-pencil/scene-graph/geometry'
 import { computeImageHash } from '@open-pencil/scene-graph/images'
@@ -138,6 +139,11 @@ export class FigmaAPI implements NodeProxyHost {
     return node ? this.wrapNode(id) : null
   }
 
+  /** The async lookup that Figma requires in dynamic-page mode; same result as getNodeById. */
+  async getNodeByIdAsync(id: string): Promise<FigmaNodeProxy | null> {
+    return this.getNodeById(id)
+  }
+
   // --- Node Creation ---
 
   private _createNode(type: NodeType): FigmaNodeProxy {
@@ -196,6 +202,13 @@ export class FigmaAPI implements NodeProxyHost {
     return (node as BaseNode & { [INTERNAL_ID]: string })[INTERNAL_ID]
   }
 
+  private _rawNode(node: BaseNode | FigmaNodeProxy): CoreSceneNode {
+    const id = this._nodeId(node)
+    const raw = this.graph.getNode(id)
+    if (!raw) throw new Error(`Node ${id} not found`)
+    return raw
+  }
+
   group(
     nodes: ReadonlyArray<FigmaNodeProxy>,
     parent: FigmaNodeProxy,
@@ -208,7 +221,12 @@ export class FigmaAPI implements NodeProxyHost {
     index?: number
   ): FigmaGroupNode {
     const parentId = this._nodeId(parent)
-    const groupNode = this.graph.createNode('GROUP', parentId)
+    const members = nodes.map((node) => this._rawNode(node))
+    const groupNode = this.graph.createNode(
+      'GROUP',
+      parentId,
+      members.length > 0 ? getAxisAlignedBoundsInParent(members, parentId, this.graph) : undefined
+    )
     for (const n of nodes) {
       this.graph.reparentNode(this._nodeId(n), groupNode.id)
     }
@@ -375,14 +393,10 @@ export class FigmaAPI implements NodeProxyHost {
   ): FigmaBooleanOperationNode {
     if (nodes.length < 2) throw new Error('Need at least 2 nodes for boolean operation')
     const parentId = this._nodeId(parent)
-    const first = this.graph.getNode(this._nodeId(nodes[0]))
-    if (!first) throw new Error('Node not found')
+    const members = nodes.map((node) => this._rawNode(node))
     const group = this.graph.createNode('BOOLEAN_OPERATION', parentId, {
       name: `Boolean ${operation.toLowerCase()}`,
-      x: first.x,
-      y: first.y,
-      width: first.width,
-      height: first.height,
+      ...getAxisAlignedBoundsInParent(members, parentId, this.graph),
       booleanOperation: operation
     })
     for (const node of nodes) {

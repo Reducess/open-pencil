@@ -51,7 +51,7 @@ provenance next to the fixture, not transient cloud-file IDs in architecture doc
 Run from the repository root, with the matching Figma document open:
 
 ```sh
-bun tools/visual-oracles/src/operations/compare/interpreted-document.ts \
+bun open-pencil-visual-oracles compare interpreted-document \
   --file tests/fixtures/gold-preview.fig --node 1:3461 \
   --figma-key NmoHzskYNiSKOaRX14bMdw --output /tmp/gold-oracle
 ```
@@ -67,7 +67,7 @@ export against the reader's. Captures target the active document, so bring the i
 file's tab to the front first:
 
 ```sh
-bun tools/visual-oracles/src/operations/activate-tab.ts --title gold-preview-edited
+bun open-pencil-visual-oracles activate-tab --title gold-preview-edited
 ```
 
 Property and structural differences are export defects. Geometry differences on hug and fill
@@ -75,8 +75,8 @@ layouts are expected: the reader applies saved derived geometry without a layout
 Figma recomputes layout with its own text metrics. See [the reopen log](./observations/reader-reopen.md) for
 a recorded run.
 
-- [Comparison and capture implementation](../../../tools/visual-oracles/src/document/)
-- [Command implementation](../../../tools/visual-oracles/src/operations/compare/interpreted-document.ts)
+- [Comparison and capture implementation](../../../tools/generate/visual-oracles/src/document/)
+- [Command implementation](../../../tools/generate/visual-oracles/src/operations/compare/interpreted-document.ts)
 
 ## Gates and regression placement
 

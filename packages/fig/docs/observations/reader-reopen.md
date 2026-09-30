@@ -64,7 +64,7 @@ icon each owner assigned; icon vectors keep their `On Surface Variant` alias. Th
 keeps its 50 variants and axis properties.
 
 Import was done by hand through Figma's Import dialog; inspection ran through `figma-use eval`
-and then through `tools/visual-oracles … compare/interpreted-document.ts` against each
+and then through `visual-oracles compare interpreted-document` against each
 imported file (`--file` the exported archive, `--figma-key` the imported file). Property
 differences: synthetic instance 0 of 5 nodes, synthetic Panel instance 0 of 6 nodes, material 3
 App bar `Configuration=Small, Elevation=Flat` 0 of 25 nodes, gold-preview Input 0 of 89 nodes.

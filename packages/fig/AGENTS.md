@@ -8,3 +8,4 @@
 - Vector networks use the reverse-engineered `vectorNetworkBlob`; codecs live under `packages/core/src/vector/` and types in Scene Graph.
 - Changes to `.fig` behavior require round-trip validation in Figma. `packages/docs/development/roadmap.md` tracks raw metadata coverage and the code map for import/export mapping and schema files.
 - Fixtures under `tests/fixtures/*.fig` use Git LFS; use a normal `git push` when they change, and `git push --no-verify` to skip the LFS hook otherwise.
+- Tests address the package by alias rather than drilling: `#fig/*` for source, `#fig-tests/*` for shared test helpers, both registered in `tools/checks/architecture/src/steiger-rules/support.ts`.

@@ -33,6 +33,11 @@ export const VALID_NODE_TYPES = new Set<string>([
   'SHAPE_WITH_TEXT'
 ])
 
+/** Read a shared JSON fixture as data. */
+export function readFixtureJSON<T>(name: string): T {
+  return JSON.parse(readFileSync(resolve(FIXTURES, name), 'utf8')) as T
+}
+
 export function readFixtureBytes(name: string): Uint8Array {
   return readFileSync(resolve(FIXTURES, name))
 }

@@ -179,7 +179,12 @@ export function createEditorStore(initialGraph?: SceneGraph) {
       }
       succeeded = true
     } catch (error) {
-      if (preparation.signal.aborted) throw error
+      if (preparation.signal.aborted) {
+        // A newer page switch cancels this UI-owned operation. Callers that
+        // supplied a preparation handle still need rejection for orchestration.
+        if (ownsPreparation) return
+        throw error
+      }
       if (ownsPreparation) {
         const presentationTimedOut =
           error instanceof Error && error.message === 'The operation was timed out'

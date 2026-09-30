@@ -36,6 +36,35 @@ describe('multi-tab editor preparation', () => {
     second.dispose()
   })
 
+  test('superseding a UI-owned page switch resolves without clearing the replacement', async () => {
+    const store = createEditorStore()
+    try {
+      const page = store.graph.addPage('Destination')
+      const pending = store.switchPage(page.id)
+      const replacement = store.preparationController.begin({ kind: 'page-switch' })
+
+      await expect(pending).resolves.toBeUndefined()
+      expect(replacement.signal.aborted).toBe(false)
+      expect(store.state.preparation?.id).toBe(replacement.id)
+    } finally {
+      store.dispose()
+    }
+  })
+
+  test('caller-owned page preparation still rejects cancellation', async () => {
+    const store = createEditorStore()
+    try {
+      const page = store.graph.addPage('Destination')
+      const preparation = store.preparationController.begin({ kind: 'document-open' })
+      const pending = store.switchPage(page.id, { preparation })
+      preparation.cancel()
+
+      await expect(pending).rejects.toThrow()
+    } finally {
+      store.dispose()
+    }
+  })
+
   test('disposing one editor aborts only its own active preparation', () => {
     const first = createEditorStore()
     const second = createEditorStore()

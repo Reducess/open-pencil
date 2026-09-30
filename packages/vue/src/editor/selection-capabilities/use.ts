@@ -1,4 +1,4 @@
-import { computed, shallowRef, triggerRef } from 'vue'
+import { computed, shallowRef, triggerRef, watchEffect } from 'vue'
 
 import { canMakeBooleanSourceNode, hasVisibleStrokeSourceNode } from '@open-pencil/core/canvas'
 
@@ -17,6 +17,9 @@ export function useSelectionCapabilities() {
   const selection = useSelectionState()
   const { editor, selectedIds, selectedNode, selectedCount, hasSelection } = selection
   const history = shallowRef(editor.undo)
+  watchEffect(() => {
+    history.value = editor.undo
+  })
   useEditorEvent('history:changed', () => triggerRef(history))
 
   const selectedNodesCanFlatten = useSceneComputed(() => {

@@ -51,6 +51,7 @@ import {
 const noop = () => undefined
 
 export { FigmaNodeProxy } from './proxy'
+export type { FigmaEffect } from './effects'
 export type {
   FigmaBooleanOperationNode,
   FigmaComponentNode,

@@ -1,3 +1,4 @@
+import type { PageSnapshot } from '@open-pencil/core/editor'
 import type { StepBudget } from '@open-pencil/core/tools'
 
 import { DEFAULT_AGENT_STEPS, resolveAgentStepLimit } from '@/app/ai/chat/step-limit'
@@ -10,11 +11,14 @@ class RunState {
   maxSteps = DEFAULT_AGENT_STEPS
   /** The page the run works on. The user's navigation does not move it; the agent's does. */
   pageId: string | null = null
+  /** Each page as it was before the run first edited it, for `diff_changes`. */
+  baselines = new Map<string, PageSnapshot>()
 
   start(maxSteps: number, pageId: string): void {
     this.currentSteps = 0
     this.maxSteps = resolveAgentStepLimit(maxSteps)
     this.pageId = pageId
+    this.baselines = new Map()
   }
 
   hitLimit(): boolean {
@@ -63,4 +67,15 @@ export function runPageId(store: EditorStore): string {
 export async function moveRunToPage(store: EditorStore, pageId: string): Promise<void> {
   getRunState(store).pageId = pageId
   if (store.state.currentPageId !== pageId) await store.switchPage(pageId)
+}
+
+/** Keep `snapshot` as the run's starting state of its page unless the run already edited it. */
+export function recordRunBaseline(store: EditorStore, snapshot: PageSnapshot): void {
+  const pageId = snapshot.values().next().value?.id
+  const { baselines } = getRunState(store)
+  if (pageId && !baselines.has(pageId)) baselines.set(pageId, snapshot)
+}
+
+export function runBaseline(store: EditorStore, pageId: string): PageSnapshot | null {
+  return getRunState(store).baselines.get(pageId) ?? null
 }

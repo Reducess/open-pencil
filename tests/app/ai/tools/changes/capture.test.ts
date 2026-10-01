@@ -8,7 +8,7 @@ import { FigmaAPI } from '@open-pencil/core/figma-api'
 
 import { snapshotMessages, restoreMessages } from '@/app/ai/chat/history/messages'
 import { changePreviewSize } from '@/app/ai/chat/preferences'
-import { createAITools } from '@/app/ai/tools'
+import { createAITools, startRun } from '@/app/ai/tools'
 import { clipChangedJSX } from '@/app/ai/tools/changes/capture'
 import { clearToolChanges, readToolChange } from '@/app/ai/tools/changes/store'
 import * as figmaFactory from '@/app/automation/bridge/figma-factory'
@@ -86,6 +86,20 @@ test('keeps an undo step per structural call and records removed layers', async 
   expect(change?.jsx.after).toBe('')
   store.undo.undo()
   expect(store.graph.getNode(card.id)?.name).toBe('Card')
+})
+
+test('diff_changes compares the run page with its state before the run first edited it', async () => {
+  const pageId = store.state.currentPageId
+  const card = store.graph.createNode('FRAME', pageId, { name: 'Card', width: 100, height: 60 })
+  startRun(store, 10)
+
+  await execute('set_fill', { id: card.id, color: '#ff0000' }, 'first')
+  await execute('node_resize', { id: card.id, width: 240, height: 60 }, 'second')
+  const result = (await execute('diff_changes', {}, 'check')) as { diff: string | null }
+
+  // Both calls show up against the state before the first one.
+  expect(result.diff).toContain('-<Frame name="Card" w={100} h={60} />')
+  expect(result.diff).toContain('+<Frame name="Card" w={240} h={60} bg="#FF0000" />')
 })
 
 test('saves recorded changes with the conversation and restores them', async () => {

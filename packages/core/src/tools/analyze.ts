@@ -2,6 +2,7 @@ export { analyzeClusters, calcClusterConfidence } from './analyze/clusters'
 export { analyzeColors } from './analyze/colors'
 export {
   diffApply,
+  diffChanges,
   diffCreate,
   diffDocuments,
   diffPageLayersJSX,

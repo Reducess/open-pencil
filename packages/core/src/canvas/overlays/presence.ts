@@ -13,6 +13,8 @@ const LABEL_PADDING_Y = 2
 const LABEL_FONT_SIZE = 10
 const LABEL_OFFSET_X = 12
 const LABEL_OFFSET_Y = 20
+/** Longer names end with an ellipsis. */
+const LABEL_MAX_WIDTH = 160
 
 function drawSelection(r: SkiaRenderer, canvas: Canvas, graph: SceneGraph, cursor: PresenceCursor) {
   if (!cursor.selection?.length) return
@@ -105,37 +107,44 @@ function drawSparkle(
 
 /** A name pill: filled for people, outlined in the owner's color for agents. */
 function drawLabel(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor: PresenceCursor) {
-  const font = r.labelFont
-  if (!cursor.name || !font) return
-  font.setSize(LABEL_FONT_SIZE)
-  const labelX = x + LABEL_OFFSET_X
-  const labelY = y + LABEL_OFFSET_Y
-  const width = font
-    .getGlyphWidths(font.getGlyphIDs(cursor.name))
-    .reduce((total, glyph) => total + glyph, 0)
-  const pill = r.ck.RRectXY(
-    r.ck.XYWHRect(
-      labelX - LABEL_PADDING_X,
-      labelY - LABEL_FONT_SIZE - LABEL_PADDING_Y + 2,
-      width + LABEL_PADDING_X * 2,
-      LABEL_FONT_SIZE + LABEL_PADDING_Y * 2
-    ),
-    4,
-    4
-  )
+  const provider = r.fontProvider
+  if (!cursor.name || !provider) return
   const { r: red, g, b } = cursor.color
   const color = r.ck.Color4f(red, g, b, 1)
   const agent = cursor.kind === 'agent'
-  r.auxFill.setColor(agent ? r.ck.Color4f(1, 1, 1, 1) : color)
-  canvas.drawRRect(pill, r.auxFill)
-  if (agent) {
-    r.auxStroke.setColor(color)
-    r.auxStroke.setStrokeWidth(1)
-    r.auxStroke.setPathEffect(null)
-    canvas.drawRRect(pill, r.auxStroke)
-  }
-  r.auxFill.setColor(agent ? color : r.ck.Color4f(1, 1, 1, 1))
-  canvas.drawText(cursor.name, labelX, labelY, r.auxFill, font)
+  const pillX = x + LABEL_OFFSET_X - LABEL_PADDING_X
+  const pillY = y + LABEL_OFFSET_Y - LABEL_FONT_SIZE - LABEL_PADDING_Y + 2
+  const pillHeight = LABEL_FONT_SIZE + LABEL_PADDING_Y * 2
+  // Shaped like other canvas labels: kerning, fallback fonts, and RTL names.
+  r.labelParagraphCache.use(
+    r.ck,
+    provider,
+    cursor.name,
+    LABEL_FONT_SIZE,
+    LABEL_MAX_WIDTH,
+    agent ? color : r.ck.WHITE,
+    r.fontGeneration,
+    ({ paragraph, metrics }) => {
+      const pill = r.ck.RRectXY(
+        r.ck.XYWHRect(pillX, pillY, metrics.width + LABEL_PADDING_X * 2, pillHeight),
+        4,
+        4
+      )
+      r.auxFill.setColor(agent ? r.ck.WHITE : color)
+      canvas.drawRRect(pill, r.auxFill)
+      if (agent) {
+        r.auxStroke.setColor(color)
+        r.auxStroke.setStrokeWidth(1)
+        r.auxStroke.setPathEffect(null)
+        canvas.drawRRect(pill, r.auxStroke)
+      }
+      canvas.drawParagraph(
+        paragraph,
+        pillX + LABEL_PADDING_X,
+        pillY + (pillHeight - metrics.height) / 2
+      )
+    }
+  )
 }
 
 /** Cursors of people and agents in screen space, with outlines of what they selected. */

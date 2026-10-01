@@ -30,6 +30,7 @@
 
 ### Fixed
 
+- Give every layer on an exported `.fig` canvas its own ordering key. Shared styles, variables and the canvas's own layers were numbered in separate passes that each restarted, so Figma saw siblings claiming the same position and ordered them arbitrarily.
 - Keep an AI reply running in the chat panel, with its Stop button, when you switch pages, instead of detaching the panel from the reply in progress.
 - Undo an AI edit while another page is on screen; undo previously did nothing until you returned to the page the AI changed.
 - Type `parameterConsumptionMap`, `propRefValue`, and `expressionValue` in the Kiwi `NodeChange` codec, which `fig.kiwi` declares but the TypeScript definitions omitted, so reading them no longer needs a cast.

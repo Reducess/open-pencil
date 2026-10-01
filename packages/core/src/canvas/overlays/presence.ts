@@ -7,7 +7,6 @@ import Matrix from '@open-pencil/scene-graph/matrix'
 import type { PresenceCursor, SkiaRenderer } from '#core/canvas/renderer'
 
 const CURSOR_SIZE = 9
-const SPARKLE_RADIUS = 7
 const LABEL_PADDING_X = 4
 const LABEL_PADDING_Y = 2
 const LABEL_FONT_SIZE = 10
@@ -15,6 +14,9 @@ const LABEL_OFFSET_X = 12
 const LABEL_OFFSET_Y = 20
 /** Longer names end with an ellipsis. */
 const LABEL_MAX_WIDTH = 160
+/** The sparkle that marks an agent's name. */
+const LABEL_SPARKLE_RADIUS = 4
+const LABEL_SPARKLE_GAP = 3
 
 function drawSelection(r: SkiaRenderer, canvas: Canvas, graph: SceneGraph, cursor: PresenceCursor) {
   if (!cursor.selection?.length) return
@@ -49,8 +51,7 @@ function drawSelection(r: SkiaRenderer, canvas: Canvas, graph: SceneGraph, curso
   }
 }
 
-/** A person's pointer: an arrow filled with their color, outlined in white. */
-function drawArrow(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor: PresenceCursor) {
+function arrowPath(r: SkiaRenderer, x: number, y: number) {
   const S = CURSOR_SIZE
   const builder = new r.ck.PathBuilder()
   builder.moveTo(x, y)
@@ -61,28 +62,11 @@ function drawArrow(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor
   builder.lineTo(x + S * 0.58, y + S * 0.88)
   builder.lineTo(x + S * 1.0, y + S * 0.82)
   builder.close()
-  const path = builder.detachAndDelete()
-  r.auxStroke.setColor(r.ck.Color4f(1, 1, 1, 1))
-  r.auxStroke.setStrokeWidth(2)
-  r.auxStroke.setPathEffect(null)
-  canvas.drawPath(path, r.auxStroke)
-  const { r: red, g, b } = cursor.color
-  r.auxFill.setColor(r.ck.Color4f(red, g, b, 1))
-  canvas.drawPath(path, r.auxFill)
-  path.delete()
+  return builder.detachAndDelete()
 }
 
-/** An agent: a four-point sparkle outlined in its owner's color. */
-function drawSparkle(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  x: number,
-  y: number,
-  cursor: PresenceCursor
-) {
-  const R = SPARKLE_RADIUS
-  const cx = x + R
-  const cy = y + R
+/** A four-point sparkle of radius `R` centered on `cx`, `cy`. */
+function sparklePath(r: SkiaRenderer, cx: number, cy: number, R: number) {
   const inner = R * 0.32
   const builder = new r.ck.PathBuilder()
   builder.moveTo(cx, cy - R)
@@ -94,24 +78,33 @@ function drawSparkle(
   builder.lineTo(cx - R, cy)
   builder.lineTo(cx - inner, cy - inner)
   builder.close()
-  const path = builder.detachAndDelete()
-  r.auxFill.setColor(r.ck.Color4f(1, 1, 1, 1))
-  canvas.drawPath(path, r.auxFill)
-  const { r: red, g, b } = cursor.color
-  r.auxStroke.setColor(r.ck.Color4f(red, g, b, 1))
-  r.auxStroke.setStrokeWidth(1.5)
+  return builder.detachAndDelete()
+}
+
+/** The pointer, filled with a person's color, or for an agent its owner's, and outlined in white. */
+function drawArrow(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor: PresenceCursor) {
+  const path = arrowPath(r, x, y)
+  r.auxStroke.setColor(r.ck.WHITE)
+  r.auxStroke.setStrokeWidth(2)
   r.auxStroke.setPathEffect(null)
   canvas.drawPath(path, r.auxStroke)
+  const { r: red, g, b } = cursor.color
+  r.auxFill.setColor(r.ck.Color4f(red, g, b, 1))
+  canvas.drawPath(path, r.auxFill)
   path.delete()
 }
 
-/** A name pill: filled for people, outlined in the owner's color for agents. */
+/**
+ * A name pill: filled for people; for agents outlined in the owner's color, with a
+ * sparkle before the name.
+ */
 function drawLabel(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor: PresenceCursor) {
   const provider = r.fontProvider
   if (!cursor.name || !provider) return
   const { r: red, g, b } = cursor.color
   const color = r.ck.Color4f(red, g, b, 1)
   const agent = cursor.kind === 'agent'
+  const badge = agent ? LABEL_SPARKLE_RADIUS * 2 + LABEL_SPARKLE_GAP : 0
   const pillX = x + LABEL_OFFSET_X - LABEL_PADDING_X
   const pillY = y + LABEL_OFFSET_Y - LABEL_FONT_SIZE - LABEL_PADDING_Y + 2
   const pillHeight = LABEL_FONT_SIZE + LABEL_PADDING_Y * 2
@@ -126,7 +119,7 @@ function drawLabel(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor
     r.fontGeneration,
     ({ paragraph, metrics }) => {
       const pill = r.ck.RRectXY(
-        r.ck.XYWHRect(pillX, pillY, metrics.width + LABEL_PADDING_X * 2, pillHeight),
+        r.ck.XYWHRect(pillX, pillY, badge + metrics.width + LABEL_PADDING_X * 2, pillHeight),
         4,
         4
       )
@@ -137,10 +130,19 @@ function drawLabel(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor
         r.auxStroke.setStrokeWidth(1)
         r.auxStroke.setPathEffect(null)
         canvas.drawRRect(pill, r.auxStroke)
+        const sparkle = sparklePath(
+          r,
+          pillX + LABEL_PADDING_X + LABEL_SPARKLE_RADIUS,
+          pillY + pillHeight / 2,
+          LABEL_SPARKLE_RADIUS
+        )
+        r.auxFill.setColor(color)
+        canvas.drawPath(sparkle, r.auxFill)
+        sparkle.delete()
       }
       canvas.drawParagraph(
         paragraph,
-        pillX + LABEL_PADDING_X,
+        pillX + LABEL_PADDING_X + badge,
         pillY + (pillHeight - metrics.height) / 2
       )
     }
@@ -158,8 +160,7 @@ export function drawPresenceCursors(
     const x = cursor.x * r.zoom + r.panX
     const y = cursor.y * r.zoom + r.panY
     drawSelection(r, canvas, graph, cursor)
-    if (cursor.kind === 'agent') drawSparkle(r, canvas, x, y, cursor)
-    else drawArrow(r, canvas, x, y, cursor)
+    drawArrow(r, canvas, x, y, cursor)
     drawLabel(r, canvas, x, y, cursor)
   }
 }

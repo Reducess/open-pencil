@@ -30,6 +30,8 @@
 
 ### Fixed
 
+- Keep the view centered on what you were looking at when zooming to 100% or another fixed level, instead of jumping elsewhere whenever the zoom changes.
+- Draw collaborators' names on their cursors with proper letter spacing and fallback fonts, and end long names with an ellipsis.
 - Keep an AI reply running in the chat panel, with its Stop button, when you switch pages, instead of detaching the panel from the reply in progress.
 - Undo an AI edit while another page is on screen; undo previously did nothing until you returned to the page the AI changed.
 - Type `parameterConsumptionMap`, `propRefValue`, and `expressionValue` in the Kiwi `NodeChange` codec, which `fig.kiwi` declares but the TypeScript definitions omitted, so reading them no longer needs a cast.

@@ -2,7 +2,14 @@ import 'fake-indexeddb/auto'
 import { afterEach, expect, test } from 'bun:test'
 
 import { createEditorStore } from '@/app/editor/session/create'
-import { addAgent, setOwnerColor, setPeers } from '@/app/presence/registry'
+import {
+  addAgent,
+  follow,
+  presenceOf,
+  renameAgent,
+  setOwnerColor,
+  setPeers
+} from '@/app/presence/registry'
 
 const stores: ReturnType<typeof createEditorStore>[] = []
 afterEach(() => {
@@ -65,4 +72,57 @@ test('follows the page on screen', async () => {
   store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
   await store.switchPage(other)
   expect(store.state.presenceCursors).toHaveLength(1)
+})
+
+/** In app tests the viewport falls back to 1920 × 1080. */
+function centered(store: ReturnType<typeof createEditorStore>) {
+  const { panX, panY, zoom } = store.state
+  return { x: (960 - panX) / zoom, y: (540 - panY) / zoom }
+}
+
+test('following an agent takes the view to its page and keeps its cursor centered', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 300, y: 200, pageId: other } })
+  const switched = new Promise<string>((resolve) => {
+    store.onEditorEvent('page:changed', resolve)
+  })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  expect(await switched).toBe(other)
+  expect(centered(store)).toEqual({ x: 300, y: 200 })
+
+  agent.update({ cursor: { x: 500, y: 100, pageId: other } })
+  expect(centered(store)).toEqual({ x: 500, y: 100 })
+})
+
+test('an idle agent keeps its followers; a departed one releases them', () => {
+  const { store, pageId } = setup()
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  agent.update({ status: 'idle', cursor: undefined })
+  expect(presenceOf(store).following.value).toEqual({ kind: 'agent', agentId: agent.id })
+  agent.remove()
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('following a person matches their zoom, and stops when they leave', () => {
+  const { store, pageId } = setup()
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 2 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(store.state.zoom).toBe(2)
+  expect(centered(store)).toEqual({ x: 40, y: 50 })
+  setPeers(store, [])
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('renames our agents, and their handles report the new name', () => {
+  const { store } = setup()
+  const agent = addAgent(store, 'chat')
+  renameAgent(store, agent.id, '  Juniper  ')
+  expect(agent.name).toBe('Juniper')
+  renameAgent(store, agent.id, '   ')
+  expect(agent.name).toBe('Juniper')
 })

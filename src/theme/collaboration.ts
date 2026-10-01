@@ -7,6 +7,15 @@ const collaborationTheme = {
       'flex h-7 cursor-pointer items-center gap-1.5 rounded border-none px-3 text-[11px] font-medium transition-colors outline-none focus-visible:ring-1 focus-visible:ring-accent',
     presenceDot: 'size-2 rounded-full bg-green-500',
     presenceContent: 'z-50 w-56 rounded-xl bg-panel p-3 shadow-[0_8px_30px_rgb(0_0_0/0.4)]',
+    presenceList: 'flex flex-col gap-0.5',
+    presenceRow: 'flex h-7 min-w-0 items-center gap-2',
+    agentRow: 'flex h-7 min-w-0 items-center gap-2 pl-8',
+    agentIcon: 'size-3.5 shrink-0',
+    presenceName:
+      'min-w-0 flex-1 cursor-default truncate text-left text-[11px] text-surface outline-none focus-visible:ring-1 focus-visible:ring-accent',
+    presenceStatus: 'shrink-0 truncate text-[10px] text-muted',
+    renameInput:
+      'h-6 min-w-0 flex-1 rounded border border-accent bg-input px-1.5 text-[11px] text-surface outline-none',
     peerRow:
       'flex cursor-pointer items-center gap-2 rounded-md px-0.5 py-0.5 outline-none select-none active:bg-hover focus-visible:ring-1 focus-visible:ring-accent'
   },

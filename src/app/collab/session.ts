@@ -37,7 +37,6 @@ type ConnectCollabSessionOptions = {
   store: EditorStore
   disconnect: () => void
   updatePeersList: () => void
-  tickFollow: () => void
   broadcastAwareness: () => void
   applyYjsToGraph: (events: Y.YEvent<Y.Map<unknown>>[]) => void
   syncNodeToYjs: (nodeId: string) => void
@@ -48,11 +47,9 @@ type CollabConnectionActionsOptions = {
   state: Ref<CollabState>
   getStore: () => EditorStore
   updatePeersList: () => void
-  tickFollow: () => void
   broadcastAwareness: () => void
   applyYjsToGraph: (events: Y.YEvent<Y.Map<unknown>>[]) => void
   syncNodeToYjs: (nodeId: string) => void
-  resetFollow: () => void
 }
 
 type CollabSessionResources = {
@@ -64,7 +61,6 @@ type CollabSessionResources = {
   unbindGraphEvents: (() => void) | null
   stopZoomWatch: (() => void) | null
   stopAgentSync: (() => void) | null
-  resetFollow: () => void
 }
 
 export function createCollabRuntime(): CollabRuntime {
@@ -99,11 +95,9 @@ export function createCollabConnectionActions({
   state,
   getStore,
   updatePeersList,
-  tickFollow,
   broadcastAwareness,
   applyYjsToGraph,
-  syncNodeToYjs,
-  resetFollow
+  syncNodeToYjs
 }: CollabConnectionActionsOptions) {
   function connect(roomId: string) {
     connectCollabSession({
@@ -113,7 +107,6 @@ export function createCollabConnectionActions({
       store: getStore(),
       disconnect,
       updatePeersList,
-      tickFollow,
       broadcastAwareness,
       applyYjsToGraph,
       syncNodeToYjs
@@ -130,8 +123,7 @@ export function createCollabConnectionActions({
       ydoc: runtime.ydoc,
       unbindGraphEvents: runtime.unbindGraphEvents,
       stopZoomWatch: runtime.stopZoomWatch,
-      stopAgentSync: runtime.stopAgentSync,
-      resetFollow
+      stopAgentSync: runtime.stopAgentSync
     })
     resetCollabRuntime(runtime)
     resetCollabConnectionState(state)
@@ -160,7 +152,6 @@ export function connectCollabSession({
   store,
   disconnect,
   updatePeersList,
-  tickFollow,
   broadcastAwareness,
   applyYjsToGraph,
   syncNodeToYjs
@@ -175,10 +166,8 @@ export function connectCollabSession({
   runtime.yimages = runtime.ydoc.getMap('images')
   runtime.persistence = new IndexeddbPersistence(`op-room-${roomId}`, runtime.ydoc)
 
-  runtime.awareness.on('change', () => {
-    updatePeersList()
-    tickFollow()
-  })
+  // Peer updates also move the view of anyone following them.
+  runtime.awareness.on('change', updatePeersList)
 
   registerYjsObservers({
     store,
@@ -248,6 +237,5 @@ export function disposeCollabSessionResources(resources: CollabSessionResources)
   }
   resources.ydoc?.destroy()
   resources.stopAgentSync?.()
-  resources.resetFollow()
   setPeers(resources.store, [])
 }

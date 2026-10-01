@@ -74,6 +74,17 @@ export function createViewportActions(ctx: EditorContext) {
     emitViewportChanged(previous)
   }
 
+  /** Put the world point (x, y) at the center of the viewport, at `zoom` (the current one by default). */
+  function centerOn(x: number, y: number, zoom = ctx.state.zoom) {
+    const previous = currentViewport()
+    const { width, height } = ctx.getViewportSize()
+    ctx.state.zoom = Math.max(0.02, Math.min(256, zoom))
+    ctx.state.panX = width / 2 - x * ctx.state.zoom
+    ctx.state.panY = height / 2 - y * ctx.state.zoom
+    ctx.requestRepaint()
+    emitViewportChanged(previous)
+  }
+
   function zoomToFit() {
     const nodes = ctx.graph.getChildren(ctx.state.currentPageId)
     if (nodes.length === 0) return
@@ -117,6 +128,7 @@ export function createViewportActions(ctx: EditorContext) {
     applyZoom,
     pan,
     zoomToBounds,
+    centerOn,
     zoomToFit,
     zoomTo100,
     zoomToLevel,

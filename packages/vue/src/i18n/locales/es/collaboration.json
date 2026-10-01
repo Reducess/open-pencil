@@ -13,5 +13,12 @@
   "pasteRoomLinkOrId": "Pega el enlace o ID de la sala",
   "connected": "Conectado",
   "disconnect": "Desconectar",
-  "share": "Compartir"
+  "share": "Compartir",
+  "follow": "Seguir a {name}",
+  "stopFollowing": "Dejar de seguir a {name}",
+  "renameAgent": "Renombrar {name}",
+  "agentName": "Nombre del agente",
+  "agentThinking": "Pensando",
+  "agentEditing": "Editando",
+  "agentIdle": "Inactivo"
 }

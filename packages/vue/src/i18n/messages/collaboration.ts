@@ -17,7 +17,14 @@ export const collaborationMessageDefaults = {
   pasteRoomLinkOrId: 'Paste room link or ID',
   connected: 'Connected',
   disconnect: 'Disconnect',
-  share: 'Share'
+  share: 'Share',
+  follow: params('Follow {name}'),
+  stopFollowing: params('Stop following {name}'),
+  renameAgent: params('Rename {name}'),
+  agentName: 'Agent name',
+  agentThinking: 'Thinking',
+  agentEditing: 'Editing',
+  agentIdle: 'Idle'
 } as const
 
 export const collaborationMessages = i18n('collaboration', collaborationMessageDefaults)

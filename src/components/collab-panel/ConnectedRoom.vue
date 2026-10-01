@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { selectTarget } from '@open-pencil/vue'
 
-import { useCollabPanelContext } from '@/components/CollabPanel/context'
+import { useCollabPanelContext } from '@/components/collab-panel/context'
 import AppButton from '@/components/ui/button/AppButton.vue'
 import AppInput from '@/components/ui/input/AppInput.vue'
+
+import PresenceList from './PresenceList.vue'
 
 const collab = useCollabPanelContext()
 </script>
@@ -32,9 +34,14 @@ const collab = useCollabPanelContext()
     </AppButton>
   </div>
 
-  <div class="mb-2 text-xs font-medium text-surface">
-    {{ collab.peers.length + 1 }} {{ collab.peers.length === 0 ? 'person' : 'people' }} in this room
-  </div>
+  <div class="mb-2 text-xs font-medium text-surface">{{ collab.messages.inThisRoom }}</div>
+  <PresenceList
+    class="mb-3"
+    :rows="collab.presenceRows"
+    :following="collab.following"
+    @follow="collab.follow"
+    @rename="collab.renameLocalAgent"
+  />
 
   <AppButton
     variant="outline"

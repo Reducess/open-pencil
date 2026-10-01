@@ -9,7 +9,8 @@ import type { RemotePeer } from '@/app/collab/types'
 import type { EditorStore } from '@/app/editor/active-store'
 
 import { pickCallsign } from './callsigns'
-import type { AgentKind, AgentPresence } from './types'
+import { MAX_NAME_LENGTH } from './schema'
+import type { AgentKind, AgentPresence, FollowTarget, PersonPoint } from './types'
 
 /** Agents' color outside a room, where there is no collaborator color to inherit. */
 const SOLO_AGENT_COLOR: Color = { ...AI_ACTIVE_COLOR, a: 1 }
@@ -21,6 +22,8 @@ interface Presence {
   peers: ShallowRef<readonly RemotePeer[]>
   /** The local collaborator's color while in a room. */
   ownerColor: ShallowRef<Color | null>
+  /** Who the viewport follows, if anyone. */
+  following: ShallowRef<FollowTarget | null>
 }
 
 const presences = new WeakMap<EditorStore, Presence>()
@@ -31,7 +34,8 @@ export function presenceOf(store: EditorStore): Presence {
   const presence: Presence = {
     agents: shallowRef([]),
     peers: shallowRef([]),
-    ownerColor: shallowRef(null)
+    ownerColor: shallowRef(null),
+    following: shallowRef(null)
   }
   presences.set(store, presence)
   store.onEditorEvent('page:changed', () => refreshCursors(store))
@@ -68,6 +72,53 @@ export function refreshCursors(store: EditorStore): void {
     )
   ]
   store.requestRepaint()
+  keepFollowing(store)
+}
+
+/** Where the followed person or agent is; null when they left, idle when an agent rests. */
+function followedPoint(store: EditorStore, target: FollowTarget): PersonPoint | 'idle' | null {
+  const { agents, peers } = presenceOf(store)
+  if (target.kind === 'person') {
+    return peers.value.find((peer) => peer.clientId === target.clientId)?.cursor ?? null
+  }
+  const agent = [...agents.value, ...peers.value.flatMap((peer) => peer.agents)].find(
+    (entry) => entry.id === target.agentId
+  )
+  if (!agent) return null
+  return agent.status === 'idle' ? 'idle' : (agent.cursor ?? 'idle')
+}
+
+/** Move the view to the followed person or agent; stop when they are gone. */
+function keepFollowing(store: EditorStore): void {
+  const presence = presenceOf(store)
+  const target = presence.following.value
+  if (!target) return
+  const point = followedPoint(store, target)
+  if (point === 'idle') return
+  if (!point) {
+    presence.following.value = null
+    return
+  }
+  // The page change refreshes cursors, which calls back here to center on the new page.
+  if (point.pageId !== store.state.currentPageId) void store.switchPage(point.pageId)
+  else store.centerOn(point.x, point.y, point.zoom)
+}
+
+/** Follow a person or an agent, or stop following with null. */
+export function follow(store: EditorStore, target: FollowTarget | null): void {
+  presenceOf(store).following.value = target
+  keepFollowing(store)
+}
+
+/** Rename one of our agents; the new name reaches the room with our next awareness update. */
+export function renameAgent(store: EditorStore, agentId: string, name: string): void {
+  const trimmed = name.trim().slice(0, MAX_NAME_LENGTH)
+  const presence = presenceOf(store)
+  if (!trimmed) return
+  presence.agents.value = presence.agents.value.map((agent) =>
+    agent.id === agentId ? { ...agent, name: trimmed } : agent
+  )
+  refreshCursors(store)
 }
 
 export function setPeers(store: EditorStore, peers: readonly RemotePeer[]): void {
@@ -102,6 +153,7 @@ export function addAgent(store: EditorStore, kind: AgentKind, model?: string): A
     status: 'idle'
   }
   presence.agents.value = [...presence.agents.value, agent]
+  const current = () => presence.agents.value.find((entry) => entry.id === agent.id)
   const replace = (next: AgentPresence | null) => {
     const agents = presence.agents.value
     presence.agents.value = next
@@ -111,10 +163,13 @@ export function addAgent(store: EditorStore, kind: AgentKind, model?: string): A
   }
   return {
     id: agent.id,
-    name: agent.name,
+    // The owner may rename the agent.
+    get name() {
+      return current()?.name ?? agent.name
+    },
     update: (patch) => {
-      const current = presence.agents.value.find((entry) => entry.id === agent.id)
-      if (current) replace({ ...current, ...patch })
+      const entry = current()
+      if (entry) replace({ ...entry, ...patch })
     },
     remove: () => replace(null)
   }

@@ -5,7 +5,7 @@ import { colorToCSS } from '@open-pencil/scene-graph/color'
 import { useI18n } from '@open-pencil/vue'
 
 import { initials } from '@/app/shell/ui'
-import { useCollabPanelContext } from '@/components/CollabPanel/context'
+import { useCollabPanelContext } from '@/components/collab-panel/context'
 import Tip from '@/components/ui/overlay/Tip.vue'
 import collaborationTheme from '@/theme/collaboration'
 

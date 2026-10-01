@@ -13,5 +13,12 @@
   "pasteRoomLinkOrId": "Wklej link lub ID pokoju",
   "connected": "Połączono",
   "disconnect": "Rozłącz",
-  "share": "Udostępnij"
+  "share": "Udostępnij",
+  "follow": "Obserwuj {name}",
+  "stopFollowing": "Przestań obserwować {name}",
+  "renameAgent": "Zmień nazwę {name}",
+  "agentName": "Nazwa agenta",
+  "agentThinking": "Myśli",
+  "agentEditing": "Edytuje",
+  "agentIdle": "Bezczynny"
 }

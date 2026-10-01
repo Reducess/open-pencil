@@ -13,5 +13,12 @@
   "pasteRoomLinkOrId": "Raumlink oder ID einfügen",
   "connected": "Verbunden",
   "disconnect": "Verbindung trennen",
-  "share": "Teilen"
+  "share": "Teilen",
+  "follow": "{name} folgen",
+  "stopFollowing": "{name} nicht mehr folgen",
+  "renameAgent": "{name} umbenennen",
+  "agentName": "Agentenname",
+  "agentThinking": "Denkt nach",
+  "agentEditing": "Bearbeitet",
+  "agentIdle": "Inaktiv"
 }

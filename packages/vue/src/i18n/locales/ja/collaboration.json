@@ -13,5 +13,12 @@
   "pasteRoomLinkOrId": "ルームのリンクまたはIDを貼り付け",
   "connected": "接続済み",
   "disconnect": "切断",
-  "share": "共有"
+  "share": "共有",
+  "follow": "{name}をフォロー",
+  "stopFollowing": "{name}のフォローを解除",
+  "renameAgent": "{name}の名前を変更",
+  "agentName": "エージェント名",
+  "agentThinking": "考え中",
+  "agentEditing": "編集中",
+  "agentIdle": "待機中"
 }

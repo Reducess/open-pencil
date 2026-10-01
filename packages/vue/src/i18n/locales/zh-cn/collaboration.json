@@ -13,5 +13,12 @@
   "pasteRoomLinkOrId": "粘贴房间链接或 ID",
   "connected": "已连接",
   "disconnect": "断开连接",
-  "share": "分享"
+  "share": "分享",
+  "follow": "跟随 {name}",
+  "stopFollowing": "停止跟随 {name}",
+  "renameAgent": "重命名 {name}",
+  "agentName": "智能体名称",
+  "agentThinking": "思考中",
+  "agentEditing": "编辑中",
+  "agentIdle": "空闲"
 }

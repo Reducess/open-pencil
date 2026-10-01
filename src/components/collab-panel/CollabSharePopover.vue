@@ -3,10 +3,10 @@ import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'reka
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
 
-import ConnectedRoom from '@/components/CollabPanel/ConnectedRoom.vue'
-import { useCollabPanelContext } from '@/components/CollabPanel/context'
-import JoinRoomPrompt from '@/components/CollabPanel/JoinRoomPrompt.vue'
-import ShareOrJoinRoom from '@/components/CollabPanel/ShareOrJoinRoom.vue'
+import ConnectedRoom from '@/components/collab-panel/ConnectedRoom.vue'
+import { useCollabPanelContext } from '@/components/collab-panel/context'
+import JoinRoomPrompt from '@/components/collab-panel/JoinRoomPrompt.vue'
+import ShareOrJoinRoom from '@/components/collab-panel/ShareOrJoinRoom.vue'
 import { usePopoverUI } from '@/components/ui/overlay/popover'
 import collaborationTheme from '@/theme/collaboration'
 

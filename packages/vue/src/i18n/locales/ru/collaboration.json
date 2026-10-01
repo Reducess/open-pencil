@@ -13,5 +13,12 @@
   "pasteRoomLinkOrId": "Вставьте ссылку на комнату или ID",
   "connected": "Подключено",
   "disconnect": "Отключиться",
-  "share": "Поделиться"
+  "share": "Поделиться",
+  "follow": "Следовать за {name}",
+  "stopFollowing": "Перестать следовать за {name}",
+  "renameAgent": "Переименовать {name}",
+  "agentName": "Имя агента",
+  "agentThinking": "Думает",
+  "agentEditing": "Редактирует",
+  "agentIdle": "Неактивен"
 }

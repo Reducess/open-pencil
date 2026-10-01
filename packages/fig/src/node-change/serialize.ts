@@ -3,7 +3,7 @@ import { normalizeFontFamily, weightToStyle } from '@open-pencil/scene-graph'
 import { effectiveFigmaRawNodeFields } from '../source-metadata'
 import { computeExportTransform, fractionalPosition, mapToFigmaType } from './basics'
 import { bytesToHex } from './bytes'
-import { buildDerivedTextData as buildSharedDerivedTextData } from './derived-text-data'
+import { buildDerivedTextData as buildSharedDerivedTextData } from './derived-text/data'
 import { EMPTY_EXPORT_RUNTIME, type FigNodeChangeExportRuntime } from './export/runtime'
 import { applyFontFeaturesToKiwi } from './font/features'
 import { weightToFigmaStyle } from './font/style'
@@ -11,6 +11,7 @@ import { fillToKiwiPaint, safeColor } from './paint'
 import { bakeGlyphScale, encodePathCommandsBlob } from './path/commands'
 import {
   BOUND_VARIABLES_PLUGIN_KEY,
+  removePluginData,
   LAYOUT_DIRECTION_PLUGIN_KEY,
   TEXT_DIRECTION_PLUGIN_KEY,
   upsertPluginData,
@@ -19,12 +20,12 @@ import {
 import {
   exportedVariableConsumptionEntries,
   mergeVariableConsumptionMaps
-} from './variable-bindings'
+} from './variable/bindings'
 import {
   buildStyleOverrideTable,
   encodeVectorNetworkBlob,
   type StyleOverride
-} from './vector-network'
+} from './vector/network'
 
 export {
   buildFigKiwi,
@@ -43,8 +44,8 @@ import {
   sceneNodeToKiwiWithContext,
   type KiwiNodeChange
 } from './export/node'
-import { exportTextData, fontVariationToKiwi } from './text-data-export'
-import { toKiwiWindingRule } from './vector-geometry'
+import { exportTextData, fontVariationToKiwi } from './text/data-export'
+import { toKiwiWindingRule } from './vector/geometry'
 
 function textLines(text: string): NonNullable<NodeChange['textData']>['lines'] {
   const lineCount = Math.max(1, text.split('\n').length)
@@ -491,15 +492,11 @@ function serializeVariableBindings(
     const varGuid = varIdToGuid?.get(varId) ?? stringToGuid(varId)
     roundtripBindings[field] = guidToString(varGuid)
   }
-  if (
-    Object.keys(roundtripBindings).length > 0 ||
-    node.pluginData.some(
-      (entry) =>
-        entry.pluginId === OPEN_PENCIL_PLUGIN_ID && entry.key === BOUND_VARIABLES_PLUGIN_KEY
-    )
-  ) {
+  // An entry the node was imported with is dropped rather than emptied: nothing reads an
+  // empty map, and writing one leaves the record in every file the node is exported to.
+  if (Object.keys(roundtripBindings).length > 0)
     upsertPluginData(node, BOUND_VARIABLES_PLUGIN_KEY, JSON.stringify(roundtripBindings))
-  }
+  else removePluginData(node, BOUND_VARIABLES_PLUGIN_KEY)
   if (entries.length > 0) {
     nc.variableConsumptionMap = { entries }
     Object.assign(

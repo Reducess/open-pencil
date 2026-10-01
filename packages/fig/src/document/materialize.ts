@@ -228,6 +228,12 @@ function materializeReader(
     componentIds.set(item.sourceId, materialized.root.id)
     sources.set(item.sourceId, materialized.root.id)
   }
+  /**
+   * Components whose instances a resumed load must re-sync. Syncing visits every instance
+   * of a component, so a page placing many instances of one component collects it once
+   * and syncs after the page is built rather than per instance.
+   */
+  const resync = new Set<string>()
   const populateInstances = (occurrence: InstanceOccurrence): void => {
     if (occurrence.properties.type === 'SYMBOL') return
     const parentId = sources.get(occurrence.sourceId)
@@ -244,7 +250,7 @@ function materializeReader(
         linkInstanceSourceChildren(child, materialized, components)
         if (previous) {
           reconcileLiveComponentEdits(graph, materialized)
-          graph.syncInstances(materialized.root.componentId ?? '')
+          if (materialized.root.componentId) resync.add(materialized.root.componentId)
         }
         sources.set(child.sourceId, materialized.root.id)
       } else if (child.mainComponentId === null && child.properties.type !== 'SYMBOL')
@@ -258,6 +264,7 @@ function materializeReader(
       parent.childIds = [...ordered, ...parent.childIds.filter((id) => !ordered.includes(id))]
   }
   for (const page of pages) populateInstances(page)
+  for (const componentId of resync) graph.syncInstances(componentId)
   for (const node of graph.getAllNodes()) {
     if (existingNodeIds.has(node.id)) continue
     for (const field of [

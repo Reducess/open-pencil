@@ -3,8 +3,8 @@ import { describe, expect, it } from 'bun:test'
 import { importClipboardNodes } from '@open-pencil/core'
 import type { NodeChange } from '@open-pencil/core'
 
-import { getNodeOrThrow } from '../../../helpers/assert'
-import { createClipboardGraph } from '../../../helpers/clipboard'
+import { getNodeOrThrow } from '#core-tests/helpers/assert'
+import { createClipboardGraph } from '#core-tests/helpers/clipboard'
 
 describe('importClipboardNodes: filtering', () => {
   it('skips VARIABLE_SET and VARIABLE nodes', () => {
@@ -22,13 +22,27 @@ describe('importClipboardNodes: filtering', () => {
         guid: { sessionID: 0, localID: 2 },
         parentIndex: { guid: { sessionID: 0, localID: 1 }, position: '!' },
         type: 'VARIABLE_SET',
-        name: 'Primitives'
+        name: 'Primitives',
+        variableSetModes: [{ id: { sessionID: 0, localID: 4 }, name: 'Default' }]
       },
       {
         guid: { sessionID: 0, localID: 3 },
         parentIndex: { guid: { sessionID: 0, localID: 2 }, position: '!' },
         type: 'VARIABLE',
-        name: 'Colors/Brand/500'
+        name: 'Colors/Brand/500',
+        variableResolvedType: 'COLOR',
+        variableDataValues: {
+          entries: [
+            {
+              modeID: { sessionID: 0, localID: 4 },
+              variableData: {
+                dataType: 'COLOR',
+                resolvedDataType: 'COLOR',
+                value: { colorValue: { r: 0, g: 0, b: 1, a: 1 } }
+              }
+            }
+          ]
+        }
       },
       {
         guid: { sessionID: 0, localID: 10 },

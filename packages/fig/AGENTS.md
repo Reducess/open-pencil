@@ -8,5 +8,7 @@
 - Browser `.fig` export uses fflate and `@open-pencil/fig`; Tauri uses `build_fig_file` in `desktop/`.
 - Vector networks use the reverse-engineered `vectorNetworkBlob`; codecs live under `packages/core/src/vector/` and types in Scene Graph.
 - Changes to `.fig` behavior require round-trip validation in Figma. `packages/docs/development/roadmap.md` tracks raw metadata coverage and the code map for import/export mapping and schema files.
+- Measure a reader change over a whole archive, not one frame: capture before and after with `visual-oracles compare digest --file F --out baseline.json` then `--baseline baseline.json`, and account for every node it reports. `compare interpreted-document` checks one frame against live Figma and will report no change while a rule breaks pages it does not cover.
+- A rule about Figma's override or binding semantics holds only where it was observed. Before encoding one, find a second archive or frame that exercises it and confirm the outcome in live Figma; several plausible rules here fit one file and are contradicted by the next.
 - Fixtures under `tests/fixtures/*.fig` use Git LFS; use a normal `git push` when they change, and `git push --no-verify` to skip the LFS hook otherwise.
 - Tests address the package by alias rather than drilling: `#fig/*` for source, `#fig-tests/*` for shared test helpers, both registered in `tools/checks/architecture/src/steiger-rules/support.ts`.

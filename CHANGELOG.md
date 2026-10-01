@@ -4,6 +4,7 @@
 
 ### Breaking changes
 
+- The editor state's `remoteCursors` is now `presenceCursors`, typed `PresenceCursor[]` from `@open-pencil/core/canvas`, and each cursor has a `kind` of `'person'` or `'agent'`.
 - The desktop app now requires macOS 13 or later; the web app supports Chrome 111, Edge 111, Firefox 128, and Safari 16.4 or later.
 - `.fig` reading moved to one reader, so the previous importer's exports are gone. `importNodeChanges` (`@open-pencil/core` and `@open-pencil/core/kiwi`) and `importClipboardNodes` (`@open-pencil/fig/clipboard`) are replaced by `parseFigFile` and `parseFigmaClipboard`; `populateLazyFigImportRoots` and `populateAllLazyFigImportRoots` (`@open-pencil/core/kiwi`) are replaced by `populateFigPage` and `populateAllFigPages` on `@open-pencil/core/io/formats/fig`; `populateAndApplyOverrides` (`@open-pencil/fig/instance-overrides`) is replaced by `interpretInstance` with `materializeInstance`. `FIG_PACKAGE_STATUS` now reads `document-reader`, and `assertFigPackageReady()` is gone, because `@open-pencil/fig` reads an archive into a SceneGraph itself rather than directing callers to Core.
 - `sceneNodeToJSX` and `selectionToJSX` in `@open-pencil/core` produce only OpenPencil JSX, and `JSXFormat` and `JSXExportOptions` are removed. For Tailwind JSX, use `sceneNodesToTailwindJSX(graph, nodeIds)` from `@open-pencil/dom-css` or the browser-safe `@open-pencil/dom-css/export`.
@@ -12,6 +13,7 @@
 
 ### Added
 
+- See where the built-in AI chat is working: while it replies, an outlined sparkle with a callsign such as *Fern* marks the layers it edits. In a shared room, collaborators see each other's agents in the color of the person running them.
 - Preview designs progressively on the canvas as direct AI providers stream JSX, without saving partial designs or adding intermediate undo steps. A preview stays with its page: it hides while you view another page and returns when you come back.
 - Write design trees as TSX with `@open-pencil/design-jsx` as the JSX import source, and render them with `renderTree`.
 - Swap the component behind an instance with `instance.swapComponent(component)` in the plugin API, as in Figma.
@@ -60,6 +62,7 @@
 
 ### Security
 
+- Validate cursors, selections, and names that collaborators send before drawing them, and cap their size, so a broken or hostile peer cannot crash or flood the canvas.
 - Evaluate `calc` expressions through `jsep` and an arithmetic allowlist that never compiles input into JavaScript, replacing the `expr-eval` dependency and its unpatched critical code-execution advisory (GHSA-q9v2-7m5w-4693).
 - Escape layer names and other text properties in JSX and Tailwind JSX export, so text from a document can no longer add attributes or JavaScript expressions that the AI and MCP `render` and `replace` tools would execute, and names containing `&` no longer change when the JSX is rendered back.
 

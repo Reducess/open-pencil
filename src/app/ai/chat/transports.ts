@@ -1,4 +1,5 @@
 import { Chat } from '@ai-sdk/vue'
+import { useEventListener } from '@vueuse/core'
 import { createUIMessageStream, DirectChatTransport, stepCountIs, ToolLoopAgent } from 'ai'
 import type {
   ChatTransport,
@@ -19,7 +20,7 @@ import { buildReasoningProviderOptions, type AIProviderOptions } from '@/app/ai/
 import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
 import { createAIModelRuntime, resolveModelConnectionAPIKey } from '@/app/ai/models'
 import { createCanvasJSXPreview } from '@/app/ai/preview/canvas'
-import { createAITools, recordStep, runPageId, startRun } from '@/app/ai/tools'
+import { createAITools, endRun, recordStep, runPageId, startRun } from '@/app/ai/tools'
 import { enabledAIToolDefinitions } from '@/app/ai/tools/catalog'
 import { aiToolOverrides } from '@/app/ai/tools/preferences'
 import {
@@ -123,7 +124,7 @@ export function createToolLoopTransport({
         enabledAIToolDefinitions(aiToolOverrides.value).map((tool) => tool.name)
       )
       preview.clear()
-      startRun(store, stepLimit)
+      startRun(store, stepLimit, effectiveModelID)
       return {
         ...options,
         stopWhen: stepCountIs(stepLimit),
@@ -133,7 +134,10 @@ export function createToolLoopTransport({
         providerOptions
       }
     },
-    onFinish: () => preview.clear(),
+    onFinish: () => {
+      preview.clear()
+      endRun(store)
+    },
     onStepFinish: ({ usage }) => {
       preview.clear()
       recordStep(store)
@@ -153,6 +157,7 @@ export function createToolLoopTransport({
 
   function handleError(error: unknown): string {
     preview.clear()
+    endRun(store)
     onError?.(error)
     return 'The provider rejected the request.'
   }
@@ -163,6 +168,8 @@ export function createToolLoopTransport({
   return resumableTransport({
     reconnectToStream: (options) => transport.reconnectToStream(options),
     async sendMessages(options) {
+      // Stopping a reply ends the run without onFinish.
+      if (options.abortSignal) useEventListener(options.abortSignal, 'abort', () => endRun(store))
       // DirectChatTransport handles error chunks, but not a rejected underlying stream.
       return createUIMessageStream<UIMessage>({
         execute: async ({ writer }) => {

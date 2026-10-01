@@ -29,8 +29,10 @@ test('multipart assistant messages expose one copy action', async ({ configuredC
 
 test('tool calls render their result', async ({ configuredChat: chat }) => {
   await chat.submit('Create a frame')
-  await expect(chat.assistantMessage().getByText('Create Shape')).toBeVisible()
-  await expect(chat.assistantMessage().getByText('Done')).toBeVisible()
+  // The status icon's label leads the call's accessible name.
+  await expect(
+    chat.assistantMessage().getByRole('button', { name: /^Done Create Shape\b/ })
+  ).toBeVisible()
   await expect(chat.assistantMessage().getByText('Created a frame', { exact: false })).toBeVisible()
 })
 

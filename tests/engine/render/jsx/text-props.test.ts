@@ -165,3 +165,19 @@ describe('attribute string round-trip', () => {
     expect(getNodeOrThrow(g, result.id)).toMatchObject({ name, width: 10 })
   })
 })
+
+describe('text content round-trip', () => {
+  it.each([
+    'Curly {braces} and <tags>',
+    'Fish &amp; chips',
+    'Line one\nLine two',
+    '  padded  ',
+    'Back\\slash'
+  ])('keeps the text %p', async (text) => {
+    const g = makeSceneGraph()
+    const [source] = await renderJSX(g, '<Text color="#000">Placeholder</Text>')
+    getNodeOrThrow(g, source.id).text = text
+    const [result] = await renderJSX(g, sceneNodeToJSX(source.id, g))
+    expect(getNodeOrThrow(g, result.id).text).toBe(text)
+  })
+})

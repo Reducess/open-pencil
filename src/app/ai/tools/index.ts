@@ -12,7 +12,7 @@ import { useLibraryService } from '@/app/libraries'
 import { aiToolDefinitions } from './catalog'
 import { markRunWork, moveRunToPage, runPageId, stepBudget } from './run'
 
-export { didHitStepLimit, endRun, recordStep, runPageId, startRun } from './run'
+export { didHitStepLimit, endRun, recordStep, runAgentId, runPageId, startRun } from './run'
 
 export function createAITools(store: EditorStore, diagnosticContext?: AIDiagnosticContext) {
   let before: { pageId: string; snapshot: ReturnType<EditorStore['snapshotPage']> } | null = null

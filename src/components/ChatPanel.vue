@@ -16,6 +16,7 @@ import { activeTab } from '@/app/tabs'
 import ACPPermissionDialog from '@/components/chat/ACPPermissionDialog.vue'
 import ChatHistory from '@/components/chat/ChatHistory.vue'
 import ChatInput from '@/components/chat/ChatInput.vue'
+import ChatRunLocation from '@/components/chat/ChatRunLocation.vue'
 import ChatTranscript from '@/components/chat/ChatTranscript.vue'
 import ProviderSetup from '@/components/chat/ProviderSetup.vue'
 
@@ -205,6 +206,7 @@ function handleStop() {
       <p v-if="history.readOnly.value" role="status" class="px-3 py-2 text-xs text-muted">
         {{ ai.chatReadOnly }}
       </p>
+      <ChatRunLocation />
       <ChatInput
         v-if="isConfigured && !agentHistoryReadOnly && !history.readOnly.value"
         :status="status"

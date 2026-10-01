@@ -5,6 +5,7 @@ import { createEditorStore } from '@/app/editor/session/create'
 import {
   addAgent,
   follow,
+  presenceByPage,
   presenceOf,
   renameAgent,
   setOwnerColor,
@@ -125,4 +126,27 @@ test('renames our agents, and their handles report the new name', () => {
   expect(agent.name).toBe('Juniper')
   renameAgent(store, agent.id, '   ')
   expect(agent.name).toBe('Juniper')
+})
+
+test("lists people and working agents by page, knowing an agent's page before its first edit", () => {
+  const { store, pageId, other } = setup()
+  setPeers(store, [
+    {
+      clientId: 5,
+      name: 'Ana',
+      color: red,
+      cursor: { x: 0, y: 0, pageId },
+      agents: [{ id: 'o', name: 'Orbit', kind: 'mcp', status: 'idle', pageId: other }]
+    }
+  ])
+  const thinking = addAgent(store, 'chat')
+  thinking.update({ status: 'thinking', pageId: other })
+  expect(
+    presenceByPage(store)
+      .get(pageId)
+      ?.map((entry) => entry.name)
+  ).toEqual(['Ana'])
+  expect(presenceByPage(store).get(other)).toEqual([
+    { kind: 'agent', name: thinking.name, color: expect.anything() }
+  ])
 })

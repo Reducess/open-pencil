@@ -13,6 +13,7 @@
 
 ### Added
 
+- See which pages people and AI agents are working on: the Pages panel marks those pages in their colors, the command palette names who is there, and the chat offers **Go to page** while its reply works on a page you're not viewing.
 - Follow an AI agent from the share panel, which now lists everyone in the room with their agents, what each is doing, and on which page. Rename your own agents there.
 - See where the built-in AI chat is working: while it replies, an outlined sparkle with a callsign such as *Fern* marks the layers it edits. In a shared room, collaborators see each other's agents in the color of the person running them.
 - Jump between pages from the command palette: it lists the pages you visited recently in the tab, **Go to page…** lists every page, and typing a page name finds it.

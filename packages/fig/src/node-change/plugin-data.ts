@@ -19,7 +19,7 @@ import {
   variableConsumptionEntries,
   VARIABLE_BINDING_FIELDS_INVERSE,
   referencesVariable
-} from './variable-bindings'
+} from './variable/bindings'
 
 export const OPEN_PENCIL_PLUGIN_ID = 'open-pencil'
 export const TEXT_DIRECTION_PLUGIN_KEY = 'textDirection'
@@ -48,6 +48,12 @@ export function upsertPluginData(
   )
   pluginData.push({ pluginId: OPEN_PENCIL_PLUGIN_ID, key, value })
   node.pluginData = pluginData
+}
+
+export function removePluginData(node: { pluginData: PluginDataEntry[] }, key: string): void {
+  node.pluginData = node.pluginData.filter(
+    (entry) => !(entry.pluginId === OPEN_PENCIL_PLUGIN_ID && entry.key === key)
+  )
 }
 
 export function applyExportSettingsPluginData(

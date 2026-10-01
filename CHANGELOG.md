@@ -12,6 +12,7 @@
 
 ### Added
 
+- Preview designs progressively on the canvas as direct AI providers stream JSX, without saving partial designs or adding intermediate undo steps. A preview stays with its page: it hides while you view another page and returns when you come back.
 - Write design trees as TSX with `@open-pencil/design-jsx` as the JSX import source, and render them with `renderTree`.
 - Swap the component behind an instance with `instance.swapComponent(component)` in the plugin API, as in Figma.
 - Detach an instance from its component with `detachInstance()` in the plugin API, as in Figma, from scripts run through `eval`.
@@ -22,12 +23,15 @@
 
 ### Changed
 
+- Keep an AI chat working on the page where it started when you switch to another page, instead of sending its next edits to whichever page is on screen. When the AI switches pages itself, your view follows.
 - `openpencil://` and web `?node=` links select the layer on another page when the current page has none, switching to that page.
 - Generate Tailwind JSX with the same class mapping as Tailwind HTML export, so both describe a design the same way, and write opaque colors as hex in HTML, CSS, and Tailwind output. `openpencil export -f jsx --style tailwind` now exports a whole page when no `--node` is given.
 - Show download progress with a percentage and transferred size while installing a desktop update, instead of an indeterminate message that lasted until the restart.
 
 ### Fixed
 
+- Keep an AI reply running in the chat panel, with its Stop button, when you switch pages, instead of detaching the panel from the reply in progress.
+- Undo an AI edit while another page is on screen; undo previously did nothing until you returned to the page the AI changed.
 - Type `parameterConsumptionMap`, `propRefValue`, and `expressionValue` in the Kiwi `NodeChange` codec, which `fig.kiwi` declares but the TypeScript definitions omitted, so reading them no longer needs a cast.
 - Read `.fig` text bound to a string variable, in a component and through an instance override, and keep the bound value where Figma does instead of applying a literal override the layer's binding retires. Text bindings also survive export.
 - Draw a `.fig` fill or stroke bound to a colour variable at the variable's own transparency, which was previously ignored in favour of the paint's own opacity — so a translucent token drew opaque, and an opacity left over from an override the binding supersedes drew in its place.

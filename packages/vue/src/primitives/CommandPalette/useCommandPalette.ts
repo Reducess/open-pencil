@@ -9,7 +9,7 @@ function searchItems(
   query: string,
   resultLimit: number
 ): CommandPaletteItem[] {
-  if (!query) return items.slice(0, resultLimit)
+  if (!query) return items.filter((item) => !item.searchOnly).slice(0, resultLimit)
 
   return new Fuse(items, {
     keys: ['label', 'description', 'keywords'],

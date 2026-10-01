@@ -55,3 +55,26 @@ describe('select', () => {
     expect(ran).toBe(true)
   })
 })
+
+describe('nested steps', () => {
+  const pages = Array.from({ length: 20 }, (_, i) => ({ id: `page-${i}`, label: `Page ${i + 1}` }))
+  const open = () => {
+    const palette = useCommandPalette({
+      resultLimit: 12,
+      groups: [{ id: 'pages', items: [{ id: 'go-to', label: 'Go to page', children: pages }] }]
+    })
+    const [goTo] = palette.filteredGroups.value[0]?.items ?? []
+    if (goTo) palette.select(goTo)
+    return palette
+  }
+
+  test('list every item before searching', () => {
+    expect(labels(open().filteredGroups.value)).toHaveLength(20)
+  })
+
+  test('still limit search results', () => {
+    const { searchTerm, filteredGroups } = open()
+    searchTerm.value = 'Page'
+    expect(labels(filteredGroups.value)).toHaveLength(12)
+  })
+})

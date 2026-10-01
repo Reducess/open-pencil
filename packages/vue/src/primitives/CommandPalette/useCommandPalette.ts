@@ -9,7 +9,7 @@ function searchItems(
   query: string,
   resultLimit: number
 ): CommandPaletteItem[] {
-  if (!query) return items.slice(0, resultLimit)
+  if (!query) return items.filter((item) => !item.searchOnly).slice(0, resultLimit)
 
   return new Fuse(items, {
     keys: ['label', 'description', 'keywords'],
@@ -81,11 +81,13 @@ export function useCommandPalette(options: MaybeRefOrGetter<UseCommandPaletteOpt
     return true
   }
 
-  function select(item: CommandPaletteItem) {
-    if (item.disabled || navigate(item)) return
+  /** Run `item`, or open its children. Returns whether a command ran. */
+  function select(item: CommandPaletteItem): boolean {
+    if (item.disabled || navigate(item)) return false
     selectedId.value = item.id
     item.onSelect?.()
     close()
+    return true
   }
 
   return {

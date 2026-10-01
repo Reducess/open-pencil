@@ -43,7 +43,7 @@ import { mergeOverrides, serializeRuntimePropertyOverrides } from './override-cl
 
 export type { KiwiNodeChange, SceneNodeToKiwiContext } from './context'
 
-const siblingOrderKeyCache = new WeakMap<object, Map<string, { ids: string[]; keys: string[] }>>()
+const siblingOrderKeyCache = new WeakMap<object, Map<string, { keyById: Map<string, string> }>>()
 
 /**
  * A layer's `parentIndex.position`: its imported key where that still orders it after the
@@ -71,14 +71,12 @@ function exportOrderKey(
   let entry = cache.get(parentId)
   if (!entry) {
     const siblings = context.graph.getChildren(parentId).filter((child) => !child.internalOnly)
-    entry = {
-      ids: siblings.map((sibling) => sibling.id),
-      keys: siblingOrderKeys(siblings.map((sibling) => sibling.source.orderKey))
-    }
+    const keys = siblingOrderKeys(siblings.map((sibling) => sibling.source.orderKey))
+    // Keyed by id: this runs once per child, so a scan per child would cost the parent O(n²).
+    entry = { keyById: new Map(siblings.map((sibling, index) => [sibling.id, keys[index]])) }
     cache.set(parentId, entry)
   }
-  const at = entry.ids.indexOf(node.id)
-  return at === -1 ? context.fractionalPosition(childIndex) : entry.keys[at]
+  return entry.keyById.get(node.id) ?? context.fractionalPosition(childIndex)
 }
 
 type KiwiBooleanOperation = NonNullable<NodeChange['booleanOperation']>

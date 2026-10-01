@@ -2,6 +2,7 @@ import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { guidToString } from '@open-pencil/kiwi/fig/guid'
 import type { Vector } from '@open-pencil/scene-graph'
 
+import { cloneRecord } from '../node-change/clone'
 import { mergeVariableConsumptionMaps } from '../node-change/variable-bindings'
 import {
   bindSourceProperties,
@@ -301,7 +302,7 @@ function interpretRoot(
     invalidateInheritedTextData(target.properties, retained)
     Object.assign(
       target.properties,
-      structuredClone(retained),
+      cloneRecord(retained),
       mergeVariableConsumptionMaps(target.properties, retained as NodeChange)
     )
     if ('name' in retained) target.hasOwnName = true

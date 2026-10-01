@@ -52,7 +52,7 @@
 
 ### Performance
 
-- Open multi-page `.fig` documents faster: the archive is indexed once rather than once for every page, each page resolves only the layers it adds instead of rescanning the whole document, and placing an instance no longer re-synchronises every other instance of its component. A 33-page file loads about a fifth quicker, and a page of repeated components opens roughly three times faster once a document is already open.
+- Open multi-page `.fig` documents faster: the archive is indexed once rather than once for every page, each page resolves only the layers it adds instead of rescanning the whole document, placing an instance no longer re-synchronises every other instance of its component, and archive records are copied directly rather than through `structuredClone`. A 33-page file loads about a fifth quicker, and a page of repeated components opens three to four times faster once a document is already open.
 
 ### Security
 

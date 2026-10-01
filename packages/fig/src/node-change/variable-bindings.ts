@@ -7,6 +7,7 @@ import {
 } from '@open-pencil/scene-graph'
 
 import { effectiveFigmaRawNodeFields } from '../source-metadata'
+import { cloneRecord } from './clone'
 import { linearVariableExpression } from './variable-expression'
 
 export const VARIABLE_BINDING_FIELDS: Record<string, string> = {
@@ -96,8 +97,8 @@ export function mergeVariableConsumptionMaps(
     const index = entry.variableField
       ? entries.findIndex((previous) => previous.variableField === entry.variableField)
       : -1
-    if (index < 0) entries.push(structuredClone(entry))
-    else entries[index] = structuredClone(entry)
+    if (index < 0) entries.push(cloneRecord(entry))
+    else entries[index] = cloneRecord(entry)
   }
   // VariableDataMap carries nothing but its entries, so the merged list is the whole map.
   return { parameterConsumptionMap: { entries } }

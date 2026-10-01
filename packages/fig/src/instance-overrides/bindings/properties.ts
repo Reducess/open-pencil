@@ -1,3 +1,5 @@
+import { cloneRecord } from '#fig/node-change/clone'
+
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 
 import { sameGuid } from '../source-index'
@@ -92,7 +94,7 @@ export function bindSourceProperties(
   bindings: readonly PropertyBinding[],
   record?: (claim: BoundPropertyClaim, binding: PropertyBinding) => void
 ): NodeChange {
-  const result = structuredClone(source)
+  const result = cloneRecord(source)
   const refs = source.componentPropRefs as
     | (ComponentPropRef & { isDeleted?: boolean })[]
     | undefined

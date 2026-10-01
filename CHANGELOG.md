@@ -24,6 +24,8 @@
 - Export components to Storybook with `openpencil export -f storybook`: one CSF3 story file per component set or component for React, Vue, or HTML, with a story and `select` controls per variant, a design image per variant, and an `openpencil://` link that opens the variant in OpenPencil. `--watch` re-exports on every save and removes stories of deleted components, and `--beside` writes each document's stories next to it, for many documents at once (#727).
 - Export HTML and Tailwind JSX from the app's export options and through the IO registry, and export Tailwind JSX from the CLI with `-f tailwind-jsx` (`-f jsx --style tailwind` still works). HTML export of a single layer now includes the layer itself, as other formats do.
 - Choose PPTX in the Export panel's format list, alongside PNG, JPG, WEBP, SVG, and PDF.
+- Let AI and MCP agents verify their edits with diff tools: `diff_visual` returns a pixel diff of two rendered nodes with the changed region, `diff_apply` applies a `diff_create` or `diff_show` patch only when the nodes still match it, and `diff_show` now also previews stroke weight, blend mode, clipping, and font changes. The built-in AI chat enables `diff_create`, `diff_jsx`, and `diff_visual` by default.
+- Compare designs from the terminal with `openpencil diff`: `create`, `jsx`, `show`, `apply`, and `visual` work on a file or the running app, and `diff files` compares two documents page by page and exits with status 1 when they differ.
 
 ### Changed
 

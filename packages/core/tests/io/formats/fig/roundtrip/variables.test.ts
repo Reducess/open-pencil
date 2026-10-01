@@ -9,9 +9,9 @@ import {
   type Color
 } from '@open-pencil/core'
 
-import { expectDefined } from '../../../../helpers/assert'
-import { parseFixture } from '../../../../helpers/fig/fixtures'
-import { runsHeavyTests } from '../../../../helpers/test-utils'
+import { expectDefined } from '#core-tests/helpers/assert'
+import { parseFixture } from '#core-tests/helpers/fig/fixtures'
+import { runsHeavyTests } from '#core-tests/helpers/test-utils'
 
 setDefaultTimeout(60_000)
 

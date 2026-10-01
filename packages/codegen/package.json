@@ -47,7 +47,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/open-pencil/open-pencil.git",
-    "directory": "packages/design-jsx"
+    "directory": "packages/codegen"
   },
   "publishConfig": {
     "access": "public",

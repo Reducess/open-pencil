@@ -15,4 +15,15 @@ const card = jsx.element(
 jsx.printJSX(card) // <Card title={"Fish & chips"}>Hello</Card>
 ```
 
-`jsx.stringValue` and `jsx.text` keep a value as plain JSX only when JSX reads it back unchanged; anything with quotes, entities, braces, angle brackets, backslashes, or line breaks becomes a string literal. `es` parses TypeScript templates, fills `$name` placeholders, and prints modules.
+`jsx.stringValue` and `jsx.text` keep a value as plain JSX only when JSX reads it back unchanged; anything with quotes, entities, braces, angle brackets, backslashes, or line breaks becomes a string literal.
+
+`es` parses TypeScript templates, fills `$name` placeholders, and prints modules:
+
+```ts
+import { es } from '@open-pencil/codegen'
+
+const module = es.fill(es.parseModule("export const title = '$title'"), {
+  $title: es.string('Checkout')
+})
+es.printModule(module) // export const title = 'Checkout';
+```

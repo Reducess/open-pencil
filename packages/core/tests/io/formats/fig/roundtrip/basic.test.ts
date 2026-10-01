@@ -9,8 +9,8 @@ import {
 } from '@open-pencil/core'
 import { populateFigPage } from '@open-pencil/core/io/formats/fig'
 
-import { expectDefined } from '#tests/helpers/assert'
-import { collectAllNodes, countByType } from '#tests/helpers/fig/traversal'
+import { expectDefined } from '../../../../helpers/assert'
+import { collectAllNodes, countByType } from '../../../../helpers/fig/traversal'
 
 setDefaultTimeout(60_000)
 

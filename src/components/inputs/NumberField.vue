@@ -71,7 +71,7 @@ const accessibleLabel = computed(() => {
   const ariaLabel = attrs['aria-label']
   return typeof ariaLabel === 'string' ? ariaLabel : (label ?? icon)
 })
-const styles = computed(() => tv(theme)({ suffix: Boolean(slots.suffix) }))
+const styles = computed(() => tv(theme)({ suffix: Boolean(suffix || slots.suffix) }))
 
 const emit = defineEmits<{
   'update:modelValue': [value: number]

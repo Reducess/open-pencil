@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- Keep paint hex values and opacity percentages readable in compact property fields without clipping their digits.
 - Keep Undo and Redo available according to the active document when switching tabs, rather than the first document's history.
 - Avoid unhandled cancellation errors when a newer page switch interrupts an earlier one, including during page renaming.
 - Keep grid layouts, rotation, inner shadows, every shadow of a layer, layer and background blur, flex grow, right-to-left direction, and sections in HTML export, which previously turned grids into columns and dropped the rest.

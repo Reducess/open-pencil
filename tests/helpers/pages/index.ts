@@ -20,6 +20,10 @@ export function currentPageName(page: Page): Promise<string | undefined> {
 
 /** Driver: open a page from the Pages panel, as a user would. */
 export async function visitPage(page: Page, name: string): Promise<void> {
-  await page.getByTestId('pages-row').filter({ hasText: name }).click()
+  // Exact text, so "Chapter 1" does not also match "Chapter 10".
+  await page
+    .getByTestId('pages-row')
+    .filter({ has: page.getByText(name, { exact: true }) })
+    .click()
   await expect.poll(() => currentPageName(page)).toBe(name)
 }

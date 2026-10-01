@@ -4,13 +4,12 @@ import { exportFigFile } from '@open-pencil/core/io'
 import { initCodec } from '@open-pencil/core/kiwi'
 import { parseFigBuffer } from '@open-pencil/fig'
 import { SceneGraph } from '@open-pencil/scene-graph'
+import type { GUID } from '@open-pencil/scene-graph/primitives'
 
 function positionsByParent(nodeChanges: readonly { parentIndex?: unknown }[]) {
   const byParent = new Map<string, string[]>()
   for (const change of nodeChanges) {
-    const parentIndex = change.parentIndex as
-      | { guid?: { sessionID: number; localID: number }; position?: string }
-      | undefined
+    const parentIndex = change.parentIndex as { guid?: GUID; position?: string } | undefined
     const parent = parentIndex?.guid
     if (!parent || parentIndex?.position === undefined) continue
     const key = `${parent.sessionID}:${parent.localID}`

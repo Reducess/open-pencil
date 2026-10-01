@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
+import { range } from 'es-toolkit'
+
 import { useCommandPalette } from '@open-pencil/vue'
 
 const palette = () =>
@@ -57,7 +59,7 @@ describe('select', () => {
 })
 
 describe('nested steps', () => {
-  const pages = Array.from({ length: 20 }, (_, i) => ({ id: `page-${i}`, label: `Page ${i + 1}` }))
+  const pages = range(1, 21).map((n) => ({ id: `page-${n}`, label: `Page ${n}` }))
   const open = () => {
     const palette = useCommandPalette({
       resultLimit: 12,

@@ -1,3 +1,5 @@
+import { range } from 'es-toolkit'
+
 import { expect, test, useEditorSetup } from '#tests/e2e/fixtures'
 import { addPages, currentPageName, visitPage } from '#tests/helpers/pages'
 
@@ -77,7 +79,7 @@ test('command palette goes to any page in a page step', async () => {
 })
 
 test('command palette page step lists every page, beyond the search result limit', async () => {
-  const names = Array.from({ length: 14 }, (_, i) => `Chapter ${i + 1}`)
+  const names = range(1, 15).map((n) => `Chapter ${n}`)
   await addPages(editor.page, names)
 
   const palette = await openPalette()

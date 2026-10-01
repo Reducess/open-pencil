@@ -1,4 +1,4 @@
-import { groupBy } from 'es-toolkit/array'
+import { groupBy, take } from 'es-toolkit/array'
 import Fuse from 'fuse.js'
 import { computed, ref, type MaybeRefOrGetter, toValue } from 'vue'
 
@@ -9,7 +9,11 @@ function searchItems(
   query: string,
   resultLimit: number
 ): CommandPaletteItem[] {
-  if (!query) return items.filter((item) => !item.searchOnly).slice(0, resultLimit)
+  if (!query)
+    return take(
+      items.filter((item) => !item.searchOnly),
+      resultLimit
+    )
 
   return new Fuse(items, {
     keys: ['label', 'description', 'keywords'],

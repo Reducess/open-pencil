@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { classifyToolState, isMCPToolName } from '@/components/chat/tool-state'
+import { classifyToolState, isMCPToolName } from '@/components/chat/tool/state'
 
 describe('classifyToolState', () => {
   test('recognizes MCP tools by their names', () => {

@@ -11,19 +11,19 @@ import {
   type MaterializedComponentOccurrence
 } from '../instance-overrides/source-children'
 import { nodeChangeToProps } from '../node-change'
-import type { BindingReferenceDiagnostic } from './binding-references'
+import { applyDocumentLayoutBindings } from './bindings/layout'
+import { applyDocumentPaintBindings } from './bindings/paint'
+import type { BindingReferenceDiagnostic } from './bindings/references'
+import { applyDocumentTextBindings } from './bindings/text'
 import {
   checkpointComponent,
   restoreComponentCheckpoint,
   type ComponentCheckpoint
 } from './component/checkpoint'
 import { linkComponentPropertyValues, resolveVariantPropertyValues } from './component/values'
-import { applyDocumentLayoutBindings } from './layout-bindings'
 import { loadPageTransaction } from './load-transaction'
 import { applyDocumentMetadata } from './metadata'
-import { applyDocumentPaintBindings } from './paint-bindings'
 import { createArchiveDocumentReader, createDocumentReader } from './read'
-import { applyDocumentTextBindings } from './text-bindings'
 import { materializeVariableResources } from './variables'
 
 export interface DocumentAssemblyOptions extends InterpretInstanceOptions {

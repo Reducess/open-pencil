@@ -1,12 +1,13 @@
+import { symbolOverridesOf, type SymbolOverride } from '#fig/instance-overrides/types'
+import { variableConsumptionEntries } from '#fig/node-change/variable-bindings'
+import { visitVariableReferences } from '#fig/node-change/variable-expression'
+
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { guidToString, stringToGuid } from '@open-pencil/kiwi/fig/guid'
 
-import { symbolOverridesOf, type SymbolOverride } from '../instance-overrides/types'
-import { variableConsumptionEntries } from '../node-change/variable-bindings'
-import { visitVariableReferences } from '../node-change/variable-expression'
-import { normalizeComponentPropertyRecords } from './property-records'
-import { createResourceResolver } from './resource-reference'
-import { STYLE_REFERENCE_FIELDS } from './style-dependencies'
+import { normalizeComponentPropertyRecords } from '../property-records'
+import { createResourceResolver } from '../resource-reference'
+import { STYLE_REFERENCE_FIELDS } from '../style-dependencies'
 
 export interface BindingReferenceDiagnostic {
   sourceId: string

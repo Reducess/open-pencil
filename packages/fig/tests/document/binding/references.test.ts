@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 
 import { guid } from '#fig-tests/helpers/guid'
-import { resolveDocumentBindingReferences } from '#fig/document/binding-references'
+import { resolveDocumentBindingReferences } from '#fig/document/bindings/references'
 
 import { nodeChangeToProps } from '@open-pencil/fig/node-change'
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'

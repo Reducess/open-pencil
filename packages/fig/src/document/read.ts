@@ -16,7 +16,7 @@ import { applyStyleRefsToFields } from '../node-change/style-refs'
 import {
   resolveDocumentBindingReferences,
   type BindingReferenceDiagnostic
-} from './binding-references'
+} from './bindings/references'
 import { planComponentConstruction } from './components'
 import { collectSceneDependencies } from './dependency-closure'
 import { inheritComponentPropertyDefinitions } from './property-inheritance'

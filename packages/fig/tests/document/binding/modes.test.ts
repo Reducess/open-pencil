@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 
 import { guid } from '#fig-tests/helpers/guid'
-import { applyDocumentLayoutBindings } from '#fig/document/layout-bindings'
+import { applyDocumentLayoutBindings } from '#fig/document/bindings/layout'
 import { materializeDocument } from '#fig/document/materialize'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'

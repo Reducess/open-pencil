@@ -2,6 +2,7 @@ import {
   copyFills,
   copyStrokes,
   type Color,
+  type Fill,
   type SceneGraph,
   type SceneNode
 } from '@open-pencil/scene-graph'
@@ -11,7 +12,7 @@ import {
  * that alpha from the paint's opacity rather than the color, so the variable owns both
  * and any opacity the record carried is a stale literal Figma would not apply either.
  */
-function applyBoundColor(paint: { color: Color; opacity: number }, color: Color): void {
+function applyBoundColor(paint: Pick<Fill, 'color' | 'opacity'>, color: Color): void {
   paint.color = { ...color, a: 1 }
   paint.opacity = color.a
 }

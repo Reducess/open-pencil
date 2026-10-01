@@ -1,10 +1,10 @@
-import { forEachInstanceOverride } from '@open-pencil/scene-graph'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-
 import {
   resolvedNumericBindingUpdate,
   numericVariableBindingScales
-} from '../node-change/variable-bindings'
+} from '#fig/node-change/variable-bindings'
+
+import { forEachInstanceOverride } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
 /** Apply resolved scalar layout values after hierarchy and explicit modes exist. */
 export function applyDocumentLayoutBindings(

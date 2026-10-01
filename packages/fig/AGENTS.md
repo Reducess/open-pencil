@@ -3,7 +3,8 @@
 `@open-pencil/kiwi` owns Kiwi schema, runtime, codecs, containers, and parse helpers without SceneGraph knowledge. `@open-pencil/fig` owns complete `.fig` archive parsing, SceneGraph conversion, metadata policy, component/instance interpretation, and the Figma clipboard format. Core owns format-neutral orchestration, runtime fonts and workers, and thumbnails.
 
 - Keep Kiwi runtime changes minimal; put project policy in wrappers, not in the runtime.
-- Figma clipboard envelope encoding, decoding, bounds, and SceneGraph import conversion belong to `@open-pencil/fig/clipboard`. Core prepares runtime fonts and text and owns editor placement and history; browser and Tauri adapters own system clipboard I/O. Do not add platform clipboard APIs here.
+- Figma clipboard envelope encoding, decoding, and bounds belong to `@open-pencil/fig/clipboard`; converting those records to a SceneGraph is `materializeFigFragment` in `packages/fig/src/document/fragment.ts`, which Core drives from `packages/core/src/clipboard/fig-import.ts`. Core prepares runtime fonts and text and owns editor placement and history; browser and Tauri adapters own system clipboard I/O. Do not add platform clipboard APIs here.
+- One reader serves every `.fig` path — parse, worker, page population, session recovery, export, and paste — through the document sessions in `packages/fig/src/document/`. Read what it could not resolve with `readerDiagnostics(graph)` from `packages/core/src/kiwi/fig/session/document-state.ts`; do not add a second import path.
 - Browser `.fig` export uses fflate and `@open-pencil/fig`; Tauri uses `build_fig_file` in `desktop/`.
 - Vector networks use the reverse-engineered `vectorNetworkBlob`; codecs live under `packages/core/src/vector/` and types in Scene Graph.
 - Changes to `.fig` behavior require round-trip validation in Figma. `packages/docs/development/roadmap.md` tracks raw metadata coverage and the code map for import/export mapping and schema files.

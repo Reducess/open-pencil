@@ -1,6 +1,6 @@
 # FIG package architecture
 
-These documents explain the `.fig` reader replacement and its editing/export contracts.
+These documents explain the `.fig` reader and its editing/export contracts.
 They are package implementation documentation, not a release-status log.
 
 ## Reading order

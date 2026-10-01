@@ -1,8 +1,8 @@
 # .fig Reader Architecture
 
-The reader replacement interprets Figma source records into independently editable scene
-occurrences. Its completion criterion is one reader across the application, CLI, MCP, and
-worker paths, with the superseded importer and repair pipeline removed.
+The reader interprets Figma source records into independently editable scene occurrences.
+One reader serves the application, CLI, MCP, and worker paths; the earlier importer and its
+repair pipeline are gone.
 
 ::: warning Implementation status
 The reader is the only import path: synchronous parsing, the document worker, page population,

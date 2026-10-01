@@ -2,7 +2,7 @@
 
 The inherited-expression fixture receives a placed left-padding binding to direct token 12
 and a definition-level right-padding binding to inherited token 20. After synchronization,
-left padding is6 and right padding 5; outer width 36 and nested width 16.
+left padding is 6 and right padding 5; outer width 36 and nested width 16.
 
 Export reopened in Figma retains those values. Changing the inherited token 20→40 changes
 right padding 5→10 and outer width 36→41, while explicitly bound left padding stays 6. The token

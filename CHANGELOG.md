@@ -13,6 +13,7 @@
 
 ### Added
 
+- Jump between pages from the command palette: it lists the pages you visited recently in the tab, **Go to page…** lists every page, and typing a page name finds it.
 - Preview designs progressively on the canvas as direct AI providers stream JSX, without saving partial designs or adding intermediate undo steps. A preview stays with its page: it hides while you view another page and returns when you come back.
 - Write design trees as TSX with `@open-pencil/design-jsx` as the JSX import source, and render them with `renderTree`.
 - Swap the component behind an instance with `instance.swapComponent(component)` in the plugin API, as in Figma.
@@ -31,6 +32,7 @@
 
 ### Fixed
 
+- Announce unavailable commands in the command palette as disabled to screen readers.
 - Show an imported Figma page's background, and keep a background you change when you switch pages or save the document.
 - Keep fixed-size text from collapsing and clipping beside smaller siblings in a Hug auto-layout container.
 - Keep the text and icon an instance was given when a page loads on its own, instead of resynchronising it back to the component's defaults.

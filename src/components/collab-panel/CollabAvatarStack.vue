@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { tv } from 'tailwind-variants'
-
 import { colorToCSS } from '@open-pencil/scene-graph/color'
 import { useI18n } from '@open-pencil/vue'
 
 import { initials } from '@/app/shell/ui'
 import { useCollabPanelContext } from '@/components/collab-panel/context'
 import Tip from '@/components/ui/overlay/Tip.vue'
-import collaborationTheme from '@/theme/collaboration'
+import { avatar } from '@/theme/collaboration/avatar'
 
 const collab = useCollabPanelContext()
 const { common, collaboration: collaborationMessages } = useI18n()
-const collaboration = tv(collaborationTheme)
-const avatar = collaboration({ size: 'sm', bordered: true })
+const localAvatar = avatar({ bordered: true })
 
 function peerAvatarClass(following: boolean) {
-  return collaboration({ size: 'sm', bordered: true, following }).avatar()
+  return avatar({ bordered: true, following, interactive: true })
 }
 </script>
 
@@ -24,7 +21,7 @@ function peerAvatarClass(following: boolean) {
     <Tip :label="`${collab.state.localName || common.you} (${common.youSuffix})`">
       <div
         data-test-id="collab-local-avatar"
-        :class="avatar.avatar()"
+        :class="localAvatar"
         :style="{ background: colorToCSS(collab.state.localColor) }"
       >
         {{ initials(collab.state.localName || common.you) }}
@@ -43,7 +40,7 @@ function peerAvatarClass(following: boolean) {
       <div
         data-test-id="collab-peer-avatar"
         :data-following="collab.followingPeer === peer.clientId || undefined"
-        :class="[peerAvatarClass(collab.followingPeer === peer.clientId), avatar.peerAvatar()]"
+        :class="peerAvatarClass(collab.followingPeer === peer.clientId)"
         :style="{ background: colorToCSS(peer.color) }"
         @click="collab.toggleFollowPeer(peer.clientId)"
       >

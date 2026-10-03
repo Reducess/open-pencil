@@ -1,3 +1,4 @@
+import { partition } from 'es-toolkit/array'
 import { omit, omitBy } from 'es-toolkit/object'
 
 import { BLACK } from './constants'
@@ -5,7 +6,13 @@ import type { SceneGraph } from './index'
 import { setInstanceOverride } from './instance-overrides'
 import { findInstanceAncestor } from './instances'
 import type { Color } from './primitives'
-import type { Variable, VariableCollection, VariableType, VariableValue } from './types'
+import type {
+  Variable,
+  VariableCollection,
+  VariableCollectionMode,
+  VariableType,
+  VariableValue
+} from './types'
 import {
   isNumericVariableBindingField,
   variableBindingOwner,
@@ -197,10 +204,15 @@ export function renameMode(
 export function setDefaultMode(graph: SceneGraph, collectionId: string, modeId: string): void {
   const collection = graph.variableCollections.get(collectionId)
   if (!collection) return
-  const mode = collection.modes.find((m) => m.modeId === modeId)
-  if (!mode) return
-  collection.modes = [mode, ...collection.modes.filter((m) => m !== mode)]
+  if (!collection.modes.some((m) => m.modeId === modeId)) return
   collection.defaultModeId = modeId
+  collection.modes = modesDefaultFirst(collection)
+}
+
+/** Figma has no default-mode field: the first mode is the default. */
+export function modesDefaultFirst(collection: VariableCollection): VariableCollectionMode[] {
+  const [defaults, rest] = partition(collection.modes, (m) => m.modeId === collection.defaultModeId)
+  return [...defaults, ...rest]
 }
 
 export function resolveVariable(

@@ -1,7 +1,12 @@
 import { pluginDataNodeChange, variableMetadataNodeChange } from '@open-pencil/fig/node-change'
 import type { GUID, NodeChange, VariableDataEntry } from '@open-pencil/kiwi/fig/codec'
 import { stringToGuid } from '@open-pencil/kiwi/fig/guid'
-import type { SceneGraph, SceneNode, VariableValue } from '@open-pencil/scene-graph'
+import {
+  modesDefaultFirst,
+  type SceneGraph,
+  type SceneNode,
+  type VariableValue
+} from '@open-pencil/scene-graph'
 
 import { fractionalPosition, safeColor } from '#core/kiwi/fig/node-change/serialize'
 
@@ -125,11 +130,6 @@ export function appendVariableNodeChanges(
 ): void {
   for (const collection of graph.variableCollections.values()) {
     const guid = ids.get(collection.id) ?? stringToGuid(collection.id)
-    // Figma has no default-mode field: the first mode is the default.
-    const defaultMode = collection.modes.find((mode) => mode.modeId === collection.defaultModeId)
-    const modeOrder = defaultMode
-      ? [defaultMode, ...collection.modes.filter((mode) => mode !== defaultMode)]
-      : collection.modes
     changes.push({
       guid,
       parentIndex: { guid: parent, position: nextPosition() },
@@ -138,7 +138,7 @@ export function appendVariableNodeChanges(
       phase: 'CREATED',
       strokeAlign: 'CENTER',
       strokeJoin: 'BEVEL',
-      variableSetModes: modeOrder.map((mode, i) => ({
+      variableSetModes: modesDefaultFirst(collection).map((mode, i) => ({
         id: modes.get(mode.modeId) ?? stringToGuid(mode.modeId),
         name: mode.name,
         sortPosition: fractionalPosition(i)

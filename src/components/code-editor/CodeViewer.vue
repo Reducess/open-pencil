@@ -58,6 +58,6 @@ watch(
   <div
     ref="host"
     data-slot="code-viewer"
-    class="max-h-64 overflow-hidden rounded border border-border"
+    class="max-h-64 overflow-hidden rounded border border-border [&_.cm-scroller]:scrollbar-thin"
   />
 </template>

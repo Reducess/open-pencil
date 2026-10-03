@@ -105,5 +105,9 @@ watch(
 </script>
 
 <template>
-  <div ref="host" data-slot="code-editor" class="min-h-0 flex-1 overflow-hidden text-xs" />
+  <div
+    ref="host"
+    data-slot="code-editor"
+    class="min-h-0 flex-1 overflow-hidden text-xs [&_.cm-scroller]:scrollbar-thin"
+  />
 </template>

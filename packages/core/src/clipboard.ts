@@ -145,11 +145,15 @@ export async function buildFigmaClipboardHTML(
       })
     )
   }
-  // Slot content is collected while its instances serialize, so it follows the components.
-  placeSlotContent(slotContentRecords, dependencyCanvas, dependencies.size, fractionalPosition)
-  nodeChanges.push(...slotContentRecords)
-
   appendVariableNodeChanges(graph, nodeChanges, dependencyCanvas, variableIds, modeIds)
+  // Slot content is collected while instances serialize; it follows the canvas's other records.
+  const written = nodeChanges.filter(
+    (change) =>
+      change.parentIndex?.guid.sessionID === dependencyCanvas.sessionID &&
+      change.parentIndex.guid.localID === dependencyCanvas.localID
+  ).length
+  placeSlotContent(slotContentRecords, dependencyCanvas, written, fractionalPosition)
+  nodeChanges.push(...slotContentRecords)
   const textNodeQueue = [...exportedTextNodes]
   await Promise.all(
     nodeChanges.map(async (change) => {

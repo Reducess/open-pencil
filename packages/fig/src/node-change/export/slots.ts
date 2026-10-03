@@ -1,3 +1,5 @@
+import { DEFAULT_SLOT_CONTENT } from '#fig/instance-overrides/types'
+
 import {
   ownsSlotContent,
   slotPropertyId,
@@ -7,9 +9,6 @@ import {
 import type { GUID } from '@open-pencil/scene-graph/primitives'
 
 import type { KiwiNodeChange, SceneNodeToKiwiContext } from './context'
-
-/** Figma's value for "the component's own content", the default of every slot property. */
-const DEFAULT_SLOT_CONTENT: GUID = { sessionID: 0xffffffff, localID: 0xffffffff }
 
 function slotContentValue(guid: GUID) {
   return {
@@ -23,7 +22,9 @@ function slotContentValue(guid: GUID) {
 export function slotDefinitionFields(
   definition: ComponentPropertyDefinition
 ): Record<string, unknown> {
-  const fields: Record<string, unknown> = { varValue: slotContentValue(DEFAULT_SLOT_CONTENT) }
+  const fields: Record<string, unknown> = {
+    varValue: slotContentValue({ ...DEFAULT_SLOT_CONTENT })
+  }
   const settings = definition.slotSettings
   if (!settings) return fields
   const config: Record<string, unknown> = {
@@ -73,7 +74,13 @@ export function slotContentAssignment(
   const sink = context.slotContentRecords
   const frame = ownedSlotFrame(context, instance, propertyId)
   if (!sink || !frame) return null
-  const records = context.sceneNodeToKiwi(frame, DEFAULT_SLOT_CONTENT, 0, localIdCounter, context)
+  const records = context.sceneNodeToKiwi(
+    frame,
+    { ...DEFAULT_SLOT_CONTENT },
+    0,
+    localIdCounter,
+    context
+  )
   const root = records.at(0)
   if (!root?.guid) return null
   markSlotContent(root)

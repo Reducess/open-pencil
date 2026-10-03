@@ -58,6 +58,13 @@ export interface MissingComponentDiagnostic {
   componentId: string
 }
 
+/** A slot assignment naming a content frame the archive no longer contains. */
+export interface MissingSlotContentDiagnostic {
+  /** The slot frame being expanded, as the source record that declares it. */
+  slotId: string
+  slotContentId: string
+}
+
 export interface InterpretInstanceOptions {
   /** Apply explicitly saved effective bounds, geometry and typography; no inferred scaling or layout. */
   derivedBounds?: boolean
@@ -70,4 +77,6 @@ export interface InterpretInstanceOptions {
    * saved reference, the way Figma does, instead of rejecting the document.
    */
   onMissingComponent?: (diagnostic: MissingComponentDiagnostic) => void
+  /** Keep the component's own slot content where the assigned content frame is gone. */
+  onMissingSlotContent?: (diagnostic: MissingSlotContentDiagnostic) => void
 }

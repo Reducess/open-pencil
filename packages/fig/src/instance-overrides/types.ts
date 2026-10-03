@@ -58,13 +58,15 @@ export type ComponentPropValue = {
   slotContentIdValue?: { guid?: GUID }
 }
 
-const DEFAULT_SLOT_CONTENT_ID = 0xffffffff
+/** Figma's slot value for "the component's own content", the default of every slot property. */
+export const DEFAULT_SLOT_CONTENT: Readonly<GUID> = { sessionID: 0xffffffff, localID: 0xffffffff }
 
 /** The content frame a slot value names, unless it names the component's own content. */
 export function assignedSlotContent(value: ComponentPropValue | undefined): GUID | undefined {
   const guid = value?.slotContentIdValue?.guid
   if (!guid) return undefined
-  return guid.sessionID === DEFAULT_SLOT_CONTENT_ID && guid.localID === DEFAULT_SLOT_CONTENT_ID
+  return guid.sessionID === DEFAULT_SLOT_CONTENT.sessionID &&
+    guid.localID === DEFAULT_SLOT_CONTENT.localID
     ? undefined
     : guid
 }

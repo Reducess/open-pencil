@@ -1,8 +1,11 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 
 import { readFixtureArrayBuffer } from '#fig-tests/helpers/fig-fixtures'
-import { materializeFigArchive } from '#fig/document/materialize'
+import { guid } from '#fig-tests/helpers/guid'
+import { materializeDocument, materializeFigArchive } from '#fig/document/materialize'
+import { DEFAULT_SLOT_CONTENT } from '#fig/instance-overrides/types'
 
+import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
 /**
@@ -19,8 +22,8 @@ function topLevel(name: string): SceneNode {
   return node
 }
 
-function slotFrame(node: SceneNode): SceneNode {
-  const frame = graph
+function slotFrame(node: SceneNode, from = graph): SceneNode {
+  const frame = from
     .getChildren(node.id)
     .find((child) => child.componentPropertyReferences.some((ref) => ref.field === 'SLOT_CONTENT'))
   if (!frame) throw new Error(`No slot frame in ${node.name}`)
@@ -132,6 +135,81 @@ describe('instance slot content', () => {
 
   test('content frames are not layers of the internal canvas', () => {
     const internal = graph.getPages(true).find((page) => page.internalOnly)
-    expect(internal && graph.getChildren(internal.id)).toEqual([])
+    if (!internal) throw new Error('Missing internal canvas')
+    expect(graph.getChildren(internal.id)).toEqual([])
+  })
+})
+
+describe('missing slot content', () => {
+  /** A card whose slot holds `Default`, and an instance assigning a content frame that is gone. */
+  const records = (): NodeChange[] => {
+    const slotValue = (target: { sessionID: number; localID: number }) => ({
+      value: { slotContentIdValue: { guid: target } },
+      dataType: 'SLOT_CONTENT_ID',
+      resolvedDataType: 'SLOT_CONTENT_ID'
+    })
+    return [
+      { guid: guid(1), type: 'DOCUMENT' },
+      { guid: guid(2), type: 'CANVAS', parentIndex: { guid: guid(1), position: '!' } },
+      {
+        guid: guid(3),
+        type: 'SYMBOL',
+        name: 'Card',
+        parentIndex: { guid: guid(2), position: 'a' },
+        componentPropDefs: [
+          { id: guid(10), name: 'Content', type: 'SLOT', varValue: slotValue(DEFAULT_SLOT_CONTENT) }
+        ]
+      },
+      {
+        guid: guid(4),
+        type: 'FRAME',
+        name: 'Content',
+        parentIndex: { guid: guid(3), position: 'a' },
+        parameterConsumptionMap: {
+          entries: [
+            {
+              variableField: 'SLOT_CONTENT_ID',
+              variableData: {
+                value: { propRefValue: { defId: guid(10) } },
+                dataType: 'PROP_REF',
+                resolvedDataType: 'SLOT_CONTENT_ID'
+              }
+            }
+          ]
+        }
+      },
+      {
+        guid: guid(5),
+        type: 'TEXT',
+        name: 'Default',
+        parentIndex: { guid: guid(4), position: 'a' },
+        textData: { characters: 'Default' }
+      },
+      {
+        guid: guid(6),
+        type: 'INSTANCE',
+        name: 'Card',
+        parentIndex: { guid: guid(2), position: 'b' },
+        symbolData: { symbolID: guid(3) },
+        componentPropAssignments: [{ defID: guid(10), varValue: slotValue(guid(99)) }]
+      }
+    ] as NodeChange[]
+  }
+
+  test('is fatal in strict reads', () => {
+    expect(() => materializeDocument(records())).toThrow('Missing slot content')
+  })
+
+  test('is reported, and the slot keeps its component content', () => {
+    const reported: unknown[] = []
+    const result = materializeDocument(records(), [], {
+      onMissingSlotContent: (diagnostic) => reported.push(diagnostic)
+    })
+    const instance = result.sources.get('1:6')
+    const node = instance && result.graph.getNode(instance)
+    if (!node) throw new Error('Missing instance')
+    const content = result.graph.getChildren(slotFrame(node, result.graph).id)
+    expect(content.map((child) => child.name)).toEqual(['Default'])
+    expect(reported).toEqual([{ slotId: '1:4', slotContentId: '1:99' }])
   })
 })

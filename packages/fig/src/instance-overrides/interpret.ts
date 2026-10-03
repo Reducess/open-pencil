@@ -35,6 +35,7 @@ import { applyInstanceLayoutScale } from './scale/layout'
 import {
   createSourceIndex,
   findStaticSegment,
+  idOf,
   readOverrideKey,
   recordMatches,
   resolvesInSourceComponent,
@@ -337,8 +338,11 @@ function interpretRoot(
         slotContent = content ? guidToString(content) : undefined
       }
     })
-    if (slotContent && !sources.has(slotContent))
-      throw new Error(`Missing slot content ${slotContent}`)
+    if (slotContent && !sources.has(slotContent)) {
+      if (!options.onMissingSlotContent) throw new Error(`Missing slot content ${slotContent}`)
+      options.onMissingSlotContent({ slotId: idOf(raw) ?? '', slotContentId: slotContent })
+      slotContent = undefined
+    }
     return { source, claims, bound, superseded, slotContent }
   }
 

@@ -32,7 +32,7 @@ export const it: LandingMessages = {
       title: 'Progetta con l’AI, con le tue chiavi',
       detail:
         'Chiedi con parole tue e l’agente modifica il documento con gli stessi strumenti che usi tu, mostrando il lavoro sulla tela man mano che arriva. Collega qualsiasi provider con la tua chiave, oppure usa l’agente di programmazione che già utilizzi.',
-      hint: 'La conversazione è un turno registrato; la tela mostra ciò che ha costruito.'
+      hint: 'Un turno registrato passa per il vero ciclo dell’agente. Guarda la tela costruirsi mentre arriva.'
     },
     code: {
       title: 'Dal design al codice',
@@ -180,6 +180,8 @@ export const it: LandingMessages = {
     },
     ai: {
       recorded: 'Turno registrato',
+      play: 'Riproduci',
+      replay: 'Riproduci di nuovo',
       request: 'Aggiungi tre garanzie sotto i piani.',
       reasoning:
         'I piani sono in una colonna con auto-layout, quindi una riga di tre schede può stare subito sotto.',

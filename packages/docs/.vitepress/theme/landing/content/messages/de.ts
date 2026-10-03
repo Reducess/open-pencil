@@ -32,7 +32,7 @@ export const de: LandingMessages = {
       title: 'Gestalten mit KI, mit deinen Schlüsseln',
       detail:
         'Beschreibe in normaler Sprache, was du willst: Der Agent bearbeitet das Dokument mit denselben Werkzeugen wie du und zeigt seine Arbeit schon während des Streamings auf der Arbeitsfläche. Verbinde einen beliebigen Anbieter mit deinem eigenen Schlüssel oder nutze den Coding-Agenten, den du ohnehin verwendest.',
-      hint: 'Das Protokoll ist ein aufgezeichneter Durchgang; die Arbeitsfläche zeigt das Ergebnis.'
+      hint: 'Ein aufgezeichneter Durchgang läuft durch die echte Agentenschleife. Sieh zu, wie die Arbeitsfläche beim Streamen entsteht.'
     },
     code: {
       title: 'Vom Design zum Code',
@@ -179,6 +179,8 @@ export const de: LandingMessages = {
     },
     ai: {
       recorded: 'Aufgezeichneter Durchgang',
+      play: 'Abspielen',
+      replay: 'Erneut abspielen',
       request: 'Füge drei Garantien unter den Tarifen hinzu.',
       reasoning:
         'Die Tarife liegen in einer Auto-Layout-Spalte, also passt eine Reihe mit drei Karten direkt darunter.',

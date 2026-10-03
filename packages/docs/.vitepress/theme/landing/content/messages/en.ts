@@ -32,7 +32,7 @@ export const en: LandingMessages = {
       title: 'Design with AI, on your keys',
       detail:
         'Ask in plain language and the agent edits the document with the same tools you use, previewing its work on the canvas as it streams. Connect any provider with your own key, or bring the coding agent you already use.',
-      hint: 'The transcript is a recorded turn; the canvas shows what it built.'
+      hint: 'A recorded turn plays through the real agent loop. Watch the canvas build as it streams.'
     },
     code: {
       title: 'From design to code',
@@ -165,6 +165,8 @@ export const en: LandingMessages = {
     },
     ai: {
       recorded: 'Recorded turn',
+      play: 'Play',
+      replay: 'Replay',
       request: 'Add three guarantees under the plans.',
       reasoning:
         'The plans sit in an auto-layout column, so a row of three cards can go right below them.',

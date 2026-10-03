@@ -32,7 +32,7 @@ export const fr: LandingMessages = {
       title: 'Concevez avec l’AI, avec vos clés',
       detail:
         'Demandez en langage courant : l’agent modifie le document avec les mêmes outils que vous et affiche son travail sur le canevas au fil de la génération. Connectez le fournisseur de votre choix avec votre propre clé, ou utilisez l’agent de code que vous employez déjà.',
-      hint: 'La conversation est un échange enregistré ; le canevas montre ce qu’il a construit.'
+      hint: 'Un échange enregistré passe par la vraie boucle de l’agent. Regardez le canevas se construire au fil du flux.'
     },
     code: {
       title: 'Du design au code',
@@ -180,6 +180,8 @@ export const fr: LandingMessages = {
     },
     ai: {
       recorded: 'Échange enregistré',
+      play: 'Lire',
+      replay: 'Rejouer',
       request: 'Ajoute trois garanties sous les offres.',
       reasoning:
         'Les offres sont dans une colonne en auto-layout, donc une rangée de trois cartes peut se placer juste en dessous.',

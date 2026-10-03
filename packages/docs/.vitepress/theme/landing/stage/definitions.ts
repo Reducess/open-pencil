@@ -6,7 +6,7 @@ import DesignPanel from '@/components/DesignPanel.vue'
 import LayerTree from '@/components/LayerTree/LayerTree.vue'
 
 import type { StageKind } from './kinds'
-import AiTranscriptPanel from './panels/AiTranscriptPanel.vue'
+import AiChatPanel from './ai/AiChatPanel.vue'
 import SdkSnippetPanel from './panels/SdkSnippetPanel.vue'
 import TerminalPanel from './panels/TerminalPanel.vue'
 import { SCENES, type SceneBuilder } from './scenes'
@@ -24,7 +24,7 @@ export const STAGES: Record<StageKind, StageDefinition> = {
   figma: { scene: SCENES.figma, panel: LayerTree, layersHeading: true },
   design: { scene: SCENES.pricingSelected, panel: DesignPanel, toolbar: true },
   components: { scene: SCENES.components, panel: AssetsPanel },
-  ai: { scene: SCENES.pricingWithGuarantees, panel: AiTranscriptPanel },
+  ai: { scene: SCENES.pricing, panel: AiChatPanel },
   code: { scene: SCENES.pricingSelected, panel: CodePanel },
   script: { scene: SCENES.pricing, panel: TerminalPanel },
   sdk: { scene: SCENES.pricing, panel: SdkSnippetPanel, toolbar: true }

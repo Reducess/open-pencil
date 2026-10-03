@@ -32,7 +32,7 @@ export const pl: LandingMessages = {
       title: 'Projektuj z AI, na własnych kluczach',
       detail:
         'Opisz zadanie zwykłym językiem, a agent edytuje dokument tymi samymi narzędziami co Ty i pokazuje efekty na obszarze roboczym już w trakcie generowania. Podłącz dowolnego dostawcę własnym kluczem albo użyj agenta programistycznego, z którego już korzystasz.',
-      hint: 'Rozmowa to nagrana tura; obszar roboczy pokazuje, co agent zbudował.'
+      hint: 'Nagrana tura przechodzi przez prawdziwą pętlę agenta. Zobacz, jak obszar roboczy powstaje w trakcie strumieniowania.'
     },
     code: {
       title: 'Od projektu do kodu',
@@ -180,6 +180,8 @@ export const pl: LandingMessages = {
     },
     ai: {
       recorded: 'Nagrana tura',
+      play: 'Odtwórz',
+      replay: 'Odtwórz ponownie',
       request: 'Dodaj trzy gwarancje pod planami.',
       reasoning:
         'Plany leżą w kolumnie z auto-layoutem, więc rząd trzech kart zmieści się tuż pod nimi.',

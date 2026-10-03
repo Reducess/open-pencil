@@ -29,7 +29,7 @@ export const GUARANTEES_JSX = [
   '</Frame>'
 ].join('\n')
 
-function pricingJSX(extra = ''): string {
+function pricingJSX(): string {
   return dedent`
     <Frame name="Pricing" w={720} h="hug" flex="col" gap={28} p={40} bg="#FFFFFF" rounded={24}>
       <Frame name="Header" w="fill" h="hug" flex="col" gap={10}>
@@ -61,7 +61,6 @@ function pricingJSX(extra = ''): string {
           </Frame>
         </Frame>
       </Frame>
-      ${extra}
     </Frame>
   `
 }
@@ -75,7 +74,7 @@ async function finish(store: EditorStore): Promise<void> {
   store.requestRender()
 }
 
-function findByName(store: EditorStore, name: string): string | null {
+export function findByName(store: EditorStore, name: string): string | null {
   const pending = store.graph.getChildren(store.state.currentPageId).map((node) => node.id)
   while (pending.length > 0) {
     const id = pending.shift()
@@ -87,9 +86,9 @@ function findByName(store: EditorStore, name: string): string | null {
   return null
 }
 
-async function pricing(store: EditorStore, extra = ''): Promise<void> {
+async function pricing(store: EditorStore): Promise<void> {
   await loadDemoFonts()
-  await renderJSX(store.graph, pricingJSX(extra), {
+  await renderJSX(store.graph, pricingJSX(), {
     parentId: store.state.currentPageId,
     x: 0,
     y: 0
@@ -125,6 +124,5 @@ export const SCENES = {
     await finish(store)
   },
   pricing: (store) => pricing(store),
-  pricingSelected: pricingWithSelection,
-  pricingWithGuarantees: (store) => pricing(store, GUARANTEES_JSX)
+  pricingSelected: pricingWithSelection
 } satisfies Record<string, SceneBuilder>

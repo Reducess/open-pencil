@@ -32,7 +32,7 @@ export const es: LandingMessages = {
       title: 'Diseña con IA, con tus claves',
       detail:
         'Pide lo que necesitas con tus propias palabras y el agente edita el documento con las mismas herramientas que tú, mostrando su trabajo en el lienzo a medida que llega. Conecta cualquier proveedor con tu propia clave o usa el agente de programación que ya utilizas.',
-      hint: 'La conversación es un turno grabado; el lienzo muestra lo que construyó.'
+      hint: 'Un turno grabado se reproduce con el bucle real del agente. Mira cómo se construye el lienzo mientras llega.'
     },
     code: {
       title: 'Del diseño al código',
@@ -180,6 +180,8 @@ export const es: LandingMessages = {
     },
     ai: {
       recorded: 'Turno grabado',
+      play: 'Reproducir',
+      replay: 'Repetir',
       request: 'Añade tres garantías debajo de los planes.',
       reasoning:
         'Los planes están en una columna con auto-layout, así que una fila de tres tarjetas cabe justo debajo.',

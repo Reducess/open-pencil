@@ -63,6 +63,8 @@ export interface LandingMessages {
     terminal: Record<'tree' | 'restyle' | 'addPlan' | 'selection' | 'export', string>
     ai: {
       recorded: string
+      play: string
+      replay: string
       request: string
       reasoning: string
       reply: string

@@ -182,7 +182,9 @@ describe('renderText', () => {
   })
 
   test('keeps native paragraph layout even when outline font data is available', async () => {
-    const interData = await Bun.file(repoPath('packages/core/assets/Inter-Regular.ttf')).arrayBuffer()
+    const interData = await Bun.file(
+      repoPath('packages/core/assets/Inter-Regular.ttf')
+    ).arrayBuffer()
     fontManager.markLoaded('Inter', 'Regular', interData)
     const r = createMockRenderer()
     const canvas = createMockCanvas()

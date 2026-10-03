@@ -28,7 +28,7 @@ interface Presence {
   followPage: string | null
   /** The page a follow switch is on its way to, so cursor updates do not restart it. */
   switching: string | null
-  /** True while following moves the view itself; any other viewport change is yours. */
+  /** True while following centers the view; any other viewport change is yours. */
   moving: boolean
 }
 
@@ -51,11 +51,10 @@ export function presenceOf(store: EditorStore): Presence {
     stopIfLeftFollowedPage(store)
     refreshCursors(store)
   })
-  // Zooming or fitting the view yourself, by any shortcut or menu, ends following.
+  // Zooming or fitting the view yourself, by any shortcut or menu, ends following. A page
+  // switch restores that page's viewport without this event, so only centering is ours.
   store.onEditorEvent('viewport:changed', () => {
-    if (presence.following.value && !presence.moving && !presence.switching) {
-      presence.following.value = null
-    }
+    if (presence.following.value && !presence.moving) presence.following.value = null
   })
   return presence
 }
@@ -121,6 +120,8 @@ function keepFollowing(store: EditorStore): void {
     presence.following.value = null
     return
   }
+  // A peer's cursor can name a page this document does not have; wait as for a resting agent.
+  if (store.graph.getNode(point.pageId)?.type !== 'CANVAS') return
   presence.followPage = point.pageId
   if (point.pageId !== store.state.currentPageId) {
     // Each switch cancels the one before it, so frequent cursor updates must not restart one
@@ -130,7 +131,7 @@ function keepFollowing(store: EditorStore): void {
     presence.switching = pageId
     void store.switchPage(pageId).finally(() => {
       if (presence.switching === pageId) presence.switching = null
-      keepFollowing(store)
+      if (store.state.currentPageId === pageId) keepFollowing(store)
     })
     return
   }

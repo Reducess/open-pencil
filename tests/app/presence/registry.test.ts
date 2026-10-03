@@ -195,6 +195,25 @@ test('cursor updates while heading to a page do not restart the switch', async (
   expect(store.state.currentPageId).toBe(other)
 })
 
+test('zooming while following heads to another page stops following', () => {
+  const { store, other } = setup()
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  store.applyZoom(-100, 960, 540)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('a cursor on a page this document lacks is waited out, not switched to', () => {
+  const { store } = setup()
+  const switchPage = spyOn(store, 'switchPage')
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 1, y: 1, pageId: 'missing', zoom: 1 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(switchPage).not.toHaveBeenCalled()
+  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+})
+
 test('labels a followed agent with the person who runs it', () => {
   const { store, pageId } = setup()
   const fern = { id: 'fern', name: 'Fern', kind: 'chat' as const, status: 'editing' as const }

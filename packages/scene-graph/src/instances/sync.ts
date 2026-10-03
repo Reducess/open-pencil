@@ -176,7 +176,8 @@ export function enclosingInstanceOverrideFields(graph: SceneGraph, node: SceneNo
   return fields
 }
 
-const PROPERTY_REFERENCE_FIELDS: Record<ComponentPropertyReferenceField, string> = {
+/** SLOT_CONTENT is absent because it drives children, which `ownsSlotContent` keeps instead. */
+const PROPERTY_REFERENCE_FIELDS: Partial<Record<ComponentPropertyReferenceField, string>> = {
   VISIBLE: 'visible',
   TEXT: 'text',
   INSTANCE_SWAP: 'componentId'

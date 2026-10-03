@@ -9,7 +9,7 @@ import { parseVariantName } from '@open-pencil/scene-graph/variant-name'
 /* eslint-disable max-lines -- kiwi↔scene conversion helpers are tightly coupled */
 
 import { importCanvasGuides } from './canvas-guides'
-import { convertFigmaDerivedTextGlyphs } from './derived-text-glyphs'
+import { convertFigmaDerivedTextGlyphs } from './derived-text/glyphs'
 import { convertFontFeatures } from './font/features'
 import { convertFontVariations } from './font/variations'
 import { convertEffects, convertFills, convertStrokes } from './paint'
@@ -26,20 +26,20 @@ import {
   NODE_TYPE_PLUGIN_KEY,
   TEXT_DIRECTION_PLUGIN_KEY
 } from './plugin-data'
-import { importStyleRuns } from './style-runs'
-import { convertLetterSpacing, convertLineHeight, mapTextDecoration } from './text-values'
+import { importStyleRuns } from './style/runs'
+import { convertLetterSpacing, convertLineHeight, mapTextDecoration } from './text/values'
 import {
   alignGeometryWindingRules,
   resolveGeometryPaths,
   resolveVectorNetwork,
   resolveVectorStyleOverrideFills
-} from './vector-geometry'
-import { decodeVectorNetworkBlob, type StyleOverride } from './vector-network'
+} from './vector/geometry'
+import { decodeVectorNetworkBlob, type StyleOverride } from './vector/network'
 
 export { convertEffects, convertFills, convertStrokes, setVariableColorResolver } from './paint'
-export { importStyleRuns } from './style-runs'
-export { convertLetterSpacing, convertLineHeight, mapTextDecoration } from './text-values'
-export { resolveGeometryPaths } from './vector-geometry'
+export { importStyleRuns } from './style/runs'
+export { convertLetterSpacing, convertLineHeight, mapTextDecoration } from './text/values'
+export { resolveGeometryPaths } from './vector/geometry'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 import type {
@@ -62,6 +62,7 @@ import type {
   SharedStyleType,
   VectorNetwork,
   ComponentPropertyDefinition,
+  SlotSettings,
   ComponentPropertyReference,
   ComponentPropertyType,
   SymbolLink,
@@ -72,8 +73,8 @@ import type {
 import type { GUID } from '@open-pencil/scene-graph/primitives'
 
 export { guidToString, stringToGuid } from '@open-pencil/kiwi/fig/guid'
-import { numericVariableAssignmentScales, sourceVariableBindingScales } from './variable-bindings'
-export { VARIABLE_BINDING_FIELDS, VARIABLE_BINDING_FIELDS_INVERSE } from './variable-bindings'
+import { numericVariableAssignmentScales, sourceVariableBindingScales } from './variable/bindings'
+export { VARIABLE_BINDING_FIELDS, VARIABLE_BINDING_FIELDS_INVERSE } from './variable/bindings'
 
 interface FigVariableModeMap {
   entries?: Array<{
@@ -705,7 +706,8 @@ const COMPONENT_PROP_TYPE_MAP: Record<string, ComponentPropertyType> = {
   TEXT: 'TEXT',
   BOOL: 'BOOLEAN',
   BOOLEAN: 'BOOLEAN',
-  INSTANCE_SWAP: 'INSTANCE_SWAP'
+  INSTANCE_SWAP: 'INSTANCE_SWAP',
+  SLOT: 'SLOT'
 }
 
 function componentPropValueToString(value: unknown): string {
@@ -728,10 +730,29 @@ interface RawComponentPropDef {
   name?: string
   type?: string
   initialValue?: unknown
+  description?: string
   preferredValues?: {
     stringValues?: string[]
     instanceSwapValues?: Array<{ key?: string }>
   }
+  slotPropConfig?: {
+    stretchChildOnInsert?: boolean
+    displayByDefault?: boolean
+    minChildren?: number
+    maxChildren?: number
+    allowPreferredValuesOnly?: boolean
+  }
+}
+
+function slotSettings(config: NonNullable<RawComponentPropDef['slotPropConfig']>): SlotSettings {
+  const settings: SlotSettings = {
+    allowPreferredValuesOnly: config.allowPreferredValuesOnly ?? false,
+    displayEmptyByDefault: config.displayByDefault ?? false,
+    stretchChildOnInsert: config.stretchChildOnInsert ?? false
+  }
+  if (config.minChildren !== undefined) settings.minChildren = config.minChildren
+  if (config.maxChildren !== undefined) settings.maxChildren = config.maxChildren
+  return settings
 }
 
 interface RawComponentPropRef {
@@ -771,19 +792,23 @@ function extractComponentPropertyDefs(nc: NodeChange): ComponentPropertyDefiniti
   for (const def of defs) {
     if (!def.id || !def.name) continue
     const propType = COMPONENT_PROP_TYPE_MAP[def.type ?? ''] ?? 'VARIANT'
-    result.push({
+    const definition: ComponentPropertyDefinition = {
       id: guidToString(def.id),
       name: def.name,
       type: propType,
       defaultValue: componentPropValueToString(def.initialValue),
       variantOptions: propType === 'VARIANT' ? def.preferredValues?.stringValues : undefined,
       preferredValues:
-        propType === 'INSTANCE_SWAP'
+        propType === 'INSTANCE_SWAP' || propType === 'SLOT'
           ? def.preferredValues?.instanceSwapValues
               ?.map((value) => value.key)
               .filter((value): value is string => value !== undefined)
           : undefined
-    })
+    }
+    if (def.description) definition.description = def.description
+    if (propType === 'SLOT' && def.slotPropConfig)
+      definition.slotSettings = slotSettings(def.slotPropConfig)
+    result.push(definition)
   }
   return result
 }
@@ -795,9 +820,11 @@ function extractComponentPropertyRefs(nc: NodeChange): ComponentPropertyReferenc
     '0': 'VISIBLE',
     '1': 'TEXT',
     '2': 'INSTANCE_SWAP',
+    '4': 'SLOT_CONTENT',
     VISIBLE: 'VISIBLE',
     TEXT_DATA: 'TEXT',
-    OVERRIDDEN_SYMBOL_ID: 'INSTANCE_SWAP'
+    OVERRIDDEN_SYMBOL_ID: 'INSTANCE_SWAP',
+    SLOT_CONTENT_ID: 'SLOT_CONTENT'
   }
   return refs.flatMap((ref) => {
     const field = fieldMap[String(ref.componentPropNodeField)]

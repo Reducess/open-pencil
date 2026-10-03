@@ -3,14 +3,15 @@ import { setInstanceOverride, type SceneGraph, type SceneNode } from '@open-penc
 import { createDefaultSourceMetadata } from '@open-pencil/scene-graph/node-defaults'
 
 import { nodeChangeToProps } from '../node-change'
-import { numericVariableBindingScales } from '../node-change/variable-bindings'
+import { numericVariableBindingScales } from '../node-change/variable/bindings'
 import {
   recordVariableBindingClaims,
   occurrenceAssignmentScales,
   occurrenceScale
 } from './bindings/variables'
 import { OVERRIDE_FIELDS, type OverrideField, type RawOverrideField } from './fields'
-import { resolveOccurrencePath, type InstanceOccurrence } from './interpret'
+import { resolveOccurrencePath } from './interpret'
+import type { InstanceOccurrence } from './occurrence/types'
 import { symbolDataOf } from './types'
 
 function occurrenceMetadata(
@@ -187,7 +188,7 @@ function recordPaintBindingClaims(
   if (!Array.isArray(paints)) return
   let declared = false
   for (const [index, paint] of paints.entries()) {
-    const alias = (paint as Paint).colorVar?.value?.alias ?? (paint as Paint).colorVariableBinding
+    const alias = (paint as Paint).colorVar?.value?.alias
     if (!alias) continue
     const field = `boundVariables/${scene}/${index}/color`
     setInstanceOverride(

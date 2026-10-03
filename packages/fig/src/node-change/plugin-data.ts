@@ -19,7 +19,7 @@ import {
   variableConsumptionEntries,
   VARIABLE_BINDING_FIELDS_INVERSE,
   referencesVariable
-} from './variable-bindings'
+} from './variable/bindings'
 
 export const OPEN_PENCIL_PLUGIN_ID = 'open-pencil'
 export const TEXT_DIRECTION_PLUGIN_KEY = 'textDirection'
@@ -48,6 +48,12 @@ export function upsertPluginData(
   )
   pluginData.push({ pluginId: OPEN_PENCIL_PLUGIN_ID, key, value })
   node.pluginData = pluginData
+}
+
+export function removePluginData(node: { pluginData: PluginDataEntry[] }, key: string): void {
+  node.pluginData = node.pluginData.filter(
+    (entry) => !(entry.pluginId === OPEN_PENCIL_PLUGIN_ID && entry.key === key)
+  )
 }
 
 export function applyExportSettingsPluginData(
@@ -135,13 +141,11 @@ export function extractBoundVariables(nc: NodeChange): Record<string, string> {
     }
   }
   nc.fillPaints?.forEach((paint, i) => {
-    const variableGuid =
-      paint.colorVariableBinding?.variableID ?? paint.colorVar?.value?.alias?.guid
+    const variableGuid = paint.colorVar?.value?.alias?.guid
     if (variableGuid) bindings[`fills/${i}/color`] = guidToString(variableGuid)
   })
   nc.strokePaints?.forEach((paint, i) => {
-    const variableGuid =
-      paint.colorVariableBinding?.variableID ?? paint.colorVar?.value?.alias?.guid
+    const variableGuid = paint.colorVar?.value?.alias?.guid
     if (variableGuid) bindings[`strokes/${i}/color`] = guidToString(variableGuid)
   })
   return bindings

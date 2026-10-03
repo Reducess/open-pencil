@@ -1,66 +1,13 @@
-import type {
-  SceneGraph,
-  SceneNode,
-  Fill,
-  Stroke,
-  Effect,
-  Color,
-  GridTrack
-} from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode, Effect, Color, GridTrack } from '@open-pencil/scene-graph'
 import { colorToHex8 } from '@open-pencil/scene-graph/color'
 
 export function formatColor(color: Color, opacity = 1): string {
   return colorToHex8(color, opacity)
 }
 
-export function solidFillColor(fills: Fill[]): string | null {
-  const visible = fills.filter((f) => f.visible && f.type === 'SOLID')
-  if (visible.length !== 1) return null
-  return formatColor(visible[0].color, visible[0].opacity)
-}
-
-export function solidStroke(
-  strokes: Stroke[]
-): { color: string; weight: number; dash: number[] | null } | null {
-  const visible = strokes.filter((s) => s.visible)
-  if (visible.length !== 1) return null
-  const s = visible[0]
-  return {
-    color: formatColor(s.color, s.opacity),
-    weight: s.weight,
-    dash: s.dashPattern && s.dashPattern.length > 0 ? [...s.dashPattern] : null
-  }
-}
-
 export function formatShadow(e: Effect): string | null {
   if (e.type !== 'DROP_SHADOW' && e.type !== 'INNER_SHADOW') return null
   return `${e.offset.x} ${e.offset.y} ${e.radius} ${formatColor(e.color, e.color.a)}`
-}
-
-const JSX_ENTITY: Record<string, string> = {
-  '{': '&#123;',
-  '}': '&#125;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '&': '&amp;'
-}
-
-export function escapeJSXText(text: string): string {
-  return text.replace(/[{}<>&]/g, (c) => JSX_ENTITY[c])
-}
-
-/**
- * JSX attribute strings end at `"` and decode `&` entities, so other strings become
- * expression containers with a JavaScript string literal.
- */
-const LITERAL_ATTRIBUTE = /^[^"&]*$/
-
-export function formatProp(key: string, value: unknown): string {
-  if (typeof value === 'string')
-    return LITERAL_ATTRIBUTE.test(value) ? `${key}="${value}"` : `${key}={${JSON.stringify(value)}}`
-  if (typeof value === 'number') return `${key}={${value}}`
-  if (typeof value === 'boolean') return value ? key : `${key}={false}`
-  return `${key}={${JSON.stringify(value)}}`
 }
 
 export function getNodeContext(node: SceneNode, graph: SceneGraph) {
@@ -102,15 +49,16 @@ export interface CornerRadii {
 }
 
 export function collectCornerRadii(node: SceneNode): CornerRadii | null {
-  if (node.cornerRadius <= 0) return null
   if (node.independentCorners) {
-    return {
+    const corners = {
       tl: node.topLeftRadius,
       tr: node.topRightRadius,
       br: node.bottomRightRadius,
       bl: node.bottomLeftRadius
     }
+    return Object.values(corners).some((radius) => radius > 0) ? corners : null
   }
+  if (node.cornerRadius <= 0) return null
   const r = node.cornerRadius
   return { tl: r, tr: r, br: r, bl: r }
 }

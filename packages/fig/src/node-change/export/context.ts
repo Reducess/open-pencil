@@ -57,6 +57,11 @@ export interface SceneNodeToKiwiContext {
    *  variantPropSpecs pointing at the same property reuse the same GUID. */
   propertyIdToGuid: Map<string, GUID>
   componentPropertyDefinitionsById: ReadonlyMap<string, ComponentPropertyDefinition>
+  /**
+   * Receives the content frames of instance slots. Figma stores them on the internal canvas,
+   * so the caller re-parents the `isSlotContent` roots there after serializing its nodes.
+   */
+  slotContentRecords?: KiwiNodeChange[]
   fractionalPosition: (index: number) => string
   mapToFigmaType: (type: SceneNode['type']) => string
   fillToKiwiPaint: (fill: SceneNode['fills'][number]) => Paint
@@ -178,16 +183,19 @@ export function applyColorVariableBinding(
   field: string
 ): Paint {
   const variableId = node.boundVariables[field]
-  if (!variableId) return paint
+  // An imported paint carries the binding it arrived with. Unbinding the field has to clear
+  // it, or the export hands Figma back a variable the document no longer references.
+  if (!variableId) {
+    if (!paint.colorVar) return paint
+    const { colorVar: _cleared, ...unbound } = paint
+    return unbound
+  }
   return {
     ...paint,
     colorVar: {
       dataType: 'ALIAS',
       resolvedDataType: 'COLOR',
       value: { alias: { guid: context.varIdToGuid?.get(variableId) ?? stringToGuid(variableId) } }
-    },
-    colorVariableBinding: {
-      variableID: context.varIdToGuid?.get(variableId) ?? stringToGuid(variableId)
     }
   }
 }

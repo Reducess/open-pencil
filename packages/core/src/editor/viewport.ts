@@ -78,9 +78,14 @@ export function createViewportActions(ctx: EditorContext) {
   function centerOn(x: number, y: number, zoom = ctx.state.zoom) {
     const previous = currentViewport()
     const { width, height } = ctx.getViewportSize()
-    ctx.state.zoom = Math.max(0.02, Math.min(256, zoom))
-    ctx.state.panX = width / 2 - x * ctx.state.zoom
-    ctx.state.panY = height / 2 - y * ctx.state.zoom
+    const nextZoom = Math.max(0.02, Math.min(256, zoom))
+    const panX = width / 2 - x * nextZoom
+    const panY = height / 2 - y * nextZoom
+    // Remote cursors are finite but unbounded; a point that overflows leaves the view alone.
+    if (!Number.isFinite(panX) || !Number.isFinite(panY)) return
+    ctx.state.zoom = nextZoom
+    ctx.state.panX = panX
+    ctx.state.panY = panY
     ctx.requestRepaint()
     emitViewportChanged(previous)
   }

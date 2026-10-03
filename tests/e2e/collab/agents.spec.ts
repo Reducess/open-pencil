@@ -19,7 +19,7 @@ function pageNames(peer: Peer) {
   )
 }
 
-test("a guest's agent appears in the host's share panel and can be followed", async ({
+test("a guest's agent shows on their avatar and can be followed until Escape", async ({
   browser
 }) => {
   const relay = await startRelay()
@@ -43,18 +43,23 @@ test("a guest's agent appears in the host's share panel and can be followed", as
     await expect.poll(() => pageNames(peer)).toContain('Checkout')
     const agent = await startAgent(guest.page, 'Checkout', 300, 200)
 
-    await host.page.getByTestId('collab-share-button').click()
-    const popover = host.page.getByTestId('collab-popover')
-    await expect(popover.getByText(agent.name)).toBeVisible()
-    await expect(popover.getByText('Editing · Checkout')).toBeVisible()
+    // The guest's avatar carries a count of their agents; hovering lists them.
+    const avatar = host.page.getByTestId('collab-peer-avatar')
+    await expect(avatar).toContainText('1')
+    await avatar.hover()
+    const card = host.page.getByTestId('collab-peer-card')
+    await expect(card.getByText(agent.name)).toBeVisible()
+    await expect(card.getByText('Editing · Checkout')).toBeVisible()
 
-    await popover.getByRole('button', { name: `Follow ${agent.name}` }).click()
+    await card.getByRole('button', { name: `Follow ${agent.name}` }).click()
     await expect
       .poll(() => host?.page.evaluate(() => window.openPencil?.getStore?.().state.currentPageId))
       .toBe(agent.pageId)
-    await expect(
-      popover.getByRole('button', { name: `Stop following ${agent.name}` })
-    ).toBeVisible()
+    const frame = host.page.getByTestId('follow-frame')
+    await expect(frame).toContainText(`Following ${agent.name}`)
+
+    await host.page.keyboard.press('Escape')
+    await expect(frame).toHaveCount(0)
     expect(collaborationErrors(host)).toEqual([])
   } finally {
     await host?.context.close()

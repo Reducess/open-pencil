@@ -9,7 +9,7 @@ test('lists people with their agents and what each agent is doing', async ({ pag
   await expect(list.getByText('Dana (you)')).toBeVisible()
   await expect(list.getByText('Editing · Checkout')).toBeVisible()
   await expect(list.getByText('Thinking · Cover')).toBeVisible()
-  await expect(list.getByText('Idle')).toBeVisible()
+  await expect(list.getByText('Idle', { exact: true })).toBeVisible()
   await expect(list.getByRole('button', { name: 'Follow Ana' })).toBeVisible()
   await expect(list.getByRole('button', { name: 'Follow Dana' })).toHaveCount(0)
   await expect(list.getByRole('button', { name: 'Rename Orbit' })).toHaveCount(0)
@@ -17,7 +17,7 @@ test('lists people with their agents and what each agent is doing', async ({ pag
 
 test('renames your own agent inline', async ({ page }) => {
   await page.goto(story('room'))
-  await page.getByRole('button', { name: 'Rename Fern' }).dblclick()
+  await page.getByRole('button', { name: 'Rename Fern' }).click()
   const input = page.getByRole('textbox', { name: 'Agent name' })
   await expect(input).toBeFocused()
   await input.press('Escape')

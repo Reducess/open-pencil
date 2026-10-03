@@ -5,14 +5,12 @@ import { useCollabPanelContext } from '@/components/collab-panel/context'
 import AppButton from '@/components/ui/button/AppButton.vue'
 import AppInput from '@/components/ui/input/AppInput.vue'
 
-import PresenceList from './PresenceList.vue'
-
 const collab = useCollabPanelContext()
 </script>
 
 <template>
   <div class="mb-3 text-xs font-medium text-surface">{{ collab.messages.roomLink }}</div>
-  <div class="mb-3 flex items-center gap-1.5">
+  <div class="flex items-center gap-1.5">
     <AppInput
       :model-value="collab.shareURL"
       readonly
@@ -33,22 +31,4 @@ const collab = useCollabPanelContext()
       {{ collab.copied ? 'Copied' : 'Copy' }}
     </AppButton>
   </div>
-
-  <div class="mb-2 text-xs font-medium text-surface">{{ collab.messages.inThisRoom }}</div>
-  <PresenceList
-    class="mb-3"
-    :rows="collab.presenceRows"
-    :following="collab.following"
-    @follow="collab.follow"
-    @rename="collab.renameLocalAgent"
-  />
-
-  <AppButton
-    variant="outline"
-    class="w-full"
-    data-test-id="collab-disconnect"
-    @click="collab.disconnect"
-  >
-    Disconnect
-  </AppButton>
 </template>

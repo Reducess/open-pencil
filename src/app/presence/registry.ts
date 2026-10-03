@@ -24,6 +24,12 @@ interface Presence {
   ownerColor: ShallowRef<Color | null>
   /** Who the viewport follows, if anyone. */
   following: ShallowRef<FollowTarget | null>
+  /** The page following put the view on; landing anywhere else means you left. */
+  followPage: string | null
+  /** The page a follow switch is on its way to, so cursor updates do not restart it. */
+  switching: string | null
+  /** True while following centers the view; any other viewport change is yours. */
+  moving: boolean
 }
 
 const presences = new WeakMap<EditorStore, Presence>()
@@ -35,10 +41,21 @@ export function presenceOf(store: EditorStore): Presence {
     agents: shallowRef([]),
     peers: shallowRef([]),
     ownerColor: shallowRef(null),
-    following: shallowRef(null)
+    following: shallowRef(null),
+    followPage: null,
+    switching: null,
+    moving: false
   }
   presences.set(store, presence)
-  store.onEditorEvent('page:changed', () => refreshCursors(store))
+  store.onEditorEvent('page:changed', () => {
+    stopIfLeftFollowedPage(store)
+    refreshCursors(store)
+  })
+  // Zooming or fitting the view yourself, by any shortcut or menu, ends following. A page
+  // switch restores that page's viewport without this event, so only centering is ours.
+  store.onEditorEvent('viewport:changed', () => {
+    if (presence.following.value && !presence.moving) stopFollowing(store)
+  })
   return presence
 }
 
@@ -109,11 +126,15 @@ export function refreshCursors(store: EditorStore): void {
   keepFollowing(store)
 }
 
-/** Where the followed person or agent is; null when they left, idle when an agent rests. */
+/**
+ * Where the followed person or agent is: null when they left, idle while an agent rests or a
+ * person has not pointed anywhere yet.
+ */
 function followedPoint(store: EditorStore, target: FollowTarget): PersonPoint | 'idle' | null {
   const { agents, peers } = presenceOf(store)
   if (target.kind === 'person') {
-    return peers.value.find((peer) => peer.clientId === target.clientId)?.cursor ?? null
+    const peer = peers.value.find((entry) => entry.clientId === target.clientId)
+    return peer ? (peer.cursor ?? 'idle') : null
   }
   const agent = [...agents.value, ...peers.value.flatMap((peer) => peer.agents)].find(
     (entry) => entry.id === target.agentId
@@ -133,14 +154,82 @@ function keepFollowing(store: EditorStore): void {
     presence.following.value = null
     return
   }
-  // The page change refreshes cursors, which calls back here to center on the new page.
-  if (point.pageId !== store.state.currentPageId) void store.switchPage(point.pageId)
-  else store.centerOn(point.x, point.y, point.zoom)
+  // A peer's cursor can name a page this document does not have; wait as for a resting agent.
+  if (store.graph.getNode(point.pageId)?.type !== 'CANVAS') return
+  presence.followPage = point.pageId
+  if (point.pageId !== store.state.currentPageId) {
+    // Each switch cancels the one before it, so frequent cursor updates must not restart one
+    // already heading to this page; when it lands, follow wherever they went meanwhile.
+    if (presence.switching === point.pageId) return
+    const pageId = point.pageId
+    presence.switching = pageId
+    void store.switchPage(pageId).finally(() => {
+      if (presence.switching === pageId) presence.switching = null
+      if (store.state.currentPageId === pageId) keepFollowing(store)
+    })
+    return
+  }
+  presence.moving = true
+  try {
+    store.centerOn(point.x, point.y, point.zoom)
+  } finally {
+    presence.moving = false
+  }
+}
+
+/** A page change following did not make is yours, so it ends following, even of a resting agent. */
+function stopIfLeftFollowedPage(store: EditorStore): void {
+  const presence = presenceOf(store)
+  if (presence.following.value && store.state.currentPageId !== presence.followPage) {
+    presence.following.value = null
+  }
+}
+
+/** Who the view follows, for showing it: their name, an agent's owner, and the color. */
+export interface FollowedLabel {
+  kind: FollowTarget['kind']
+  name: string
+  /** For an agent, the person who runs it; undefined for our own agents. */
+  owner?: string
+  color: Color
+}
+
+export function followedLabel(store: EditorStore): FollowedLabel | null {
+  const { agents, peers, ownerColor, following } = presenceOf(store)
+  const target = following.value
+  if (!target) return null
+  if (target.kind === 'person') {
+    const peer = peers.value.find((entry) => entry.clientId === target.clientId)
+    return peer ? { kind: 'person', name: peer.name, color: peer.color } : null
+  }
+  const own = agents.value.find((agent) => agent.id === target.agentId)
+  if (own) return { kind: 'agent', name: own.name, color: ownerColor.value ?? SOLO_AGENT_COLOR }
+  for (const peer of peers.value) {
+    const agent = peer.agents.find((entry) => entry.id === target.agentId)
+    if (agent) return { kind: 'agent', name: agent.name, owner: peer.name, color: peer.color }
+  }
+  return null
 }
 
 /** Follow a person or an agent, or stop following with null. */
+/** Stop following; a follow switch still loading is overtaken, so it does not land later. */
+function stopFollowing(store: EditorStore): void {
+  const presence = presenceOf(store)
+  presence.following.value = null
+  if (presence.switching) {
+    presence.switching = null
+    void store.switchPage(store.state.currentPageId)
+  }
+}
+
 export function follow(store: EditorStore, target: FollowTarget | null): void {
-  presenceOf(store).following.value = target
+  if (!target) {
+    stopFollowing(store)
+    return
+  }
+  const presence = presenceOf(store)
+  presence.following.value = target
+  presence.followPage = store.state.currentPageId
   keepFollowing(store)
 }
 

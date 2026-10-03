@@ -7,7 +7,8 @@ export const shareButton = tv({
       idle: 'bg-accent text-white hover:bg-accent/90',
       joining:
         'animate-pulse motion-reduce:animate-none border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] text-[var(--color-warning-text)]',
-      connected: 'bg-[var(--color-success-bg)] text-white hover:bg-[var(--color-success-bg-hover)]'
+      // Still a share action when connected; your avatar shows the room is live.
+      connected: 'bg-accent text-white hover:bg-accent/90'
     }
   },
   defaultVariants: { connection: 'idle' }

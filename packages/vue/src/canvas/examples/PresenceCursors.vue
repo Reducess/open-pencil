@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { useTemplateRef, watchEffect } from 'vue'
+import { watchEffect } from 'vue'
 
 import { createEditor } from '@open-pencil/core/editor'
 import { parseColor } from '@open-pencil/scene-graph/color'
 
-import { useCanvas } from '#vue/canvas/surface/use'
+import CanvasRoot from '#vue/canvas/CanvasRoot.vue'
+import CanvasSurface from '#vue/canvas/CanvasSurface.vue'
+import { provideEditor } from '#vue/editor/context'
 
 const { person, personColor, agent, otherAgent, otherColor, zoom } = defineProps<{
   person: string
@@ -27,7 +29,7 @@ const card = editor.graph.createNode('RECTANGLE', editor.state.currentPageId, {
   height: 100,
   fills: [{ type: 'SOLID', color: parseColor('#e8e8eb'), opacity: 1, visible: true }]
 })
-useCanvas(useTemplateRef('canvas'), editor, { showRulers: false })
+provideEditor(editor)
 
 watchEffect(() => {
   const owner = parseColor(personColor)
@@ -45,5 +47,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <canvas ref="canvas" class="block h-[400px] w-[600px]" />
+  <CanvasRoot :show-rulers="false">
+    <CanvasSurface class="block h-[400px] w-[600px]" />
+  </CanvasRoot>
 </template>

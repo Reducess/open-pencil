@@ -1,10 +1,11 @@
 import 'fake-indexeddb/auto'
-import { afterEach, expect, test } from 'bun:test'
+import { afterEach, expect, spyOn, test } from 'bun:test'
 
 import { createEditorStore } from '@/app/editor/session/create'
 import {
   addAgent,
   follow,
+  followedLabel,
   presenceByPage,
   presenceOf,
   renameAgent,
@@ -117,6 +118,124 @@ test('following a person matches their zoom, and stops when they leave', () => {
   expect(centered(store)).toEqual({ x: 40, y: 50 })
   setPeers(store, [])
   expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('switching to another page yourself stops following', async () => {
+  const { store, pageId, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(followedLabel(store)).toEqual({ kind: 'person', name: 'Ana', color: red })
+  await store.switchPage(other)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('following survives the target moving on while its page switch is in flight', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const third = store.graph.addPage('Third').id
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  const reachedThird = new Promise<void>((resolve) => {
+    store.onEditorEvent('page:changed', (id) => {
+      if (id === third) resolve()
+    })
+  })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  // Before the switch to `other` lands, the agent moves to a third page.
+  agent.update({ cursor: { x: 20, y: 20, pageId: third } })
+  await reachedThird
+  expect(presenceOf(store).following.value).toEqual({ kind: 'agent', agentId: agent.id })
+  expect(store.state.currentPageId).toBe(third)
+})
+
+test('switching pages yourself stops following a resting agent too', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const agent = addAgent(store, 'chat')
+  follow(store, { kind: 'agent', agentId: agent.id })
+  await store.switchPage(other)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('waits for a person who has not pointed anywhere yet', () => {
+  const { store, pageId } = setup()
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [ana])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
+  expect(centered(store)).toEqual({ x: 40, y: 50 })
+})
+
+test('zooming yourself stops following', () => {
+  const { store, pageId } = setup()
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  setPeers(store, [{ ...ana, cursor: { x: 60, y: 70, pageId, zoom: 1 } }])
+  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+  store.applyZoom(-100, 960, 540)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('cursor updates while heading to a page do not restart the switch', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const switchPage = spyOn(store, 'switchPage')
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  const arrived = new Promise<void>((resolve) => {
+    store.onEditorEvent('page:changed', () => resolve())
+  })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  for (const x of [20, 30, 40]) agent.update({ cursor: { x, y: 10, pageId: other } })
+  await arrived
+  expect(switchPage).toHaveBeenCalledTimes(1)
+  expect(store.state.currentPageId).toBe(other)
+})
+
+test('zooming while following heads to another page stops following', () => {
+  const { store, other } = setup()
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  store.applyZoom(-100, 960, 540)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('a cursor on a page this document lacks is waited out, not switched to', () => {
+  const { store } = setup()
+  const switchPage = spyOn(store, 'switchPage')
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 1, y: 1, pageId: 'missing', zoom: 1 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(switchPage).not.toHaveBeenCalled()
+  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+})
+
+test('stopping while following heads to another page stays where you are', async () => {
+  const { store, pageId, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  follow(store, null)
+  await new Promise((resolve) => {
+    setTimeout(resolve, 20)
+  })
+  expect(store.state.currentPageId).toBe(pageId)
+})
+
+test('labels a followed agent with the person who runs it', () => {
+  const { store, pageId } = setup()
+  const fern = { id: 'fern', name: 'Fern', kind: 'chat' as const, status: 'editing' as const }
+  setPeers(store, [
+    { clientId: 4, name: 'Ana', color: red, agents: [{ ...fern, cursor: { x: 1, y: 1, pageId } }] }
+  ])
+  follow(store, { kind: 'agent', agentId: 'fern' })
+  expect(followedLabel(store)).toEqual({ kind: 'agent', name: 'Fern', owner: 'Ana', color: red })
 })
 
 test('renames our agents, and their handles report the new name', () => {

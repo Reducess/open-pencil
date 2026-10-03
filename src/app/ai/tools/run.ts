@@ -1,3 +1,4 @@
+import type { PageSnapshot } from '@open-pencil/core/editor'
 import { computeContentBounds } from '@open-pencil/core/io'
 import type { StepBudget } from '@open-pencil/core/tools'
 
@@ -14,11 +15,14 @@ class RunState {
   pageId: string | null = null
   /** The built-in chat as other people see it; one per document, kept between replies. */
   agent: AgentHandle | null = null
+  /** Each page as it was before the run first edited it, for `diff_changes`. */
+  baselines = new Map<string, PageSnapshot>()
 
   start(maxSteps: number, pageId: string): void {
     this.currentSteps = 0
     this.maxSteps = resolveAgentStepLimit(maxSteps)
     this.pageId = pageId
+    this.baselines = new Map()
   }
 
   hitLimit(): boolean {
@@ -94,4 +98,15 @@ export async function moveRunToPage(store: EditorStore, pageId: string): Promise
 /** The built-in chat's agent in this document, once it has replied. */
 export function runAgentId(store: EditorStore): string | undefined {
   return getRunState(store).agent?.id
+}
+
+/** Keep `snapshot` as the run's starting state of its page unless the run already edited it. */
+export function recordRunBaseline(store: EditorStore, snapshot: PageSnapshot): void {
+  const pageId = snapshot.values().next().value?.id
+  const { baselines } = getRunState(store)
+  if (pageId && !baselines.has(pageId)) baselines.set(pageId, snapshot)
+}
+
+export function runBaseline(store: EditorStore, pageId: string): PageSnapshot | null {
+  return getRunState(store).baselines.get(pageId) ?? null
 }

@@ -5,7 +5,7 @@ import dedent from 'dedent'
 import CodeEditor from '@/components/code-editor/CodeEditor.vue'
 import IconButton from '@/components/ui/button/IconButton.vue'
 
-import { useLandingMessages } from '../../content/messages'
+import { useLandingMessages } from '#docs/theme/landing/content/messages'
 
 // A literal closing tag here would end this component's own script block.
 const CLOSE_SCRIPT = `</${'script'}>`

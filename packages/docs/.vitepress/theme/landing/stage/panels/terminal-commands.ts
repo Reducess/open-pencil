@@ -11,7 +11,7 @@ import { makeFigmaFromStore } from '@/app/automation/bridge/figma-factory'
 import { createAutomationCommandHandlers } from '@/app/automation/bridge/handlers'
 import type { EditorStore } from '@/app/editor/active-store'
 
-import type { LandingMessages } from '../../content/messages'
+import type { LandingMessages } from '#docs/theme/landing/content/messages'
 
 /**
  * The CLI reaches a running app through `createAutomationCommandHandlers`. The landing page

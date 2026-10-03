@@ -8,7 +8,7 @@ import { useEditorStore } from '@/app/editor/active-store'
 import ChatTranscript from '@/components/chat/ChatTranscript.vue'
 import AppButton from '@/components/ui/button/AppButton.vue'
 
-import { useLandingMessages } from '../../content/messages'
+import { useLandingMessages } from '#docs/theme/landing/content/messages'
 import { useRecordedChat } from './useRecordedChat'
 
 /** How much of the panel must be on screen before the turn plays by itself. */

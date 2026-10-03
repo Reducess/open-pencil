@@ -4,7 +4,7 @@ import { nextTick, ref } from 'vue'
 import { useEditorStore } from '@/app/editor/active-store'
 import AppButton from '@/components/ui/button/AppButton.vue'
 
-import { useLandingMessages } from '../../content/messages'
+import { useLandingMessages } from '#docs/theme/landing/content/messages'
 import { EDITOR_COMMANDS } from './terminal-commands'
 import { useTerminalSession } from './useTerminalSession'
 

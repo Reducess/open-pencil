@@ -26,6 +26,10 @@ interface Presence {
   following: ShallowRef<FollowTarget | null>
   /** The page following put the view on; landing anywhere else means you left. */
   followPage: string | null
+  /** The page a follow switch is on its way to, so cursor updates do not restart it. */
+  switching: string | null
+  /** True while following moves the view itself; any other viewport change is yours. */
+  moving: boolean
 }
 
 const presences = new WeakMap<EditorStore, Presence>()
@@ -38,12 +42,20 @@ export function presenceOf(store: EditorStore): Presence {
     peers: shallowRef([]),
     ownerColor: shallowRef(null),
     following: shallowRef(null),
-    followPage: null
+    followPage: null,
+    switching: null,
+    moving: false
   }
   presences.set(store, presence)
   store.onEditorEvent('page:changed', () => {
     stopIfLeftFollowedPage(store)
     refreshCursors(store)
+  })
+  // Zooming or fitting the view yourself, by any shortcut or menu, ends following.
+  store.onEditorEvent('viewport:changed', () => {
+    if (presence.following.value && !presence.moving && !presence.switching) {
+      presence.following.value = null
+    }
   })
   return presence
 }
@@ -110,9 +122,24 @@ function keepFollowing(store: EditorStore): void {
     return
   }
   presence.followPage = point.pageId
-  // An overtaken switch never commits its page, so only the latest one lands here.
-  if (point.pageId !== store.state.currentPageId) void store.switchPage(point.pageId)
-  else store.centerOn(point.x, point.y, point.zoom)
+  if (point.pageId !== store.state.currentPageId) {
+    // Each switch cancels the one before it, so frequent cursor updates must not restart one
+    // already heading to this page; when it lands, follow wherever they went meanwhile.
+    if (presence.switching === point.pageId) return
+    const pageId = point.pageId
+    presence.switching = pageId
+    void store.switchPage(pageId).finally(() => {
+      if (presence.switching === pageId) presence.switching = null
+      keepFollowing(store)
+    })
+    return
+  }
+  presence.moving = true
+  try {
+    store.centerOn(point.x, point.y, point.zoom)
+  } finally {
+    presence.moving = false
+  }
 }
 
 /** A page change following did not make is yours, so it ends following, even of a resting agent. */

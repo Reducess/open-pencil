@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import { shallowRef, type Ref, type ShallowRef } from 'vue'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import type { Awareness } from 'y-protocols/awareness'
@@ -22,7 +22,8 @@ export type CollabRuntime = {
   yimages: Y.Map<Uint8Array> | null
   room: CollabRoomTransport | null
   persistence: IndexeddbPersistence | null
-  connectedStore: EditorStore | null
+  /** Reactive, so what depends on the room's document follows connects and disconnects. */
+  connectedStore: ShallowRef<EditorStore | null>
   suppressGraphSync: boolean
   suppressYjsEvents: boolean
   unbindGraphEvents: (() => void) | null
@@ -71,7 +72,7 @@ export function createCollabRuntime(): CollabRuntime {
     yimages: null,
     room: null,
     persistence: null,
-    connectedStore: null,
+    connectedStore: shallowRef<EditorStore | null>(null),
     suppressGraphSync: false,
     suppressYjsEvents: false,
     unbindGraphEvents: null,
@@ -114,7 +115,7 @@ export function createCollabConnectionActions({
   }
 
   function disconnect() {
-    const store = runtime.connectedStore ?? getStore()
+    const store = runtime.connectedStore.value ?? getStore()
     disposeCollabSessionResources({
       store,
       room: runtime.room,
@@ -158,7 +159,7 @@ export function connectCollabSession({
 }: ConnectCollabSessionOptions) {
   if (runtime.room) disconnect()
 
-  runtime.connectedStore = store
+  runtime.connectedStore.value = store
   state.value.roomId = roomId
   runtime.ydoc = new Y.Doc()
   runtime.awareness = new awarenessProtocol.Awareness(runtime.ydoc)
@@ -218,7 +219,7 @@ export function resetCollabRuntime(runtime: CollabRuntime) {
   runtime.ydoc = null
   runtime.ynodes = null
   runtime.yimages = null
-  runtime.connectedStore = null
+  runtime.connectedStore.value = null
 }
 
 export function resetCollabConnectionState(state: Ref<CollabState>) {

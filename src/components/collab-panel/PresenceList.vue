@@ -94,7 +94,7 @@ function followLabel(name: string, target: FollowTarget): string {
             type="button"
             :aria-label="messages.renameAgent({ name: agent.name })"
             :class="ui.agentName()"
-            @dblclick="rename.start(agent.id, agent.name)"
+            @click="rename.start(agent.id, agent.name)"
             @keydown.enter.prevent="rename.start(agent.id, agent.name)"
           >
             {{ agent.name }}

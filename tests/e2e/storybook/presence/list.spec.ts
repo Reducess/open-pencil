@@ -17,7 +17,7 @@ test('lists people with their agents and what each agent is doing', async ({ pag
 
 test('renames your own agent inline', async ({ page }) => {
   await page.goto(story('room'))
-  await page.getByRole('button', { name: 'Rename Fern' }).dblclick()
+  await page.getByRole('button', { name: 'Rename Fern' }).click()
   const input = page.getByRole('textbox', { name: 'Agent name' })
   await expect(input).toBeFocused()
   await input.press('Escape')

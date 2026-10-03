@@ -44,7 +44,7 @@ export const FollowingAnAgent: Story = {
 export const RenamingYourAgent: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
-    await userEvent.dblClick(canvas.getByRole('button', { name: 'Rename Fern' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Rename Fern' }))
     const input = canvas.getByRole('textbox', { name: 'Agent name' })
     await userEvent.clear(input)
     await userEvent.type(input, 'Juniper{Enter}')

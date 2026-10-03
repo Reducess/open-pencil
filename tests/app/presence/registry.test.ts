@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { afterEach, expect, test } from 'bun:test'
+import { afterEach, expect, spyOn, test } from 'bun:test'
 
 import { createEditorStore } from '@/app/editor/session/create'
 import {
@@ -166,6 +166,33 @@ test('waits for a person who has not pointed anywhere yet', () => {
   expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
   setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
   expect(centered(store)).toEqual({ x: 40, y: 50 })
+})
+
+test('zooming yourself stops following', () => {
+  const { store, pageId } = setup()
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  setPeers(store, [{ ...ana, cursor: { x: 60, y: 70, pageId, zoom: 1 } }])
+  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+  store.applyZoom(-100, 960, 540)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('cursor updates while heading to a page do not restart the switch', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const switchPage = spyOn(store, 'switchPage')
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  const arrived = new Promise<void>((resolve) => {
+    store.onEditorEvent('page:changed', () => resolve())
+  })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  for (const x of [20, 30, 40]) agent.update({ cursor: { x, y: 10, pageId: other } })
+  await arrived
+  expect(switchPage).toHaveBeenCalledTimes(1)
+  expect(store.state.currentPageId).toBe(other)
 })
 
 test('labels a followed agent with the person who runs it', () => {

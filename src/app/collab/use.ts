@@ -25,7 +25,7 @@ export function useCollab(storeOrGetter: EditorStore | (() => EditorStore)) {
   const state = ref<CollabState>(createInitialCollabState(storedName.value))
   const runtime = createCollabRuntime()
   const remotePeers = computed(() => state.value.peers)
-  const getActiveStore = () => runtime.connectedStore ?? getStore()
+  const getActiveStore = () => runtime.connectedStore.value ?? getStore()
 
   const following = computed(() => presenceOf(getActiveStore()).following.value)
   const followingPeer = computed(() =>

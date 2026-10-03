@@ -105,6 +105,9 @@ export function applyStrokeOverrides(props: Record<string, unknown>, o: Partial<
   if (nodeCap) o.strokeCap = nodeCap
   const nodeJoin = enumValue(JOIN_VALUES, props.strokeJoin)
   if (nodeJoin) o.strokeJoin = nodeJoin
+  // The node's own dash pattern, separate from the stroke-local dash `strokeDash` sets.
+  const nodeDash = dashValue(props.dashPattern)
+  if (nodeDash) o.dashPattern = nodeDash
 
   if (Array.isArray(props.strokes)) {
     const strokes = props.strokes.filter(isStrokeValue).map(toStroke)

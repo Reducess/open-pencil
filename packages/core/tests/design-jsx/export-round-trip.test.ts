@@ -185,6 +185,10 @@ const CASES: RoundTripCase[] = [
     strokes: [stroke({ cap: 'SQUARE' })],
     strokeCap: 'ROUND'
   }),
+  leafCase('node-level dash pattern under a stroke without its own', 'RECTANGLE', {
+    strokes: [stroke()],
+    dashPattern: [6, 3]
+  }),
   leafCase('stroke opacity that differs from its colour alpha', 'RECTANGLE', {
     strokes: [stroke({ opacity: 0.5 })]
   }),

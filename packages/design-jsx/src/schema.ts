@@ -83,6 +83,7 @@ export const DESIGN_JSX_SUPPORTED_PROPERTY_NAMES = [
   'strokeDash',
   'strokeCap',
   'strokeJoin',
+  'dashPattern',
   'strokes',
   'strokeWeights',
   'rounded',

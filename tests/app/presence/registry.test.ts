@@ -5,6 +5,7 @@ import { createEditorStore } from '@/app/editor/session/create'
 import {
   addAgent,
   follow,
+  followedLabel,
   presenceOf,
   renameAgent,
   setOwnerColor,
@@ -116,6 +117,27 @@ test('following a person matches their zoom, and stops when they leave', () => {
   expect(centered(store)).toEqual({ x: 40, y: 50 })
   setPeers(store, [])
   expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('switching to another page yourself stops following', async () => {
+  const { store, pageId, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(followedLabel(store)).toEqual({ name: 'Ana', color: red })
+  await store.switchPage(other)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('labels a followed agent with the person who runs it', () => {
+  const { store, pageId } = setup()
+  const fern = { id: 'fern', name: 'Fern', kind: 'chat' as const, status: 'editing' as const }
+  setPeers(store, [
+    { clientId: 4, name: 'Ana', color: red, agents: [{ ...fern, cursor: { x: 1, y: 1, pageId } }] }
+  ])
+  follow(store, { kind: 'agent', agentId: 'fern' })
+  expect(followedLabel(store)).toEqual({ name: 'Fern', owner: 'Ana', color: red })
 })
 
 test('renames our agents, and their handles report the new name', () => {

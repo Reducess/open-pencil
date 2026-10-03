@@ -38,7 +38,10 @@ export function presenceOf(store: EditorStore): Presence {
     following: shallowRef(null)
   }
   presences.set(store, presence)
-  store.onEditorEvent('page:changed', () => refreshCursors(store))
+  store.onEditorEvent('page:changed', () => {
+    stopIfLeftFollowedPage(store)
+    refreshCursors(store)
+  })
   return presence
 }
 
@@ -102,6 +105,42 @@ function keepFollowing(store: EditorStore): void {
   // The page change refreshes cursors, which calls back here to center on the new page.
   if (point.pageId !== store.state.currentPageId) void store.switchPage(point.pageId)
   else store.centerOn(point.x, point.y, point.zoom)
+}
+
+/** Switching to another page yourself ends following; following's own switches go to theirs. */
+function stopIfLeftFollowedPage(store: EditorStore): void {
+  const presence = presenceOf(store)
+  const target = presence.following.value
+  if (!target) return
+  const point = followedPoint(store, target)
+  if (point && point !== 'idle' && point.pageId !== store.state.currentPageId) {
+    presence.following.value = null
+  }
+}
+
+/** Who the view follows, for showing it: their name, an agent's owner, and the color. */
+export interface FollowedLabel {
+  name: string
+  /** For an agent, the person who runs it; undefined for our own agents. */
+  owner?: string
+  color: Color
+}
+
+export function followedLabel(store: EditorStore): FollowedLabel | null {
+  const { agents, peers, ownerColor, following } = presenceOf(store)
+  const target = following.value
+  if (!target) return null
+  if (target.kind === 'person') {
+    const peer = peers.value.find((entry) => entry.clientId === target.clientId)
+    return peer ? { name: peer.name, color: peer.color } : null
+  }
+  const own = agents.value.find((agent) => agent.id === target.agentId)
+  if (own) return { name: own.name, color: ownerColor.value ?? SOLO_AGENT_COLOR }
+  for (const peer of peers.value) {
+    const agent = peer.agents.find((entry) => entry.id === target.agentId)
+    if (agent) return { name: agent.name, owner: peer.name, color: peer.color }
+  }
+  return null
 }
 
 /** Follow a person or an agent, or stop following with null. */

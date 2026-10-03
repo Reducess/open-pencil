@@ -31,7 +31,6 @@ function createCollabPanelContext() {
   const popoverOpen = ref(!!pendingRoomId.value)
   const state = computed(() => collab?.state.value ?? DEFAULT_COLLAB_STATE)
   const peers = computed(() => collab?.remotePeers.value ?? [])
-  const followingPeer = computed(() => collab?.followingPeer.value ?? null)
   const following = computed(() => collab?.following.value ?? null)
   const storeRef = useActiveEditorStoreRef()
   const presenceRows = computed(() => {
@@ -93,10 +92,6 @@ function createCollabPanelContext() {
     void router.push('/')
   }
 
-  function toggleFollowPeer(clientId: number) {
-    collab?.followPeer(followingPeer.value === clientId ? null : clientId)
-  }
-
   function follow(target: FollowTarget | null) {
     collab?.follow(target)
   }
@@ -113,8 +108,6 @@ function createCollabPanelContext() {
     nameDraft,
     popoverOpen,
     state,
-    peers,
-    followingPeer,
     following,
     presenceRows,
     shareURL,
@@ -123,7 +116,6 @@ function createCollabPanelContext() {
     share,
     join,
     disconnect,
-    toggleFollowPeer,
     follow,
     renameLocalAgent
   }

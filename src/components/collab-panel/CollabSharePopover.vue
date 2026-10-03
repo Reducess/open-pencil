@@ -27,13 +27,7 @@ const connection = computed(() => {
         :class="shareButton({ connection })"
       >
         <icon-lucide-share-2 class="size-3.5" />
-        {{
-          collab.state.connected
-            ? collab.messages.connected
-            : collab.isJoining
-              ? collab.messages.joinRoom
-              : collab.messages.share
-        }}
+        {{ collab.isJoining ? collab.messages.joinRoom : collab.messages.share }}
       </button>
     </PopoverTrigger>
 

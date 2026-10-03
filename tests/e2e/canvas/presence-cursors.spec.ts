@@ -4,7 +4,7 @@ test.use({ viewport: { width: 900, height: 700 } })
 
 const editor = useEditorSetupWithClear('/?test&no-chrome&no-rulers')
 
-test('people show filled arrows and agents outlined sparkles in their owner color', async () => {
+test('people and agents show arrows in their color, agents with an outlined sparkle label', async () => {
   await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
     if (!store) throw new Error('OpenPencil store not initialized')

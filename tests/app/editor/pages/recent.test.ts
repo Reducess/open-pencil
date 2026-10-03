@@ -1,5 +1,7 @@
 import { expect, test } from 'bun:test'
 
+import { range } from 'es-toolkit'
+
 import { createEditor } from '@open-pencil/core/editor'
 import { SceneGraph } from '@open-pencil/scene-graph'
 
@@ -8,10 +10,7 @@ import { createRecentPages } from '@/app/editor/pages/recent'
 function setup(pageCount: number) {
   const editor = createEditor()
   const first = editor.state.currentPageId
-  const ids = [
-    first,
-    ...Array.from({ length: pageCount - 1 }, (_, i) => editor.graph.addPage(`P${i + 2}`).id)
-  ]
+  const ids = [first, ...range(2, pageCount + 1).map((n) => editor.graph.addPage(`P${n}`).id)]
   return { editor, ids, recent: createRecentPages(editor) }
 }
 

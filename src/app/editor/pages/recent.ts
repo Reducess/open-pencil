@@ -1,3 +1,4 @@
+import { take, uniq } from 'es-toolkit'
 import { shallowRef, type ShallowRef } from 'vue'
 
 import type { Editor } from '@open-pencil/core/editor'
@@ -15,7 +16,7 @@ export interface RecentPages {
 export function createRecentPages(editor: Pick<Editor, 'onEditorEvent' | 'state'>): RecentPages {
   const ids = shallowRef<readonly string[]>([editor.state.currentPageId])
   const visit = (pageId: string) => {
-    ids.value = [pageId, ...ids.value.filter((id) => id !== pageId)].slice(0, MAX_RECENT_PAGES)
+    ids.value = take(uniq([pageId, ...ids.value]), MAX_RECENT_PAGES)
   }
   const stops = [
     editor.onEditorEvent('page:changed', visit),

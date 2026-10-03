@@ -46,6 +46,7 @@ test('canonical destinations are registered before they hold files', async () =>
     'kiwi',
     'dom-css',
     'design-jsx',
+    'codegen',
     'pen',
     'cli',
     'mcp'
@@ -73,7 +74,9 @@ test('unit test groups cover all declared shards', () => {
 
 test('heavy unit test matcher excludes fixture-heavy tests', () => {
   expect(isHeavyUnitTest('tests/engine/io/fig/heavy/fixtures.test.ts')).toBe(true)
-  expect(isHeavyUnitTest('tests/engine/io/fig/roundtrip/glyph-blob.test.ts')).toBe(true)
+  expect(isHeavyUnitTest('packages/core/tests/io/formats/fig/roundtrip/glyph-blob.test.ts')).toBe(
+    true
+  )
   expect(isHeavyUnitTest('tests/engine/dom-css/runtime.test.ts')).toBe(false)
 })
 

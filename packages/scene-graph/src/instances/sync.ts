@@ -185,7 +185,10 @@ const PROPERTY_REFERENCE_FIELDS: Record<ComponentPropertyReferenceField, string>
 function hasEnclosingAssignment(graph: SceneGraph, node: SceneNode, propertyId: string): boolean {
   let current: SceneNode | undefined = node
   while (current) {
-    if (current.type === 'INSTANCE' && propertyId in current.componentPropertyAssignments)
+    if (
+      current.type === 'INSTANCE' &&
+      Object.hasOwn(current.componentPropertyAssignments, propertyId)
+    )
       return true
     current = current.parentId ? graph.nodes.get(current.parentId) : undefined
   }

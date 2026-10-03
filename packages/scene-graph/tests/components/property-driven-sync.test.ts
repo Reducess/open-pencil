@@ -58,3 +58,27 @@ test('synchronizing carries other fields of a property-driven layer', () => {
   expect(graph.getNode(clone.id)?.text).toBe('Assigned')
   expect(graph.getNode(clone.id)?.opacity).toBe(0.5)
 })
+
+/** Property IDs are document-authored strings, so one may collide with an Object prototype key. */
+test('a property id shared with an Object prototype key is not read as an assignment', () => {
+  const graph = new SceneGraph()
+  const page = graph.getPages()[0]
+  const component = graph.createNode('COMPONENT', page.id, {
+    name: 'NavItem',
+    componentPropertyDefinitions: [
+      { id: 'toString', name: 'Label', type: 'TEXT', defaultValue: 'Default' }
+    ]
+  })
+  const label = graph.createNode('TEXT', component.id, {
+    name: 'Label',
+    text: 'Default',
+    componentPropertyReferences: [{ propertyId: 'toString', field: 'TEXT' }]
+  })
+  const instance = graph.createInstance(component.id, page.id)
+  const clone = graph.getChildren(instance.id)[0]
+
+  graph.updateNode(label.id, { text: 'Edited default' })
+  graph.syncInstances(component.id)
+
+  expect(graph.getNode(clone.id)?.text).toBe('Edited default')
+})

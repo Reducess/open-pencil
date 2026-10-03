@@ -6,8 +6,8 @@ import { linkComponentPropertyValues } from '../document/component/values'
 import { createResourceResolver } from '../document/resource-reference'
 import { createOccurrenceInterpreter } from './interpret'
 import { materializeInstance } from './materialize-instance'
-import type { InstanceOccurrence, InterpretInstanceOptions } from './occurrence'
-import { occurrences } from './occurrence-path'
+import { occurrences } from './occurrence/path'
+import type { InstanceOccurrence, InterpretInstanceOptions } from './occurrence/types'
 import {
   linkInstanceSourceChildren,
   mapInstanceSourceChildren,

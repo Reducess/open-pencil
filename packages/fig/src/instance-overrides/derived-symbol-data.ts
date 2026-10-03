@@ -1,4 +1,4 @@
-import type { InstanceOccurrence } from './occurrence'
+import type { InstanceOccurrence } from './occurrence/types'
 import type { DerivedSymbolOverride } from './types'
 
 /** Copy one saved occurrence-derived record onto its target; a cache, not a claim. */

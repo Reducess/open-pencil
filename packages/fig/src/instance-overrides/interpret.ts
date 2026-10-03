@@ -22,14 +22,14 @@ import {
   type PropertyLayer,
   type StructuralLayer
 } from './layers'
-import type { InstanceOccurrence, InterpretInstanceOptions } from './occurrence'
 import {
   findSegment,
   isRootGuid,
   pathError,
   resolveOccurrencePath,
   SegmentError
-} from './occurrence-path'
+} from './occurrence/path'
+import type { InstanceOccurrence, InterpretInstanceOptions } from './occurrence/types'
 import { applyPlacedConstraints } from './resize'
 import { applyInstanceLayoutScale } from './scale/layout'
 import {
@@ -63,7 +63,7 @@ import {
  * after inner ones by construction. Saved derived data is a cache, applied last.
  */
 
-export { resolveOccurrencePath } from './occurrence-path'
+export { resolveOccurrencePath } from './occurrence/path'
 
 export function interpretInstance(
   changes: readonly NodeChange[],

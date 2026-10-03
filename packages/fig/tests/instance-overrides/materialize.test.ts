@@ -3,7 +3,7 @@ import { expect, test } from 'bun:test'
 import { guid } from '#fig-tests/helpers/guid'
 import { interpretComponent, interpretInstance } from '#fig/instance-overrides/interpret'
 import { materializeInstance } from '#fig/instance-overrides/materialize-instance'
-import type { MissingComponentDiagnostic } from '#fig/instance-overrides/occurrence'
+import type { MissingComponentDiagnostic } from '#fig/instance-overrides/occurrence/types'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { SceneGraph } from '@open-pencil/scene-graph'

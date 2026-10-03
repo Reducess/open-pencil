@@ -1,8 +1,8 @@
 import { setInstanceOverride, type SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
 
 import type { MaterializedInstance } from './materialize-instance'
-import type { InstanceOccurrence } from './occurrence'
-import { occurrences } from './occurrence-path'
+import { occurrences } from './occurrence/path'
+import type { InstanceOccurrence } from './occurrence/types'
 
 export interface MaterializedComponentOccurrence {
   occurrence: InstanceOccurrence

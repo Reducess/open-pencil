@@ -1,8 +1,8 @@
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 import type { Vector } from '@open-pencil/scene-graph'
 
-import type { BoundPropertyClaim } from './bindings/properties'
-import type { ComponentPropAssignment } from './types'
+import type { BoundPropertyClaim } from '../bindings/properties'
+import type { ComponentPropAssignment } from '../types'
 
 /** An explicit claim keeps the complete path relative to its owning occurrence. */
 export interface InstancePropertyClaim {

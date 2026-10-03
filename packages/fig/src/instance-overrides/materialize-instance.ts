@@ -11,7 +11,7 @@ import {
 } from './bindings/variables'
 import { OVERRIDE_FIELDS, type OverrideField, type RawOverrideField } from './fields'
 import { resolveOccurrencePath } from './interpret'
-import type { InstanceOccurrence } from './occurrence'
+import type { InstanceOccurrence } from './occurrence/types'
 import { symbolDataOf } from './types'
 
 function occurrenceMetadata(

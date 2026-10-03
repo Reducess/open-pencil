@@ -3,7 +3,7 @@ import { guidToString } from '@open-pencil/kiwi/fig/guid'
 
 import { parseFigBuffer } from '../archive'
 import { createOccurrenceInterpreter } from '../instance-overrides/interpret'
-import type { InterpretInstanceOptions } from '../instance-overrides/occurrence'
+import type { InterpretInstanceOptions } from '../instance-overrides/occurrence/types'
 import {
   bySavedPosition,
   createSourceIndex,

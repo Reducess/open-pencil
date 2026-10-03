@@ -16,11 +16,13 @@
 
 ### Added
 
+- Follow collaborators and their AI agents from the avatars in the toolbar: an avatar counts that person's agents, hovering lists what each is doing and on which page, and clicking follows. A frame in their color and a “Following …” bar show whom you follow; Escape, clicking, scrolling, zooming, or switching pages stops it. Your own avatar renames your agents and leaves the room.
 - See where the built-in AI chat is working: while it replies, a cursor whose outlined label shows a sparkle and a callsign such as *Fern* marks the layers it edits. In a shared room, collaborators see each other's agents in the color of the person running them.
 - Hide, lock, and constrain layers in design JSX with `visible={false}`, `locked`, and `constraints={{ horizontal, vertical }}`, set italic text with `italic`, and describe strokes fully with `strokes`, `strokeWeights`, `strokeCap`, `strokeJoin`, and the node-level `dashPattern`. JSX export now writes these together with stacked, gradient, and image fills, every effect, absolutely positioned children, size limits, vertical text alignment, masks, and variable bindings, so rendering exported JSX reproduces them and `diff_jsx` reports changes to them.
 - Jump between pages from the command palette: it lists the pages you visited recently in the tab, **Go to page…** lists every page, and typing a page name finds it.
 - Choose how much an AI model thinks for each message from the chat composer, from Off to Extra high or the provider default. Anthropic, Google, DeepSeek, OpenAI, OpenRouter, and compatible models apply it, where reasoning effort previously reached only OpenAI and OpenRouter models. A model profile's thinking level, which replaces its free-text reasoning effort, sets the starting choice, and finished reasoning shows how long the model thought.
 - Read AI tool calls at a glance: each call shows a one-line summary and buttons that bring the layers it touched into view, even on another page. Expanded, it shows highlighted JSX, scripts, and JSON input and output, and exported images inline. A render call's JSX streams in as the model writes it, and a long run folds its earlier steps into one row.
+- Review what each AI edit changed from its tool call in the chat: a before and after image with a comparison slider or highlighted changed pixels, and a diff of the layers' JSX. Both are saved with the conversation. Settings → Chat → Change previews sets the image size (240, 480, or 960 px) or turns images off to keep only the JSX diff. The chat AI can check its own work the same way with `diff_changes`, which compares the page or a layer with its state before the run edited it as a patch that `diff_apply` can replay.
 - Preview designs progressively on the canvas as direct AI providers stream JSX, without saving partial designs or adding intermediate undo steps. A preview stays with its page: it hides while you view another page and returns when you come back.
 - Write design trees as TSX with `@open-pencil/design-jsx` as the JSX import source, and render them with `renderTree`.
 - Swap the component behind an instance with `instance.swapComponent(component)` in the plugin API, as in Figma.
@@ -34,6 +36,7 @@
 
 ### Changed
 
+- Keep the Share button labeled Share while you are in a room, instead of turning it into a Connected status; a green dot on your avatar shows the room is live.
 - Show Flatten, Outline text, and Outline stroke in the canvas context menu without icons, like every other item there.
 - Keep an AI chat working on the page where it started when you switch to another page, instead of sending its next edits to whichever page is on screen. When the AI switches pages itself, your view follows.
 - `openpencil://` and web `?node=` links select the layer on another page when the current page has none, switching to that page.

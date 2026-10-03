@@ -32,3 +32,14 @@ test('the follow frame names an agent with its owner and offers to stop', async 
   await expect(page.getByRole('status')).toHaveText(/Following Orbit \(Ana\)/)
   await expect(page.getByRole('button', { name: 'Stop following' })).toBeVisible()
 })
+
+test("the keyboard reaches a collaborator's agents through the room list", async ({ page }) => {
+  await page.goto(story('collaboration-presence-avatars--room'))
+  const everyone = page.getByRole('button', { name: 'In this room' })
+  await everyone.focus()
+  await everyone.press('Enter')
+  const follow = page.getByRole('button', { name: 'Follow Orbit' })
+  await expect(follow).toBeVisible()
+  await follow.focus()
+  await expect(follow).toBeFocused()
+})

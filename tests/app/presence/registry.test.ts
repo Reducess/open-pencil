@@ -149,6 +149,25 @@ test('following survives the target moving on while its page switch is in flight
   expect(store.state.currentPageId).toBe(third)
 })
 
+test('switching pages yourself stops following a resting agent too', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const agent = addAgent(store, 'chat')
+  follow(store, { kind: 'agent', agentId: agent.id })
+  await store.switchPage(other)
+  expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('waits for a person who has not pointed anywhere yet', () => {
+  const { store, pageId } = setup()
+  const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
+  setPeers(store, [ana])
+  follow(store, { kind: 'person', clientId: 4 })
+  expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
+  setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
+  expect(centered(store)).toEqual({ x: 40, y: 50 })
+})
+
 test('labels a followed agent with the person who runs it', () => {
   const { store, pageId } = setup()
   const fern = { id: 'fern', name: 'Fern', kind: 'chat' as const, status: 'editing' as const }

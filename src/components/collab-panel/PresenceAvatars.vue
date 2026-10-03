@@ -166,15 +166,19 @@ function toggleFollow(clientId: number) {
       </HoverCardPortal>
     </HoverCardRoot>
 
-    <PopoverRoot v-if="hidden > 0">
+    <!-- Everyone, by click or keyboard: hover cards are mouse-only. -->
+    <PopoverRoot v-if="rows.length > 1">
       <PopoverTrigger as-child>
         <button
           type="button"
-          data-test-id="collab-more-people"
-          :aria-label="messages.morePeople({ count: String(hidden) })"
+          data-test-id="collab-everyone"
+          :aria-label="
+            hidden > 0 ? messages.morePeople({ count: String(hidden) }) : messages.inThisRoom
+          "
           :class="ui.overflow()"
         >
-          +{{ hidden }}
+          <template v-if="hidden > 0">+{{ hidden }}</template>
+          <icon-lucide-chevron-down v-else :class="ui.badgeIcon()" />
         </button>
       </PopoverTrigger>
       <PopoverPortal>

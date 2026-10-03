@@ -9,6 +9,7 @@ import { useI18n } from '@open-pencil/vue'
 import Toolbar from '@/components/Toolbar/Toolbar.vue'
 
 import { STAGES } from './definitions'
+import { prepareEngine } from './engine-assets'
 import type { StageKind } from './kinds'
 import StageCanvas from './StageCanvas.vue'
 import { useDocsAppearance } from './useDocsAppearance'
@@ -32,11 +33,12 @@ const root = ref<HTMLElement | null>(null)
 const mounted = ref(false)
 const { stop } = useIntersectionObserver(
   root,
-  ([entry]) => {
+  async ([entry]) => {
     if (!entry?.isIntersecting) return
+    stop()
+    await prepareEngine()
     mounted.value = true
     void build()
-    stop()
   },
   { rootMargin: MOUNT_MARGIN }
 )

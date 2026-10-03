@@ -283,11 +283,14 @@
         "@open-pencil/dom-css": "workspace:*",
         "@open-pencil/scene-graph": "workspace:*",
         "@vueuse/core": "^14.4.0",
+        "canvaskit-wasm": "^0.41.1",
         "dedent": "^1.7.2",
       },
       "devDependencies": {
         "@iconify-json/simple-icons": "^1.2.98",
         "@open-pencil/brand-tools": "workspace:*",
+        "@open-pencil/cli": "workspace:*",
+        "@open-pencil/vite-config": "workspace:*",
         "@shikijs/vitepress-twoslash": "^4.4.3",
         "@tailwindcss/vite": "^4.3.3",
         "vitepress": "^2.0.0-alpha.19",
@@ -586,6 +589,16 @@
       },
       "devDependencies": {
         "nanotar": "^0.3.0",
+      },
+    },
+    "vite": {
+      "name": "@open-pencil/vite-config",
+      "dependencies": {
+        "@open-pencil/core": "workspace:*",
+        "unplugin-icons": "^23.0.1",
+        "unplugin-vue-components": "^31.1.0",
+        "vite": "8.1.4",
+        "vite-plugin-pwa": "^1.3.0",
       },
     },
   },
@@ -1502,6 +1515,8 @@
     "@open-pencil/unit-tests-tools": ["@open-pencil/unit-tests-tools@workspace:tools/dev/unit-tests"],
 
     "@open-pencil/visual-oracles-tools": ["@open-pencil/visual-oracles-tools@workspace:tools/generate/visual-oracles"],
+
+    "@open-pencil/vite-config": ["@open-pencil/vite-config@workspace:vite"],
 
     "@open-pencil/vue": ["@open-pencil/vue@workspace:packages/vue"],
 

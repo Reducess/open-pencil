@@ -17,6 +17,8 @@
   "devDependencies": {
     "@iconify-json/simple-icons": "^1.2.98",
     "@open-pencil/brand-tools": "workspace:*",
+    "@open-pencil/cli": "workspace:*",
+    "@open-pencil/vite-config": "workspace:*",
     "@shikijs/vitepress-twoslash": "^4.4.3",
     "@tailwindcss/vite": "^4.3.3",
     "vitepress": "^2.0.0-alpha.19",
@@ -31,6 +33,7 @@
     "@open-pencil/dom-css": "workspace:*",
     "@open-pencil/scene-graph": "workspace:*",
     "@vueuse/core": "^14.4.0",
+    "canvaskit-wasm": "^0.41.1",
     "dedent": "^1.7.2"
   }
 }

@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -9,11 +8,8 @@ import { defineConfig } from 'vitepress'
 import llmstxt from 'vitepress-plugin-llms'
 
 import { ensureBrandAssets } from '@open-pencil/brand-tools'
+import { appSourceConfig } from '@open-pencil/vite-config/app-source'
 
-import rootPackage from '../../../package.json' with { type: 'json' }
-import { createOpenPencilAliases } from '../../../vite/aliases.ts'
-import { appSourceDefines, appSourcePlugins } from './app-source.ts'
-import { copyLandingAssets, serveLandingAssets } from './landing-assets.ts'
 import { docsLocales } from './locales.ts'
 import { rootThemeConfig } from './root-theme.ts'
 import { BASE, LOCALE_PREFIXES, applyPageSeo, siteHead, withAlternateSitemapLinks } from './seo.ts'
@@ -24,11 +20,8 @@ const configDir = dirname(fileURLToPath(import.meta.url))
 const docsRoot = dirname(configDir)
 const packagesRoot = dirname(docsRoot)
 const repoRoot = dirname(packagesRoot)
-// The landing page runs DOM/CSS export in the browser. `@acemir/cssom` advertises a `browser`
-// build that is a global script with no exports, so resolve its CommonJS entry instead.
-const cssomEntry = createRequire(resolve(packagesRoot, 'dom-css/package.json')).resolve(
-  '@acemir/cssom'
-)
+// The landing page mounts the app's own components, compiled from source.
+const appSource = appSourceConfig()
 const fastBuild = process.env.OPENPENCIL_DOCS_FAST_BUILD === '1'
 
 const llmsPlugin = llmstxt({
@@ -85,25 +78,15 @@ export default defineConfig({
 
   vite: {
     resolve: {
-      // The landing page mounts the app's own components, so the site resolves workspace
-      // packages and `@/` exactly as the app build does.
       alias: [
         { find: '#docs-api', replacement: resolve(docsRoot, 'programmable/sdk/api') },
         { find: '#docs', replacement: configDir },
-        { find: '@acemir/cssom', replacement: cssomEntry },
-        ...createOpenPencilAliases(repoRoot)
+        ...appSource.alias
       ]
     },
-    define: appSourceDefines(rootPackage.version),
-    plugins: [
-      ...appSourcePlugins(repoRoot),
-      tailwindcss(),
-      llmsPlugin,
-      serveLandingAssets(repoRoot)
-    ]
+    define: appSource.define,
+    plugins: [...appSource.plugins, tailwindcss(), llmsPlugin]
   },
-
-  buildEnd: (siteConfig) => copyLandingAssets(repoRoot, siteConfig.outDir),
 
   locales: docsLocales,
 

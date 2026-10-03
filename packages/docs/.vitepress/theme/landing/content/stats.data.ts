@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
+import { pathToFileURL } from 'node:url'
 
 import { ALL_TOOLS, isToolExposed } from '@open-pencil/core/tools'
 
@@ -16,9 +16,10 @@ export interface LandingStats {
 declare const data: LandingStats
 export { data }
 
-const commandsDir = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../../../cli/src/commands'
+/** One module per top-level command, as `packages/cli/src/index.ts` registers them. */
+const commandsDir = new URL(
+  'src/commands/',
+  pathToFileURL(createRequire(import.meta.url).resolve('@open-pencil/cli/package.json'))
 )
 
 /** Counted from the source at build time, so the page cannot drift from the product. */

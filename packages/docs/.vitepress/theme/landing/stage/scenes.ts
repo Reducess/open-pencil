@@ -9,8 +9,9 @@ import { createComponentsSection } from '@/app/demo/sections/components'
 import { createDemoVariables } from '@/app/demo/sections/variables'
 import type { EditorStore } from '@/app/editor/active-store'
 
-/** Served by `landing-assets.ts` from the repository's test fixtures. */
-const SAMPLE_FIG_URL = '/landing/sample.fig'
+// Placeholder: a third-party preview file, to be replaced with one we publish ourselves.
+import sampleFigURL from './assets/sample.fig?url'
+
 
 const GUARANTEES = [
   { title: 'Opens .fig', detail: 'Bring your Figma files with you.' },
@@ -113,7 +114,7 @@ export const SCENES = {
     await finish(store)
   },
   figma: async (store) => {
-    const response = await fetch(SAMPLE_FIG_URL)
+    const response = await fetch(sampleFigURL)
     if (!response.ok) throw new Error(`Sample file unavailable (${response.status})`)
     await store.openFigFile(new File([await response.blob()], 'preview.fig'))
     store.zoomToFit()

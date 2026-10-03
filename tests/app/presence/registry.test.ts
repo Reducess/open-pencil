@@ -214,6 +214,19 @@ test('a cursor on a page this document lacks is waited out, not switched to', ()
   expect(presenceOf(store).following.value).toEqual({ kind: 'person', clientId: 4 })
 })
 
+test('stopping while following heads to another page stays where you are', async () => {
+  const { store, pageId, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  follow(store, null)
+  await new Promise((resolve) => {
+    setTimeout(resolve, 20)
+  })
+  expect(store.state.currentPageId).toBe(pageId)
+})
+
 test('labels a followed agent with the person who runs it', () => {
   const { store, pageId } = setup()
   const fern = { id: 'fern', name: 'Fern', kind: 'chat' as const, status: 'editing' as const }

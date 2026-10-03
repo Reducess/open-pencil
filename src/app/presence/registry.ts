@@ -54,7 +54,7 @@ export function presenceOf(store: EditorStore): Presence {
   // Zooming or fitting the view yourself, by any shortcut or menu, ends following. A page
   // switch restores that page's viewport without this event, so only centering is ours.
   store.onEditorEvent('viewport:changed', () => {
-    if (presence.following.value && !presence.moving) presence.following.value = null
+    if (presence.following.value && !presence.moving) stopFollowing(store)
   })
   return presence
 }
@@ -178,7 +178,21 @@ export function followedLabel(store: EditorStore): FollowedLabel | null {
 }
 
 /** Follow a person or an agent, or stop following with null. */
+/** Stop following; a follow switch still loading is overtaken, so it does not land later. */
+function stopFollowing(store: EditorStore): void {
+  const presence = presenceOf(store)
+  presence.following.value = null
+  if (presence.switching) {
+    presence.switching = null
+    void store.switchPage(store.state.currentPageId)
+  }
+}
+
 export function follow(store: EditorStore, target: FollowTarget | null): void {
+  if (!target) {
+    stopFollowing(store)
+    return
+  }
   const presence = presenceOf(store)
   presence.following.value = target
   presence.followPage = store.state.currentPageId

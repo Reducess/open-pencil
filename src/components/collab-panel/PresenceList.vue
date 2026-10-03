@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { tv } from 'tailwind-variants'
-
 import { colorToCSS } from '@open-pencil/scene-graph/color'
 import { useI18n, useInlineRename } from '@open-pencil/vue'
 
 import type { FollowTarget } from '@/app/presence/types'
 import { initials } from '@/app/shell/ui'
 import IconButton from '@/components/ui/button/IconButton.vue'
-import collaborationTheme from '@/theme/collaboration'
+import { avatar } from '@/theme/collaboration/avatar'
+import { presenceList } from '@/theme/collaboration/presence-list'
 
 import { isFollowing, type PresenceAgentRow, type PresencePersonRow } from './presence'
 
@@ -22,7 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const { common, collaboration: messages } = useI18n()
-const ui = tv(collaborationTheme)({ size: 'sm' })
+const ui = presenceList()
 
 const rename = useInlineRename<string>((agentId, name) => emit('rename', agentId, name))
 
@@ -53,13 +52,13 @@ function followLabel(name: string, target: FollowTarget): string {
 </script>
 
 <template>
-  <ul data-test-id="collab-presence-list" :class="ui.presenceList()">
+  <ul data-test-id="collab-presence-list" :class="ui.root()">
     <li v-for="person in rows" :key="person.clientId ?? 'self'">
-      <div data-slot="person" :class="ui.presenceRow()">
-        <div :class="ui.avatar()" :style="{ background: colorToCSS(person.color) }">
+      <div data-slot="person" :class="ui.person()">
+        <div :class="avatar()" :style="{ background: colorToCSS(person.color) }">
           {{ initials(person.name || common.you) }}
         </div>
-        <span :class="ui.presenceName()">
+        <span :class="ui.name()">
           {{
             person.clientId === undefined
               ? `${person.name || common.you} (${common.youSuffix})`
@@ -76,7 +75,7 @@ function followLabel(name: string, target: FollowTarget): string {
         </IconButton>
       </div>
       <ul v-if="person.agents.length > 0">
-        <li v-for="agent in person.agents" :key="agent.id" data-slot="agent" :class="ui.agentRow()">
+        <li v-for="agent in person.agents" :key="agent.id" data-slot="agent" :class="ui.agent()">
           <icon-lucide-sparkle
             :class="ui.agentIcon()"
             :style="{ color: colorToCSS(person.color) }"
@@ -94,14 +93,14 @@ function followLabel(name: string, target: FollowTarget): string {
             v-else-if="agent.renamable"
             type="button"
             :aria-label="messages.renameAgent({ name: agent.name })"
-            :class="ui.presenceName()"
+            :class="ui.name()"
             @dblclick="rename.start(agent.id, agent.name)"
             @keydown.enter.prevent="rename.start(agent.id, agent.name)"
           >
             {{ agent.name }}
           </button>
-          <span v-else :class="ui.presenceName()">{{ agent.name }}</span>
-          <span :class="ui.presenceStatus()">{{ status(agent) }}</span>
+          <span v-else :class="ui.name()">{{ agent.name }}</span>
+          <span :class="ui.status()">{{ status(agent) }}</span>
           <IconButton
             :label="followLabel(agent.name, { kind: 'agent', agentId: agent.id })"
             :active="isFollowing(following, { kind: 'agent', agentId: agent.id })"

@@ -1,12 +1,12 @@
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 
 import { idOf, parentIdOf, type SourceIndex } from '../instance-overrides/source-index'
-import { componentDependencies } from './component/dependencies'
+import { componentDependencies, slotContentDependencies } from './component/dependencies'
 import { createResourceResolver } from './resource-reference'
 import { styleDependencies } from './style-dependencies'
 
 export interface SceneDependencyClosure {
-  /** Live page trees plus explicitly referenced component trees. */
+  /** Live page trees plus explicitly referenced component and slot content trees. */
   contentIds: ReadonlySet<string>
   /** Required ownership containers, without automatically including their siblings. */
   ancestorIds: ReadonlySet<string>
@@ -92,7 +92,8 @@ export function collectSceneDependencies(
     pending.push(
       ...(children.get(id) ?? []).flatMap((child) => idOf(child) ?? []),
       ...styleDependencies(node, resolveReference, availableIds),
-      ...components
+      ...components,
+      ...slotContentDependencies(node)
     )
   }
   collectAncestors(sources, contentIds, ancestorIds, missingIds)

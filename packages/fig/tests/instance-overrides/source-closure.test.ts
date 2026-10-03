@@ -1,10 +1,7 @@
 import { expect, test } from 'bun:test'
 
-import {
-  interpretInstance,
-  type InstanceOccurrence,
-  type InstancePathDiagnostic
-} from '#fig/instance-overrides/interpret'
+import { interpretInstance } from '#fig/instance-overrides/interpret'
+import type { InstanceOccurrence, InstancePathDiagnostic } from '#fig/instance-overrides/occurrence'
 
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 

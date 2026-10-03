@@ -1,6 +1,6 @@
 import type { NodeChange, Vector } from '@open-pencil/kiwi/fig/codec'
 
-import type { InstanceOccurrence } from './interpret'
+import type { InstanceOccurrence } from './occurrence'
 import { uniformScaleOf } from './types'
 
 export function applyPlacedConstraints(

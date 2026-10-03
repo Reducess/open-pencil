@@ -1,8 +1,9 @@
 import { embedClipboardImages, encodeFigmaClipboard } from '@open-pencil/fig/clipboard'
 export { parseFigmaClipboard, figmaNodesBounds } from '@open-pencil/fig/clipboard'
+import { placeSlotContent } from '@open-pencil/fig/node-change'
 import { initCodec } from '@open-pencil/kiwi/fig/codec'
 import type { GUID, NodeChange as KiwiNodeChange } from '@open-pencil/kiwi/fig/codec'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import { ownsSlotContent, type SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
 
 import {
   appendVariableNodeChanges,
@@ -16,7 +17,8 @@ import {
   sceneNodeToKiwi,
   makeDocumentNodeChange,
   makeCanvasNodeChange,
-  buildFontDigestMap
+  buildFontDigestMap,
+  fractionalPosition
 } from './kiwi/fig/node-change/serialize'
 import { randomInt } from './random'
 import { buildDerivedTextDataV4 } from './text/derived-text/clipboard'
@@ -81,6 +83,7 @@ export async function buildFigmaClipboardHTML(
     nodeIdToGuid,
     assignedGuidValues
   )
+  const slotContentRecords: KiwiNodeChange[] = []
   for (let i = 0; i < nodes.length; i++) {
     collectTextNodes(nodes[i])
     nodeChanges.push(
@@ -89,7 +92,8 @@ export async function buildFigmaClipboardHTML(
         fontDigestMap,
         varIdToGuid: variableIds,
         assignedGuidValues,
-        modeIdToGuid: modeIds
+        modeIdToGuid: modeIds,
+        slotContentRecords
       })
     )
   }
@@ -119,7 +123,11 @@ export async function buildFigmaClipboardHTML(
   for (const node of graph.getAllNodes())
     if (node.sharedStyleType && !selected.has(node.id)) dependencies.set(node.id, node)
   const dependencyCanvas = { sessionID: 0, localID: 2 }
-  if (dependencies.size || graph.variableCollections.size)
+  const hasSlotContent = [...selected].some((id) => {
+    const node = graph.getNode(id)
+    return !!node && ownsSlotContent(graph, node)
+  })
+  if (dependencies.size || graph.variableCollections.size || hasSlotContent)
     nodeChanges.push({
       ...makeCanvasNodeChange(dependencyCanvas, docGuid, '"', 'Clipboard dependencies'),
       internalOnly: true
@@ -132,10 +140,14 @@ export async function buildFigmaClipboardHTML(
         fontDigestMap,
         varIdToGuid: variableIds,
         assignedGuidValues,
-        modeIdToGuid: modeIds
+        modeIdToGuid: modeIds,
+        slotContentRecords
       })
     )
   }
+  // Slot content is collected while its instances serialize, so it follows the components.
+  placeSlotContent(slotContentRecords, dependencyCanvas, dependencies.size, fractionalPosition)
+  nodeChanges.push(...slotContentRecords)
 
   appendVariableNodeChanges(graph, nodeChanges, dependencyCanvas, variableIds, modeIds)
   const textNodeQueue = [...exportedTextNodes]

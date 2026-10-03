@@ -1,6 +1,6 @@
 import { expect } from 'bun:test'
 
-import type { InstancePathDiagnostic } from '#fig/instance-overrides/interpret'
+import type { InstancePathDiagnostic } from '#fig/instance-overrides/occurrence'
 import { InstancePathError } from '#fig/instance-overrides/occurrence-path'
 
 /**

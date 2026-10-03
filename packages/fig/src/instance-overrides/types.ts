@@ -54,6 +54,19 @@ export type ComponentPropValue = {
   textValue?: ComponentPropTextValue
   textDataValue?: { characters?: string }
   guidValue?: GUID
+  /** A slot's content frame; the all-ones GUID means the component's own content. */
+  slotContentIdValue?: { guid?: GUID }
+}
+
+const DEFAULT_SLOT_CONTENT_ID = 0xffffffff
+
+/** The content frame a slot value names, unless it names the component's own content. */
+export function assignedSlotContent(value: ComponentPropValue | undefined): GUID | undefined {
+  const guid = value?.slotContentIdValue?.guid
+  if (!guid) return undefined
+  return guid.sessionID === DEFAULT_SLOT_CONTENT_ID && guid.localID === DEFAULT_SLOT_CONTENT_ID
+    ? undefined
+    : guid
 }
 
 export interface ComponentPropAssignment {
@@ -65,6 +78,7 @@ export interface ComponentPropAssignment {
       textValue?: string
       textDataValue?: { characters?: string }
       symbolIdValue?: { guid?: GUID }
+      slotContentIdValue?: { guid?: GUID }
     }
   }
 }

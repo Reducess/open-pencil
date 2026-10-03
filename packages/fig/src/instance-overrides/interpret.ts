@@ -1,6 +1,5 @@
 import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { guidToString } from '@open-pencil/kiwi/fig/guid'
-import type { Vector } from '@open-pencil/scene-graph'
 
 import { cloneRecord } from '../node-change/clone'
 import { mergeVariableConsumptionMaps } from '../node-change/variable/bindings'
@@ -23,6 +22,7 @@ import {
   type PropertyLayer,
   type StructuralLayer
 } from './layers'
+import type { InstanceOccurrence, InterpretInstanceOptions } from './occurrence'
 import {
   findSegment,
   isRootGuid,
@@ -43,7 +43,11 @@ import {
   type SourceIndex
 } from './source-index'
 import { invalidateInheritedTextData } from './text-provenance'
-import type { ComponentPropAssignment, DerivedSymbolOverride } from './types'
+import {
+  assignedSlotContent,
+  type ComponentPropAssignment,
+  type DerivedSymbolOverride
+} from './types'
 
 /**
  * Figma's instance model reduces to three things: an instance expands its component's
@@ -58,69 +62,7 @@ import type { ComponentPropAssignment, DerivedSymbolOverride } from './types'
  * after inner ones by construction. Saved derived data is a cache, applied last.
  */
 
-/** An explicit claim keeps the complete path relative to its owning occurrence. */
-export interface InstancePropertyClaim {
-  /** Source record declaring the claim; preserved when inherited by another occurrence. */
-  declaredBy: string
-  path: readonly GUID[]
-  properties: Record<string, unknown>
-}
-
-/** One occurrence, not a shared source node or a SceneGraph editing clone. */
-export interface InstanceOccurrence {
-  readonly sourceId: string
-  readonly overrideKey: GUID | undefined
-  mainComponentId: string | null
-  mainComponentOverrideKey?: GUID
-  sourceComponentOverrideKey?: GUID
-  sourceComponentId?: GUID
-  properties: NodeChange
-  children: InstanceOccurrence[]
-  /** Explicit property records declared by this occurrence's source. */
-  propertyClaims: InstancePropertyClaim[]
-  bindingClaims: BoundPropertyClaim[]
-  derivedSize?: Vector
-  /** Cumulative scale for unresolved layout-distance variable values. */
-  layoutScale?: number
-  /** Per-field declaration-space multipliers, composed as owners expand. */
-  variableBindingScales?: Record<string, number>
-  /** Whether this expansion supplies a name rather than only inheriting it. */
-  hasOwnName: boolean
-  defaultInstanceName?: string
-}
-
-export interface InstancePathDiagnostic {
-  ownerId: string
-  mainComponentId?: string | null
-  path: readonly GUID[]
-  reason: 'missing-target' | 'ambiguous-target'
-}
-
-export interface InstanceAssignmentDiagnostic extends InstancePathDiagnostic {
-  assignments: readonly ComponentPropAssignment[]
-}
-
-/** An instance whose main component the archive no longer contains. */
-export interface MissingComponentDiagnostic {
-  ownerId: string
-  componentId: string
-}
-
 export { resolveOccurrencePath } from './occurrence-path'
-
-export interface InterpretInstanceOptions {
-  /** Apply explicitly saved effective bounds, geometry and typography; no inferred scaling or layout. */
-  derivedBounds?: boolean
-  /** Unresolved property overrides are skipped only when a diagnostic receiver is supplied. */
-  onUnresolvedProperty?: (diagnostic: InstancePathDiagnostic) => void
-  /** Explicit partial evaluation: report and skip missing assignment targets. Swaps remain fatal. */
-  onUnresolvedAssignment?: (diagnostic: InstanceAssignmentDiagnostic) => void
-  /**
-   * Keep an instance of a deleted component as a childless instance that retains its
-   * saved reference, the way Figma does, instead of rejecting the document.
-   */
-  onMissingComponent?: (diagnostic: MissingComponentDiagnostic) => void
-}
 
 export function interpretInstance(
   changes: readonly NodeChange[],
@@ -376,10 +318,13 @@ function interpretRoot(
     bound: Map<string, number>
     /** Swap values earlier owners assigned before a later one replaced them. */
     superseded: GUID[]
+    /** The content frame an assignment put in this slot frame. */
+    slotContent: string | undefined
   } => {
     const claims: BoundPropertyClaim[] = []
     const bound = new Map<string, number>()
     const superseded: GUID[] = []
+    let slotContent: string | undefined
     const source = bindSourceProperties(raw, bindings, (claim, binding) => {
       claims.push(claim)
       if (binding.origin === 'assignment' && binding.rank !== undefined)
@@ -387,8 +332,14 @@ function interpretRoot(
       if (claim.field === 'symbolData')
         for (const value of binding.superseded ?? [])
           if (value.guidValue) superseded.push(value.guidValue)
+      if (claim.field === 'slotContent') {
+        const content = assignedSlotContent(binding.value)
+        slotContent = content ? guidToString(content) : undefined
+      }
     })
-    return { source, claims, bound, superseded }
+    if (slotContent && !sources.has(slotContent))
+      throw new Error(`Missing slot content ${slotContent}`)
+    return { source, claims, bound, superseded, slotContent }
   }
 
   /**
@@ -412,10 +363,13 @@ function interpretRoot(
       const own = ownLayers(source, owner)
       const structural = [...own.structural, ...layers].sort((a, b) => b.owner.rank - a.owner.rank)
       const root = resolveRoot(raw, source, record.superseded, structural, rank)
-      const subtree = root.effective
-        ? expandBase(owner, { ...root, effective: root.effective }, rank)
-        : expandChildren(id, source, bindings, root.groups, root.descendant, rank)
+      let subtree: Subtree
+      if (root.effective) subtree = expandBase(owner, { ...root, effective: root.effective }, rank)
+      else if (record.slotContent)
+        subtree = expandSlotContent(record.slotContent, root.descendant, rank)
+      else subtree = expandChildren(id, source, bindings, root.groups, root.descendant, rank)
       const occurrence = createOccurrence(id, raw, source, root, subtree, record.claims)
+      if (record.slotContent) occurrence.slotContentId = record.slotContent
       assignedFields.set(occurrence, record.bound)
       if (subtree.base && root.replaced.length) replacedComponents.set(occurrence, root.replaced)
       declareSourceVariableBindingUnits(occurrence, source)
@@ -494,6 +448,24 @@ function interpretRoot(
       if (!child.guid) throw new Error('Indexed child has no GUID')
       const childId = guidToString(child.guid)
       return expand(childId, scoped, routed.get(childId) ?? [], rank + 1)
+    })
+    return { base: null, children: expanded }
+  }
+
+  /**
+   * Slot content is the instance's own layers, saved under a content frame. Component
+   * property bindings do not reach into a slot, so its layers expand outside that scope.
+   */
+  const expandSlotContent = (
+    contentId: string,
+    descendant: readonly StructuralLayer[],
+    rank: number
+  ): Subtree => {
+    const routed = routeToChildren(contentId, descendant)
+    const expanded = (children.get(contentId) ?? []).map((child) => {
+      if (!child.guid) throw new Error('Indexed child has no GUID')
+      const childId = guidToString(child.guid)
+      return expand(childId, [], routed.get(childId) ?? [], rank + 1)
     })
     return { base: null, children: expanded }
   }

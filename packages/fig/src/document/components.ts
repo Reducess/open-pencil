@@ -1,7 +1,7 @@
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { guidToString } from '@open-pencil/kiwi/fig/guid'
 
-import type { InstanceOccurrence } from '../instance-overrides/interpret'
+import type { InstanceOccurrence } from '../instance-overrides/occurrence'
 import { occurrences } from '../instance-overrides/occurrence-path'
 import { parentIdOf } from '../instance-overrides/source-index'
 

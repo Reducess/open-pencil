@@ -12,7 +12,6 @@ import type { EditorStore } from '@/app/editor/active-store'
 // Placeholder: a third-party preview file, to be replaced with one we publish ourselves.
 import sampleFigURL from './assets/sample.fig?url'
 
-
 const GUARANTEES = [
   { title: 'Opens .fig', detail: 'Bring your Figma files with you.' },
   { title: 'MIT licensed', detail: 'Read, fork, and ship all of it.' },

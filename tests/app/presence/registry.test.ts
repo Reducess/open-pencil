@@ -125,9 +125,28 @@ test('switching to another page yourself stops following', async () => {
   const ana = { clientId: 4, name: 'Ana', color: red, agents: [] }
   setPeers(store, [{ ...ana, cursor: { x: 40, y: 50, pageId, zoom: 1 } }])
   follow(store, { kind: 'person', clientId: 4 })
-  expect(followedLabel(store)).toEqual({ name: 'Ana', color: red })
+  expect(followedLabel(store)).toEqual({ kind: 'person', name: 'Ana', color: red })
   await store.switchPage(other)
   expect(presenceOf(store).following.value).toBeNull()
+})
+
+test('following survives the target moving on while its page switch is in flight', async () => {
+  const { store, other } = setup()
+  store.preparationController.acknowledgePresentation(Number.MAX_SAFE_INTEGER)
+  const third = store.graph.addPage('Third').id
+  const agent = addAgent(store, 'chat')
+  agent.update({ status: 'editing', cursor: { x: 10, y: 10, pageId: other } })
+  const reachedThird = new Promise<void>((resolve) => {
+    store.onEditorEvent('page:changed', (id) => {
+      if (id === third) resolve()
+    })
+  })
+  follow(store, { kind: 'agent', agentId: agent.id })
+  // Before the switch to `other` lands, the agent moves to a third page.
+  agent.update({ cursor: { x: 20, y: 20, pageId: third } })
+  await reachedThird
+  expect(presenceOf(store).following.value).toEqual({ kind: 'agent', agentId: agent.id })
+  expect(store.state.currentPageId).toBe(third)
 })
 
 test('labels a followed agent with the person who runs it', () => {
@@ -137,7 +156,7 @@ test('labels a followed agent with the person who runs it', () => {
     { clientId: 4, name: 'Ana', color: red, agents: [{ ...fern, cursor: { x: 1, y: 1, pageId } }] }
   ])
   follow(store, { kind: 'agent', agentId: 'fern' })
-  expect(followedLabel(store)).toEqual({ name: 'Fern', owner: 'Ana', color: red })
+  expect(followedLabel(store)).toEqual({ kind: 'agent', name: 'Fern', owner: 'Ana', color: red })
 })
 
 test('renames our agents, and their handles report the new name', () => {

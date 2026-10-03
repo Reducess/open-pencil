@@ -7,7 +7,8 @@ import { follow, followedLabel, presenceOf } from './registry'
 
 /**
  * Who the active document's view follows, for a canvas pane's frame and banner. Your own
- * input on the canvas — a click, scrolling or zooming — or Escape stops following.
+ * input on the canvas — a click, scrolling or zooming — stops following; the frame also
+ * stops it on Escape.
  */
 export function useFollowView(area: MaybeRefOrGetter<HTMLElement | null>) {
   // Presence belongs to the store object itself, not the forwarding proxy components get.
@@ -20,9 +21,6 @@ export function useFollowView(area: MaybeRefOrGetter<HTMLElement | null>) {
   }
 
   useEventListener(area, ['pointerdown', 'wheel'], stop, { capture: true, passive: true })
-  useEventListener(window, 'keydown', (event: KeyboardEvent) => {
-    if (event.key === 'Escape') stop()
-  })
 
   return { label, stop }
 }

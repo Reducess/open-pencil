@@ -29,6 +29,6 @@ test('your avatar shows the room is live and opens your menu with Leave room', a
 
 test('the follow frame names an agent with its owner and offers to stop', async ({ page }) => {
   await page.goto(story('collaboration-follow-frame--following-their-agent'))
-  await expect(page.getByRole('status')).toHaveText(/Following ✦ Orbit \(Ana\)/)
+  await expect(page.getByRole('status')).toHaveText(/Following Orbit \(Ana\)/)
   await expect(page.getByRole('button', { name: 'Stop following' })).toBeVisible()
 })

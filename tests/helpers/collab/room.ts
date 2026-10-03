@@ -14,6 +14,18 @@ export type TestRelay = {
   close: () => Promise<void>
 }
 
+/** The sender of a relayed frame; frames that are not JSON are still forwarded. */
+function senderOf(text: string): string | undefined {
+  try {
+    const message: unknown = JSON.parse(text)
+    return typeof message === 'object' && message !== null && 'senderId' in message
+      ? String(message.senderId)
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
 export async function startRelay(): Promise<TestRelay> {
   const rooms = new Map<string, Set<WebSocket>>()
   const sockets = new Map<WebSocket, { room: Set<WebSocket>; peerId: string | null }>()
@@ -31,9 +43,9 @@ export async function startRelay(): Promise<TestRelay> {
     sockets.set(socket, { room, peerId: null })
     socket.on('message', (data) => {
       const text = data.toString()
-      const message = JSON.parse(text) as { senderId?: string }
       const state = sockets.get(socket)
-      if (state && message.senderId) state.peerId = message.senderId
+      const senderId = senderOf(text)
+      if (state && senderId) state.peerId = senderId
       if (paused) {
         queuedMessages.push({ sender: socket, room, text })
         return

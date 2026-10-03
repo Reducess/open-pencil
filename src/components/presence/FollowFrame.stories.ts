@@ -12,7 +12,7 @@ type Args = { followed: FollowedLabel; onStop: () => void }
 const meta = {
   title: 'Collaboration/Follow Frame',
   component: FollowFrame,
-  args: { followed: { name: 'Ana', color: ana }, onStop: fn() },
+  args: { followed: { kind: 'person', name: 'Ana', color: ana }, onStop: fn() },
   render: (args) => ({
     components: { FollowFrame },
     setup: () => ({ args }),
@@ -33,5 +33,5 @@ export const FollowingAPerson: Story = {
 }
 
 export const FollowingTheirAgent: Story = {
-  args: { followed: { name: 'Orbit', owner: 'Ana', color: ana } }
+  args: { followed: { kind: 'agent', name: 'Orbit', owner: 'Ana', color: ana } }
 }

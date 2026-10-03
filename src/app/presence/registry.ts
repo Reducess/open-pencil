@@ -102,7 +102,7 @@ function keepFollowing(store: EditorStore): void {
     presence.following.value = null
     return
   }
-  // The page change refreshes cursors, which calls back here to center on the new page.
+  // An overtaken switch never commits its page, so only the latest one lands here.
   if (point.pageId !== store.state.currentPageId) void store.switchPage(point.pageId)
   else store.centerOn(point.x, point.y, point.zoom)
 }
@@ -120,6 +120,7 @@ function stopIfLeftFollowedPage(store: EditorStore): void {
 
 /** Who the view follows, for showing it: their name, an agent's owner, and the color. */
 export interface FollowedLabel {
+  kind: FollowTarget['kind']
   name: string
   /** For an agent, the person who runs it; undefined for our own agents. */
   owner?: string
@@ -132,13 +133,13 @@ export function followedLabel(store: EditorStore): FollowedLabel | null {
   if (!target) return null
   if (target.kind === 'person') {
     const peer = peers.value.find((entry) => entry.clientId === target.clientId)
-    return peer ? { name: peer.name, color: peer.color } : null
+    return peer ? { kind: 'person', name: peer.name, color: peer.color } : null
   }
   const own = agents.value.find((agent) => agent.id === target.agentId)
-  if (own) return { name: own.name, color: ownerColor.value ?? SOLO_AGENT_COLOR }
+  if (own) return { kind: 'agent', name: own.name, color: ownerColor.value ?? SOLO_AGENT_COLOR }
   for (const peer of peers.value) {
     const agent = peer.agents.find((entry) => entry.id === target.agentId)
-    if (agent) return { name: agent.name, owner: peer.name, color: peer.color }
+    if (agent) return { kind: 'agent', name: agent.name, owner: peer.name, color: peer.color }
   }
   return null
 }

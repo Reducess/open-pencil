@@ -1,3 +1,4 @@
+import { pluginDataNodeChange, variableMetadataNodeChange } from '@open-pencil/fig/node-change'
 import type { GUID, NodeChange, VariableDataEntry } from '@open-pencil/kiwi/fig/codec'
 import { stringToGuid } from '@open-pencil/kiwi/fig/guid'
 import type { SceneGraph, SceneNode, VariableValue } from '@open-pencil/scene-graph'
@@ -124,6 +125,11 @@ export function appendVariableNodeChanges(
 ): void {
   for (const collection of graph.variableCollections.values()) {
     const guid = ids.get(collection.id) ?? stringToGuid(collection.id)
+    // Figma has no default-mode field: the first mode is the default.
+    const defaultMode = collection.modes.find((mode) => mode.modeId === collection.defaultModeId)
+    const modeOrder = defaultMode
+      ? [defaultMode, ...collection.modes.filter((mode) => mode !== defaultMode)]
+      : collection.modes
     changes.push({
       guid,
       parentIndex: { guid: parent, position: nextPosition() },
@@ -132,11 +138,12 @@ export function appendVariableNodeChanges(
       phase: 'CREATED',
       strokeAlign: 'CENTER',
       strokeJoin: 'BEVEL',
-      variableSetModes: collection.modes.map((mode, i) => ({
+      variableSetModes: modeOrder.map((mode, i) => ({
         id: modes.get(mode.modeId) ?? stringToGuid(mode.modeId),
         name: mode.name,
         sortPosition: fractionalPosition(i)
-      }))
+      })),
+      pluginData: pluginDataNodeChange(collection.pluginData)
     })
     for (const id of collection.variableIds) {
       const variable = graph.variables.get(id)
@@ -157,7 +164,7 @@ export function appendVariableNodeChanges(
             variableData: variableValueToKiwi(value, variable.type, ids)
           }))
         },
-        variableScopes: ['ALL_SCOPES'],
+        ...variableMetadataNodeChange(variable),
         key: variable.key,
         version: variable.version
       })

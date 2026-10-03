@@ -197,7 +197,9 @@ export function renameMode(
 export function setDefaultMode(graph: SceneGraph, collectionId: string, modeId: string): void {
   const collection = graph.variableCollections.get(collectionId)
   if (!collection) return
-  if (!collection.modes.some((m) => m.modeId === modeId)) return
+  const mode = collection.modes.find((m) => m.modeId === modeId)
+  if (!mode) return
+  collection.modes = [mode, ...collection.modes.filter((m) => m !== mode)]
   collection.defaultModeId = modeId
 }
 

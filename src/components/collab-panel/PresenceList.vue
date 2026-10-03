@@ -93,13 +93,13 @@ function followLabel(name: string, target: FollowTarget): string {
             v-else-if="agent.renamable"
             type="button"
             :aria-label="messages.renameAgent({ name: agent.name })"
-            :class="ui.name()"
+            :class="ui.agentName()"
             @dblclick="rename.start(agent.id, agent.name)"
             @keydown.enter.prevent="rename.start(agent.id, agent.name)"
           >
             {{ agent.name }}
           </button>
-          <span v-else :class="ui.name()">{{ agent.name }}</span>
+          <span v-else :class="ui.agentName()">{{ agent.name }}</span>
           <span :class="ui.status()">{{ status(agent) }}</span>
           <IconButton
             :label="followLabel(agent.name, { kind: 'agent', agentId: agent.id })"

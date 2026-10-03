@@ -21,7 +21,7 @@ const names = computed(() => entries.map((entry) => entry.name).join(', '))
 <template>
   <Tip v-if="entries.length > 0" :label="names">
     <span data-test-id="presence-markers" :aria-label="names" role="img" :class="ui.root()">
-      <template v-for="entry in shown" :key="`${entry.kind}:${entry.name}`">
+      <template v-for="entry in shown" :key="entry.id">
         <icon-lucide-sparkle
           v-if="entry.kind === 'agent'"
           :class="ui.agent()"

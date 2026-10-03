@@ -266,6 +266,20 @@ test("lists people and working agents by page, knowing an agent's page before it
       ?.map((entry) => entry.name)
   ).toEqual(['Ana'])
   expect(presenceByPage(store).get(other)).toEqual([
-    { kind: 'agent', name: thinking.name, color: expect.anything() }
+    { id: `agent:${thinking.id}`, kind: 'agent', name: thinking.name, color: expect.anything() }
   ])
+})
+
+test('keeps people with the same name apart on a page', () => {
+  const { store, pageId } = setup()
+  const anonymous = { name: 'Anonymous', color: red, agents: [], cursor: { x: 0, y: 0, pageId } }
+  setPeers(store, [
+    { ...anonymous, clientId: 4 },
+    { ...anonymous, clientId: 5 }
+  ])
+  expect(
+    presenceByPage(store)
+      .get(pageId)
+      ?.map((entry) => entry.id)
+  ).toEqual(['person:4', 'person:5'])
 })

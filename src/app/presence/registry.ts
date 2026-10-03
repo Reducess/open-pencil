@@ -65,6 +65,8 @@ function localAgentColor(store: EditorStore): Color {
 
 /** Someone working on a page, as page lists show them. */
 export interface PagePresenceEntry {
+  /** Stable per person or agent; names can repeat, such as two people named Anonymous. */
+  id: string
   kind: 'person' | 'agent'
   name: string
   color: Color
@@ -85,12 +87,27 @@ export function presenceByPage(store: EditorStore): Map<string, PagePresenceEntr
     if (pageId) byPage.set(pageId, [...(byPage.get(pageId) ?? []), entry])
   }
   for (const peer of peers.value) {
-    add(peer.cursor?.pageId, { kind: 'person', name: peer.name, color: peer.color })
+    add(peer.cursor?.pageId, {
+      id: `person:${peer.clientId}`,
+      kind: 'person',
+      name: peer.name,
+      color: peer.color
+    })
     for (const agent of peer.agents)
-      add(agentPage(agent), { kind: 'agent', name: agent.name, color: peer.color })
+      add(agentPage(agent), {
+        id: `agent:${agent.id}`,
+        kind: 'agent',
+        name: agent.name,
+        color: peer.color
+      })
   }
   for (const agent of agents.value) {
-    add(agentPage(agent), { kind: 'agent', name: agent.name, color: localAgentColor(store) })
+    add(agentPage(agent), {
+      id: `agent:${agent.id}`,
+      kind: 'agent',
+      name: agent.name,
+      color: localAgentColor(store)
+    })
   }
   return byPage
 }

@@ -10,8 +10,8 @@ const ben = { r: 0.2, g: 0.55, b: 0.95, a: 1 }
 const you = { r: 0.3, g: 0.7, b: 0.45, a: 1 }
 
 const anaWithAgent: PagePresenceEntry[] = [
-  { kind: 'person', name: 'Ana', color: ana },
-  { kind: 'agent', name: 'Orbit', color: ana }
+  { id: 'person:ana', kind: 'person', name: 'Ana', color: ana },
+  { id: 'agent:orbit', kind: 'agent', name: 'Orbit', color: ana }
 ]
 
 type Args = { entries: PagePresenceEntry[] }
@@ -33,7 +33,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Person: Story = {
-  args: { entries: [{ kind: 'person', name: 'Ben', color: ben }] }
+  args: { entries: [{ id: 'person:ben', kind: 'person', name: 'Ben', color: ben }] }
 }
 
 export const PersonAndTheirAgent: Story = {
@@ -43,16 +43,16 @@ export const PersonAndTheirAgent: Story = {
 }
 
 export const YourAgent: Story = {
-  args: { entries: [{ kind: 'agent', name: 'Fern', color: you }] }
+  args: { entries: [{ id: 'agent:fern', kind: 'agent', name: 'Fern', color: you }] }
 }
 
 export const MoreThanFit: Story = {
   args: {
     entries: [
       ...anaWithAgent,
-      { kind: 'person', name: 'Ben', color: ben },
-      { kind: 'agent', name: 'Pixel', color: ben },
-      { kind: 'agent', name: 'Fern', color: you }
+      { id: 'person:ben', kind: 'person', name: 'Ben', color: ben },
+      { id: 'agent:pixel', kind: 'agent', name: 'Pixel', color: ben },
+      { id: 'agent:fern', kind: 'agent', name: 'Fern', color: you }
     ]
   },
   play: async ({ canvasElement }) => {

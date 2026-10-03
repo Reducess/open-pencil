@@ -36,7 +36,7 @@ function filled(graph: SceneGraph, page: SceneNode, component: SceneNode, proper
   const instance = graph.createInstance(component.id, page.id)
   if (!instance) throw new Error('No instance')
   const slot = graph.getChildren(instance.id)[0]
-  for (const id of [...slot.childIds]) graph.deleteNode(id)
+  for (const id of Array.from(slot.childIds)) graph.deleteNode(id)
   graph.createNode('TEXT', slot.id, { name: 'Mine', text: 'Mine' })
   graph.updateNode(instance.id, { componentPropertyAssignments: { [propertyId]: '' } })
   return instance

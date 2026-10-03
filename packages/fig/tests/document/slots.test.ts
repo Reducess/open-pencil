@@ -5,7 +5,7 @@ import { guid } from '#fig-tests/helpers/guid'
 import { materializeDocument, materializeFigArchive } from '#fig/document/materialize'
 import { DEFAULT_SLOT_CONTENT } from '#fig/instance-overrides/types'
 
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { GUID, NodeChange } from '@open-pencil/kiwi/fig/codec'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
 /**
@@ -143,7 +143,7 @@ describe('instance slot content', () => {
 describe('missing slot content', () => {
   /** A card whose slot holds `Default`, and an instance assigning a content frame that is gone. */
   const records = (): NodeChange[] => {
-    const slotValue = (target: { sessionID: number; localID: number }) => ({
+    const slotValue = (target: GUID) => ({
       value: { slotContentIdValue: { guid: target } },
       dataType: 'SLOT_CONTENT_ID',
       resolvedDataType: 'SLOT_CONTENT_ID'

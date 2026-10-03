@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { defineClientComponent, withBase } from 'vitepress'
 
+import { useLandingMessages } from '../content/messages'
 import type { StageKind } from '../stage/kinds'
 
 /** The editor needs WebGL and CanvasKit, so a stage never renders on the server. */
 const FeatureStage = defineClientComponent(() => import('../stage/FeatureStage.vue'))
 
 const { kind } = defineProps<{ kind: StageKind }>()
+
+const messages = useLandingMessages()
 </script>
 
 <template>
   <div class="stage-frame">
     <!-- Shown until the editor code arrives. It mirrors the app's canvas loading overlay,
          which takes over once the stage mounts on top of it. -->
-    <div class="stage-loader" role="status" aria-label="Loading editor">
+    <div class="stage-loader" role="status" :aria-label="messages.loading">
       <img :src="withBase('/brand/app-icon.svg')" alt="" />
       <span />
     </div>

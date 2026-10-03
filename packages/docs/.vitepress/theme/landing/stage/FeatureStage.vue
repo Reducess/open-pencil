@@ -4,11 +4,14 @@ import { MotionConfig } from 'motion-v'
 import { TooltipProvider } from 'reka-ui'
 import { ref } from 'vue'
 
+import { useI18n } from '@open-pencil/vue'
+
 import Toolbar from '@/components/Toolbar/Toolbar.vue'
 
 import { STAGES } from './definitions'
 import type { StageKind } from './kinds'
 import StageCanvas from './StageCanvas.vue'
+import { useDocsAppearance } from './useDocsAppearance'
 import { useStageDocument } from './useStageDocument'
 import { useWheelEngagement } from './useWheelEngagement'
 
@@ -18,6 +21,8 @@ const MOUNT_MARGIN = '100% 0px'
 const { kind } = defineProps<{ kind: StageKind }>()
 const definition = STAGES[kind]
 
+useDocsAppearance()
+const { panels } = useI18n()
 const { build, focus } = useStageDocument(definition.scene)
 const { engage, disengage, guardWheel } = useWheelEngagement()
 
@@ -75,10 +80,10 @@ function onPointerDown() {
         >
           <template v-if="mounted">
             <header
-              v-if="definition.panelTitle"
+              v-if="definition.layersHeading"
               class="shrink-0 px-3 py-2 text-[11px] font-semibold text-surface"
             >
-              {{ definition.panelTitle }}
+              {{ panels.layers }}
             </header>
             <component :is="definition.panel" />
           </template>

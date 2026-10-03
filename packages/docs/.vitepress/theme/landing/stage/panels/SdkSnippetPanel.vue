@@ -5,6 +5,8 @@ import dedent from 'dedent'
 import CodeEditor from '@/components/code-editor/CodeEditor.vue'
 import IconButton from '@/components/ui/button/IconButton.vue'
 
+import { useLandingMessages } from '../../content/messages'
+
 // A literal closing tag here would end this component's own script block.
 const CLOSE_SCRIPT = `</${'script'}>`
 
@@ -32,6 +34,7 @@ const SNIPPET = dedent`
 const INSTALL = 'bun add @open-pencil/core @open-pencil/vue canvaskit-wasm'
 const FILE_NAME = 'Canvas.vue'
 
+const messages = useLandingMessages()
 const { copy, copied } = useClipboard({ copiedDuring: 2000 })
 </script>
 
@@ -45,7 +48,7 @@ const { copy, copied } = useClipboard({ copiedDuring: 2000 })
       <IconButton
         class="ml-auto"
         size="xs"
-        :label="copied ? 'Copied' : 'Copy'"
+        :label="copied ? messages.stage.sdk.copied : messages.stage.sdk.copy"
         @click="copy(SNIPPET)"
       >
         <icon-lucide-check v-if="copied" class="size-3.5" />

@@ -4,21 +4,25 @@ import IconGithub from '~icons/lucide/github'
 import IconPenTool from '~icons/lucide/pen-tool'
 
 import { LINKS } from '../content/links'
+import { useLandingMessages } from '../content/messages'
 import ActionLink from '../ui/ActionLink.vue'
 import StageFrame from '../ui/StageFrame.vue'
+
+const messages = useLandingMessages()
 </script>
 
 <template>
   <section class="hero">
-    <h1>Design without the lock&#8209;in.</h1>
-    <p class="lede">
-      An open-source design editor that opens your Figma files, runs on your machine, and lets you
-      or your AI agent drive every layer.
-    </p>
+    <h1>{{ messages.hero.title }}</h1>
+    <p class="lede">{{ messages.hero.lede }}</p>
     <div class="landing-actions">
-      <ActionLink :href="LINKS.app" :icon="IconPenTool" primary>Open the editor</ActionLink>
-      <ActionLink :href="LINKS.download" :icon="IconDownload">Download</ActionLink>
-      <ActionLink :href="LINKS.github" :icon="IconGithub">GitHub</ActionLink>
+      <ActionLink :href="LINKS.app" :icon="IconPenTool" primary>
+        {{ messages.hero.open }}
+      </ActionLink>
+      <ActionLink :href="LINKS.download" :icon="IconDownload">
+        {{ messages.hero.download }}
+      </ActionLink>
+      <ActionLink :href="LINKS.github" :icon="IconGithub">{{ messages.hero.github }}</ActionLink>
     </div>
     <div class="hero-stage">
       <StageFrame kind="hero" />

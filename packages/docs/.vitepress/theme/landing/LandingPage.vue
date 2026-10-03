@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SchemaOrg from '../SchemaOrg.vue'
-import { FEATURE_BLOCKS } from './content/features'
+import { FEATURE_KINDS } from './content/features'
 import AgentList from './sections/AgentList.vue'
 import ClosingSection from './sections/ClosingSection.vue'
 import CommandList from './sections/CommandList.vue'
@@ -15,9 +15,9 @@ import './landing.css'
 <template>
   <div class="landing">
     <HeroSection />
-    <FeatureSection v-for="block in FEATURE_BLOCKS" :key="block.kind" :block="block">
-      <AgentList v-if="block.kind === 'ai'" />
-      <CommandList v-else-if="block.kind === 'script'" />
+    <FeatureSection v-for="kind in FEATURE_KINDS" :key="kind" :kind="kind">
+      <AgentList v-if="kind === 'ai'" />
+      <CommandList v-else-if="kind === 'script'" />
     </FeatureSection>
     <OwnershipSection />
     <RoadmapSection />

@@ -1,17 +1,18 @@
 <script setup lang="ts">
+import { useLandingMessages, withCount } from '../content/messages'
 import { data as stats } from '../content/stats.data'
+
+const messages = useLandingMessages()
 </script>
 
 <template>
   <div class="commands">
-    <h3>{{ stats.cliCommands.length }} commands</h3>
+    <h3>{{ withCount(messages.commands.cli, stats.cliCommands.length) }}</h3>
     <ul>
       <li v-for="command in stats.cliCommands" :key="command">{{ command }}</li>
     </ul>
-    <h3>{{ stats.mcpTools }} MCP tools</h3>
-    <p>
-      Create, style, lay out, inspect, and export, each one also available to the built-in agent.
-    </p>
+    <h3>{{ withCount(messages.commands.mcp, stats.mcpTools) }}</h3>
+    <p>{{ messages.commands.mcpDetail }}</p>
   </div>
 </template>
 

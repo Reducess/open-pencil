@@ -4,9 +4,11 @@ import { nextTick, ref } from 'vue'
 import { useEditorStore } from '@/app/editor/active-store'
 import AppButton from '@/components/ui/button/AppButton.vue'
 
+import { useLandingMessages } from '../../content/messages'
 import { EDITOR_COMMANDS } from './terminal-commands'
 import { useTerminalSession } from './useTerminalSession'
 
+const messages = useLandingMessages()
 const scroller = ref<HTMLElement | null>(null)
 
 async function scrollToEnd() {
@@ -59,7 +61,7 @@ const { entries, busy, run } = useTerminalSession(useEditorStore(), () => void s
         @click="run(command)"
       >
         <template #leading><component :is="command.icon" /></template>
-        {{ command.label }}
+        {{ messages.stage.terminal[command.id] }}
       </AppButton>
     </div>
   </section>

@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { withBase } from 'vitepress'
 import IconBookOpen from '~icons/lucide/book-open'
 import IconDownload from '~icons/lucide/download'
 
 import { LINKS } from '../content/links'
+import { useLandingMessages, useLocalePath } from '../content/messages'
 import ActionLink from '../ui/ActionLink.vue'
+
+const messages = useLandingMessages()
+const localePath = useLocalePath()
 </script>
 
 <template>
   <section class="landing-section">
-    <h2>Take your designs with you.</h2>
+    <h2>{{ messages.closing.title }}</h2>
     <div class="landing-actions">
       <ActionLink :href="LINKS.download" :icon="IconDownload" primary>
-        Download OpenPencil
+        {{ messages.closing.download }}
       </ActionLink>
-      <ActionLink :href="withBase(LINKS.docs)" :icon="IconBookOpen">Read the docs</ActionLink>
+      <ActionLink :href="localePath(LINKS.docs)" :icon="IconBookOpen">
+        {{ messages.closing.docs }}
+      </ActionLink>
     </div>
   </section>
 </template>

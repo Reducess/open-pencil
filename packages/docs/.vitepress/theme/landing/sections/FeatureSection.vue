@@ -1,10 +1,15 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import IconMousePointerClick from '~icons/lucide/mouse-pointer-click'
 
-import type { FeatureBlock } from '../content/features'
+import type { FeatureKind } from '../content/features'
+import { useLandingMessages } from '../content/messages'
 import StageFrame from '../ui/StageFrame.vue'
 
-const { block } = defineProps<{ block: FeatureBlock }>()
+const { kind } = defineProps<{ kind: FeatureKind }>()
+
+const messages = useLandingMessages()
+const block = computed(() => messages.value.features[kind])
 </script>
 
 <template>
@@ -12,7 +17,7 @@ const { block } = defineProps<{ block: FeatureBlock }>()
     <h2>{{ block.title }}</h2>
     <div class="body">
       <div class="stage">
-        <StageFrame :kind="block.kind" />
+        <StageFrame :kind="kind" />
       </div>
       <div class="copy">
         <p>{{ block.detail }}</p>

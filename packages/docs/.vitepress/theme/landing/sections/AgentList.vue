@@ -7,6 +7,9 @@ import IconOpenAI from '~icons/simple-icons/openai'
 import IconWindsurf from '~icons/simple-icons/windsurf'
 
 import { AGENTS } from '../content/features'
+import { useLandingMessages } from '../content/messages'
+
+const messages = useLandingMessages()
 
 const ICONS: Record<(typeof AGENTS)[number], Component> = {
   'Claude Code': IconClaude,
@@ -19,12 +22,12 @@ const ICONS: Record<(typeof AGENTS)[number], Component> = {
 
 <template>
   <div class="agents">
-    <h3>Works with</h3>
+    <h3>{{ messages.agents.heading }}</h3>
     <ul>
       <li v-for="agent in AGENTS" :key="agent">
         <component :is="ICONS[agent]" aria-hidden="true" />{{ agent }}
       </li>
-      <li class="rest">and any MCP client</li>
+      <li class="rest">{{ messages.agents.rest }}</li>
     </ul>
   </div>
 </template>

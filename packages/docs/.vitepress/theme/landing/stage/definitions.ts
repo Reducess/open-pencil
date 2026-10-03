@@ -14,14 +14,14 @@ import { SCENES, type SceneBuilder } from './scenes'
 export interface StageDefinition {
   scene: SceneBuilder
   panel?: Component
-  /** Heading for panels the app nests under its own header. */
-  panelTitle?: string
+  /** The app nests the layer tree under a "Layers" heading; the stage supplies it. */
+  layersHeading?: boolean
   toolbar?: boolean
 }
 
 export const STAGES: Record<StageKind, StageDefinition> = {
   hero: { scene: SCENES.announcement, toolbar: true },
-  figma: { scene: SCENES.figma, panel: LayerTree, panelTitle: 'Layers' },
+  figma: { scene: SCENES.figma, panel: LayerTree, layersHeading: true },
   design: { scene: SCENES.pricingSelected, panel: DesignPanel, toolbar: true },
   components: { scene: SCENES.components, panel: AssetsPanel },
   ai: { scene: SCENES.pricingWithGuarantees, panel: AiTranscriptPanel },

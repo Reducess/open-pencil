@@ -1,17 +1,38 @@
 <script setup lang="ts">
-import { withBase } from 'vitepress'
+import { computed } from 'vue'
 import IconArrowRight from '~icons/lucide/arrow-right'
 
 import { LINKS } from '../content/links'
-import { ROADMAP } from '../content/roadmap'
+import { useLandingMessages, useLocalePath } from '../content/messages'
+
+const messages = useLandingMessages()
+const localePath = useLocalePath()
+
+/** The catalog keeps the stages apart so each has its own shape; the timeline wants a list. */
+const stages = computed(() => {
+  const { now, next, later } = messages.value.roadmap
+  return [
+    { label: now.label, current: true, entries: now.entries.map(withoutFeatures) },
+    {
+      label: next.label,
+      current: false,
+      entries: [next.lead, ...next.entries.map(withoutFeatures)]
+    },
+    { label: later.label, current: false, entries: later.entries.map(withoutFeatures) }
+  ]
+})
+
+function withoutFeatures(entry: { title: string; detail?: string }) {
+  return { ...entry, features: undefined }
+}
 </script>
 
 <template>
   <section class="landing-section">
-    <h2>Roadmap</h2>
+    <h2>{{ messages.roadmap.title }}</h2>
     <ol class="timeline">
       <li
-        v-for="stage in ROADMAP"
+        v-for="stage in stages"
         :key="stage.label"
         class="stage"
         :data-current="stage.current || undefined"
@@ -36,8 +57,9 @@ import { ROADMAP } from '../content/roadmap'
         </ul>
       </li>
     </ol>
-    <a class="more" :href="withBase(LINKS.roadmap)">
-      Full roadmap<IconArrowRight aria-hidden="true" />
+    <!-- The full roadmap exists only in English, so every locale links to that page. -->
+    <a class="more" :href="localePath(LINKS.roadmap, { translated: false })">
+      {{ messages.roadmap.more }}<IconArrowRight aria-hidden="true" />
     </a>
   </section>
 </template>

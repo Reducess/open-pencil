@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import type { UIMessage } from 'ai'
+import { computed } from 'vue'
 
 import ChatTranscript from '@/components/chat/ChatTranscript.vue'
 
+import { useLandingMessages } from '../../content/messages'
 import { GUARANTEES_JSX } from '../scenes'
+
+const messages = useLandingMessages()
 
 /**
  * A recorded turn shown in the app's own transcript. No model runs on this page; the canvas
  * beside it holds the design this turn produced.
  */
-const MESSAGES: UIMessage[] = [
+const transcript = computed<UIMessage[]>(() => [
   {
     id: 'request',
     role: 'user',
-    parts: [{ type: 'text', text: 'Add three guarantees under the plans.' }]
+    parts: [{ type: 'text', text: messages.value.stage.ai.request }]
   },
   {
     id: 'response',
@@ -21,7 +25,7 @@ const MESSAGES: UIMessage[] = [
     parts: [
       {
         type: 'reasoning',
-        text: 'The plans sit in an auto-layout column, so a row of three cards can go right below them.',
+        text: messages.value.stage.ai.reasoning,
         state: 'done'
       },
       {
@@ -33,11 +37,11 @@ const MESSAGES: UIMessage[] = [
       },
       {
         type: 'text',
-        text: 'Added a **Guarantees** row under the plans: three cards that share the plan cards’ background and radius.'
+        text: messages.value.stage.ai.reply
       }
     ]
   }
-]
+])
 </script>
 
 <template>
@@ -47,8 +51,8 @@ const MESSAGES: UIMessage[] = [
     >
       <icon-lucide-sparkles class="size-3.5 text-muted" aria-hidden="true" />
       AI
-      <span class="ml-auto font-normal text-muted">Recorded turn</span>
+      <span class="ml-auto font-normal text-muted">{{ messages.stage.ai.recorded }}</span>
     </header>
-    <ChatTranscript :messages="MESSAGES" status="ready" />
+    <ChatTranscript :messages="transcript" status="ready" />
   </section>
 </template>

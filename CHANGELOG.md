@@ -17,6 +17,7 @@
 
 - See where the built-in AI chat is working: while it replies, a cursor whose outlined label shows a sparkle and a callsign such as *Fern* marks the layers it edits. In a shared room, collaborators see each other's agents in the color of the person running them.
 - Jump between pages from the command palette: it lists the pages you visited recently in the tab, **Go to page…** lists every page, and typing a page name finds it.
+- Choose how much an AI model thinks for each message from the chat composer, from Off to Extra high or the provider default. Anthropic, Google, DeepSeek, OpenAI, OpenRouter, and compatible models apply it, where reasoning effort previously reached only OpenAI and OpenRouter models. A model profile's thinking level, which replaces its free-text reasoning effort, sets the starting choice, and finished reasoning shows how long the model thought.
 - Preview designs progressively on the canvas as direct AI providers stream JSX, without saving partial designs or adding intermediate undo steps. A preview stays with its page: it hides while you view another page and returns when you come back.
 - Write design trees as TSX with `@open-pencil/design-jsx` as the JSX import source, and render them with `renderTree`.
 - Swap the component behind an instance with `instance.swapComponent(component)` in the plugin API, as in Figma.

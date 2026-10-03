@@ -149,7 +149,9 @@ function setupPageRowRef(
                 >
                   <icon-lucide-file :class="pageStyles(pg, currentPageId).icon()" />
                   <span :class="pageStyles(pg, currentPageId).label()">{{ pg.name }}</span>
-                  <PresenceMarkers :entries="pagePresence.get(pg.id) ?? []" />
+                  <span :class="pageStyles(pg, currentPageId).trailing()">
+                    <PresenceMarkers :entries="pagePresence.get(pg.id) ?? []" />
+                  </span>
                 </button>
                 <div
                   v-if="pageDropPosition(pg) === 'after'"

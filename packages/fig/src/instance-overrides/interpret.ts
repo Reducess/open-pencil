@@ -474,6 +474,11 @@ function interpretRoot(
     return { base: null, children: expanded }
   }
 
+  const namesMissingSlotContent = (assignment: ComponentPropAssignment): boolean => {
+    const content = assignedSlotContent(assignment.varValue?.value)
+    return !!content && !sources.has(guidToString(content))
+  }
+
   /** Identity and provenance an occurrence inherits from the subtree it expands. */
   const inheritedFromBase = (
     base: InstanceOccurrence | null
@@ -532,7 +537,10 @@ function interpretRoot(
       children: expanded
     }
     if (source.type === 'INSTANCE')
-      occurrence.properties.componentPropAssignments = groups.flatMap((g) => g.assignments)
+      occurrence.properties.componentPropAssignments = groups
+        .flatMap((g) => g.assignments)
+        // A slot whose content frame is gone falls back to its component's content.
+        .filter((assignment) => !namesMissingSlotContent(assignment))
     // A swapped instance without a name of its own takes the replacement's default name.
     if (base && replaced.length && !occurrence.hasOwnName)
       occurrence.properties.name = base.defaultInstanceName ?? base.properties.name

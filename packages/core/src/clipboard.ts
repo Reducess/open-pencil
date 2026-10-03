@@ -154,11 +154,18 @@ export async function buildFigmaClipboardHTML(
   ).length
   placeSlotContent(slotContentRecords, dependencyCanvas, written, fractionalPosition)
   nodeChanges.push(...slotContentRecords)
-  const textNodeQueue = [...exportedTextNodes]
+  // Pair each text record with the node it was written from; instance content and slot
+  // content are not emitted in traversal order.
+  const textById = new Map(exportedTextNodes.map((node) => [node.id, node]))
+  const sourceByGuid = new Map<string, SceneNode>()
+  for (const [id, guid] of nodeIdToGuid) {
+    const node = textById.get(id)
+    if (node) sourceByGuid.set(`${guid.sessionID}:${guid.localID}`, node)
+  }
   await Promise.all(
     nodeChanges.map(async (change) => {
-      if (change.type !== 'TEXT') return
-      const source = textNodeQueue.shift()
+      if (change.type !== 'TEXT' || !change.guid) return
+      const source = sourceByGuid.get(`${change.guid.sessionID}:${change.guid.localID}`)
       if (!source) return
       change.textAutoResize = 'NONE'
       change.textUserLayoutVersion = 5

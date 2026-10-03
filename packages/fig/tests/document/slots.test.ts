@@ -210,6 +210,8 @@ describe('missing slot content', () => {
     if (!node) throw new Error('Missing instance')
     const content = result.graph.getChildren(slotFrame(node, result.graph).id)
     expect(content.map((child) => child.name)).toEqual(['Default'])
+    // Without the assignment the slot keeps following its component.
+    expect(node.componentPropertyAssignments).toEqual({})
     expect(reported).toEqual([{ slotId: '1:4', slotContentId: '1:99' }])
   })
 })

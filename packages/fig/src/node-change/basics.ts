@@ -95,6 +95,8 @@ function increasingKeyIndices(sourceKeys: ReadonlyArray<string | null | undefine
       if ((sourceKeys[tails[mid]] ?? '') < key) low = mid + 1
       else high = mid
     }
+    // A key with nothing below it cannot start the run once a sibling has to precede it.
+    if (low === 0 && index > 0 && orderKeyBetween(null, key) === null) continue
     if (low > 0) previous.set(index, tails[low - 1])
     tails[low] = index
   }

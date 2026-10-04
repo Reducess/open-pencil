@@ -87,6 +87,13 @@ describe('siblingOrderKeys', () => {
     expectStrictlyIncreasing(keys)
   })
 
+  test('does not anchor on the lowest key when a sibling has to precede it', () => {
+    const keys = siblingOrderKeys(['"', '!', '#'])
+    expect(keys[0]).toBe('"')
+    expect(keys[2]).toBe('#')
+    expectStrictlyIncreasing(keys)
+  })
+
   test('keeps the siblings a moved layer jumped over', () => {
     const keys = siblingOrderKeys([null, '~', '!O', '"', '#'])
     expect(keys.slice(2)).toEqual(['!O', '"', '#'])

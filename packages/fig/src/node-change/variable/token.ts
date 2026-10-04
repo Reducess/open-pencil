@@ -49,8 +49,9 @@ function nonEmpty<T extends object>(record: T): T | undefined {
   return isEmptyObject(record) ? undefined : record
 }
 
+/** `.fig` stores numbers as float32, so compare at that precision, not the plugin data's double. */
 function sameNumber(a: VariableValue | undefined, b: number): boolean {
-  return typeof a === 'number' && Math.abs(a - b) < 1e-6
+  return typeof a === 'number' && Math.fround(a) === Math.fround(b)
 }
 
 /**

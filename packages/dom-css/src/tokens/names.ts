@@ -69,7 +69,10 @@ export function explicitCSSName(variable: Variable): string | undefined {
   return parseCSSName(variable.codeSyntax?.WEB)
 }
 
-/** `Gray/50` as COLOR is `color-gray-50`; `Space/small` is `spacing-small`. */
+/**
+ * `Gray/50` as COLOR is `color-gray-50`; `Space/small` is `spacing-small`. Two tokens can derive
+ * the same name, so stylesheet output takes names from `variableCSSNames`, which makes them unique.
+ */
 export function deriveCSSName(variable: Variable): string {
   const namespace = variableNamespace(variable)
   const segments = compact(variable.name.split('/').map((segment) => kebabCase(segment)))

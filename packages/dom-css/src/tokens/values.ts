@@ -21,8 +21,9 @@ export function variableUnit(variable: Variable): TokenUnit {
   return variableNamespace(variable) === 'font-weight' ? 'none' : 'px'
 }
 
+/** Six decimals keep `rem` exact for every pixel step down to 1/1024px (0.5px is 0.03125rem). */
 function trimNumber(value: number): string {
-  return String(Number(value.toFixed(4)))
+  return String(Number(value.toFixed(6)))
 }
 
 /** A stored number written in its unit: 24 as `rem` is `1.5rem`, 150 as `ms` is `150ms`. */

@@ -82,6 +82,7 @@ describe('token units', () => {
 
   test('write stored numbers in their unit', () => {
     expect(tokenNumberToCSS(24, 'rem')).toBe('1.5rem')
+    expect(tokenNumberToCSS(0.5, 'rem')).toBe('0.03125rem')
     expect(tokenNumberToCSS(8, 'px')).toBe('8px')
     expect(tokenNumberToCSS(0, 'px')).toBe('0')
     expect(tokenNumberToCSS(150, 'ms')).toBe('150ms')

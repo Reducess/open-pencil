@@ -44,4 +44,15 @@ describe('token plugin data', () => {
       expressions: { a: { css: 'clamp(1rem, 4vw, 2rem)', resolved: 16 } }
     })
   })
+
+  test('match a mode value stored at float32 precision', () => {
+    const nc = record(
+      TOKEN_PLUGIN_KEY,
+      JSON.stringify({ expressions: { a: { css: 'calc(100vw / 3)', resolved: 1234.567 } } })
+    )
+    // What .fig hands back for 1234.567 after storing it as float32.
+    expect(readVariableToken(nc, { a: Math.fround(1234.567) }).expressions).toEqual({
+      a: { css: 'calc(100vw / 3)', resolved: 1234.567 }
+    })
+  })
 })

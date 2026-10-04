@@ -344,12 +344,29 @@ describe('variable roundtrip', () => {
     expect(page.pluginData).toBeUndefined()
   })
 
+  test('a token expression on a value .fig rounds to float32 survives export → re-import', async () => {
+    await initCodec()
+    const graph = new SceneGraph()
+    const collection = graph.createCollection('Space')
+    const gutter = graph.createVariable('Gutter', 'FLOAT', collection.id, 1234.567)
+    gutter.expressions = {
+      [collection.defaultModeId]: { css: 'calc(100vw / 3)', resolved: 1234.567 }
+    }
+
+    const reimported = await parseFigFile((await exportFigFile(graph)).buffer as ArrayBuffer)
+
+    const imported = [...reimported.variables.values()].find((v) => v.name === 'Gutter')
+    expect(imported?.expressions?.[collection.defaultModeId]?.css).toBe('calc(100vw / 3)')
+  })
+
   test('a token expression whose value changed elsewhere is dropped on read', async () => {
     await initCodec()
     const graph = new SceneGraph()
     const collection = graph.createCollection('Space')
     const gutter = graph.createVariable('Gutter', 'FLOAT', collection.id, 20)
-    gutter.expressions = { [collection.defaultModeId]: { css: 'clamp(1rem, 4vw, 2rem)', resolved: 16 } }
+    gutter.expressions = {
+      [collection.defaultModeId]: { css: 'clamp(1rem, 4vw, 2rem)', resolved: 16 }
+    }
 
     const reimported = await parseFigFile((await exportFigFile(graph)).buffer as ArrayBuffer)
 

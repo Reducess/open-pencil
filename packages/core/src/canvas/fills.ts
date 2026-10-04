@@ -274,6 +274,7 @@ function applyPatternFill(
     tileRect
   )
   r.fillPaint.setShader(shader)
+  shader.delete()
   picture.delete()
   return true
 }
@@ -340,6 +341,15 @@ export function applyGradientFill(
   const w = node.width
   const h = node.height
 
+  /** The paint keeps its own reference, so the caller's handle has to go or WASM memory grows. */
+  const setShader = (shader: ReturnType<typeof makeDiamondGradient>) => {
+    try {
+      paint.setShader(shader)
+    } finally {
+      shader.delete()
+    }
+  }
+
   if (fill.type === 'GRADIENT_LINEAR') {
     const { start, end } = linearGradientEndpoints(w, h, t)
     const startX = start.x
@@ -353,14 +363,9 @@ export function applyGradientFill(
       positions,
       r.ck.TileMode.Clamp
     )
-    paint.setShader(shader)
+    setShader(shader)
   } else if (fill.type === 'GRADIENT_DIAMOND') {
-    const shader = makeDiamondGradient(r, colors, positions, makeGradientLocalMatrix(r, w, h, t))
-    try {
-      paint.setShader(shader)
-    } finally {
-      shader.delete()
-    }
+    setShader(makeDiamondGradient(r, colors, positions, makeGradientLocalMatrix(r, w, h, t)))
   } else if (fill.type === 'GRADIENT_RADIAL') {
     // Figma's gradientTransform maps gradient space (center 0.5,0.5, radius 0.5)
     // to the node's normalized [0,1] coordinate space. The full local matrix
@@ -374,7 +379,7 @@ export function applyGradientFill(
       r.ck.TileMode.Clamp,
       localMatrix
     )
-    paint.setShader(shader)
+    setShader(shader)
   } else if (fill.type === 'GRADIENT_ANGULAR') {
     const localMatrix = makeGradientLocalMatrix(r, w, h, t)
     const shader = r.ck.Shader.MakeSweepGradient(
@@ -385,7 +390,7 @@ export function applyGradientFill(
       r.ck.TileMode.Clamp,
       localMatrix
     )
-    paint.setShader(shader)
+    setShader(shader)
   }
 }
 
@@ -467,6 +472,7 @@ export function applyImageFill(
       localMatrix
     )
     paint.setShader(shader)
+    shader.delete()
     return true
   }
 
@@ -479,6 +485,7 @@ export function applyImageFill(
     localMatrix
   )
   paint.setShader(shader)
+  shader.delete()
   return true
 }
 

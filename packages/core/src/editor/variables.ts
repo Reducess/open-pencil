@@ -261,9 +261,13 @@ export function createVariableActions(ctx: EditorContext) {
         refreshVariables()
       },
       inverse: () => {
-        // Setting a default moves it first; undo restores the column order too.
-        collection.modes = structuredClone(prevModes)
-        collection.defaultModeId = prevDefault
+        // Setting a default moves it first; undo restores the column order too. Look the
+        // collection up again: undoing its removal in between restores a copy.
+        const current = ctx.graph.variableCollections.get(collectionId)
+        if (current) {
+          current.modes = structuredClone(prevModes)
+          current.defaultModeId = prevDefault
+        }
         refreshVariables()
       }
     })

@@ -65,6 +65,43 @@ test('gradient strokes', async () => {
       ]
     })
 
+    // Vector strokes draw through a different path: dashed ones stroke the path, undashed ones
+    // fill an outline with fillPaint, and arrowheads are filled shapes of their own.
+    const vectorStroke = (extra: Record<string, unknown>) => ({
+      type: 'GRADIENT_LINEAR' as const,
+      color: { r: 0, g: 0, b: 0, a: 1 },
+      gradientStops: stops,
+      gradientTransform: { m00: 1, m01: 0, m02: 0, m10: 0, m11: 1, m12: 0 },
+      weight: 18,
+      visible: true,
+      opacity: 1,
+      align: 'CENTER' as const,
+      ...extra
+    })
+    const lines = [{}, { dashPattern: [24, 12] }, { cap: 'ARROW_EQUILATERAL' }]
+    for (const [index, extra] of lines.entries()) {
+      store.graph.createNode('VECTOR', pageId, {
+        name: `vector gradient stroke ${index}`,
+        x: 300,
+        y: 260 + index * 70,
+        width: 260,
+        height: 1,
+        strokeCap: extra.cap ?? 'NONE',
+        vectorNetwork: {
+          vertices: [
+            { x: 0, y: 0 },
+            { x: 260, y: 0 }
+          ],
+          segments: [
+            { start: 0, end: 1, tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }
+          ],
+          regions: []
+        },
+        fills: [],
+        strokes: [vectorStroke(extra)]
+      })
+    }
+
     store.clearSelection()
     store.requestRender()
   })

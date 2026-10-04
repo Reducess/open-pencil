@@ -59,6 +59,35 @@ describe('roundtrip: stroke paints', () => {
     expect(stroke).toMatchObject({ weight: 4, align: 'OUTSIDE' })
   })
 
+  test('an image stroke keeps its hash and scale mode', async () => {
+    await initCodec()
+    const graph = new SceneGraph()
+    graph.createNode('RECTANGLE', graph.getPages()[0].id, {
+      name: 'Image stroke',
+      width: 100,
+      height: 100,
+      strokes: [
+        {
+          type: 'IMAGE',
+          color: { r: 0, g: 0, b: 0, a: 1 },
+          imageHash: 'abc123',
+          imageScaleMode: 'FIT',
+          weight: 3,
+          opacity: 1,
+          visible: true,
+          align: 'CENTER'
+        }
+      ]
+    })
+
+    const stroke = strokeOf(await reImport(graph), 'Image stroke')
+
+    expect(stroke.type).toBe('IMAGE')
+    expect(stroke.imageHash).toBe('abc123')
+    expect(stroke.imageScaleMode).toBe('FIT')
+    expect(stroke).toMatchObject({ weight: 3, align: 'CENTER' })
+  })
+
   test('a solid stroke still round-trips unchanged', async () => {
     await initCodec()
     const graph = new SceneGraph()

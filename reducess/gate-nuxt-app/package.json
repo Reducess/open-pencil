@@ -1,0 +1,31 @@
+{
+  "name": "gate-nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@open-pencil/core": "file:../tarballs/open-pencil-core-0.15.1.tgz",
+    "@open-pencil/fig": "file:../tarballs/open-pencil-fig-0.15.1.tgz",
+    "@open-pencil/kiwi": "file:../tarballs/open-pencil-kiwi-0.15.1.tgz",
+    "@open-pencil/pen": "file:../tarballs/open-pencil-pen-0.15.1.tgz",
+    "@open-pencil/scene-graph": "file:../tarballs/open-pencil-scene-graph-0.15.1.tgz",
+    "@open-pencil/vue": "file:../tarballs/open-pencil-vue-0.15.1.tgz",
+    "@vueuse/core": "14.1.0",
+    "canvaskit-wasm": "^0.41.1",
+    "nuxt": "4.2.0",
+    "reka-ui": "2.6.1",
+    "vue": "3.5.22",
+    "vue-router": "^4.6.3"
+  },
+  "overrides": {
+    "@open-pencil/core": "file:../tarballs/open-pencil-core-0.15.1.tgz",
+    "@open-pencil/vue": "file:../tarballs/open-pencil-vue-0.15.1.tgz",
+    "@open-pencil/scene-graph": "file:../tarballs/open-pencil-scene-graph-0.15.1.tgz",
+    "@open-pencil/fig": "file:../tarballs/open-pencil-fig-0.15.1.tgz",
+    "@open-pencil/kiwi": "file:../tarballs/open-pencil-kiwi-0.15.1.tgz",
+    "@open-pencil/pen": "file:../tarballs/open-pencil-pen-0.15.1.tgz"
+  }
+}

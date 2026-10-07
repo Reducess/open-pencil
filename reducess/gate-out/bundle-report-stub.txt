@@ -1,0 +1,8 @@
+chunk do editor: _nuxt/DShb-X6f.js | pagina: _nuxt/B-VUJzNq.js | entry: _nuxt/iVnviTal.js
+entry Nuxt (base do app, toda rota): 1 chunks, cru 167 KiB, gzip 63 KiB
+rota /editor estatico, sem a base: 6 chunks, cru 1958 KiB, gzip 602 KiB
+rota /editor estatico, total com base: 7 chunks, cru 2125 KiB, gzip 665 KiB
++ lazy (import() sob demanda), sem a base: 16 chunks, cru 1876 KiB, gzip 564 KiB
+-- ESTATICO: codigo-fonte renderizado (pre-minify) 3682 KiB
+   outros                          1108 KiB  30.1%
+   @open-pencil/core               1053 KiB  28.6%

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="grad0" x1="100%" y1="0%" x2="0%" y2="0%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#FF5933"/>
+      <stop offset="100%" stop-color="#7333F2"/>
+    </linearGradient>
+    <filter id="fx1">
+      <feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <g id="node-0-3" data-name="Post">
+    <rect width="1080" height="1350" fill="#FFFFFF"/>
+    <g id="node-0-4" data-name="Titulo" transform="translate(80, 80)">
+      <text x="0" y="40" font-family="Inter" font-size="40" font-weight="700" fill="#121726">Promoção de primavera: tudo com até 40% de desconto neste fim de semana</text>
+    </g>
+    <g id="node-0-5" data-name="Faixa" transform="translate(80, 224)">
+      <rect width="920" height="280" rx="32" ry="32" fill="url(#grad0)"/>
+    </g>
+    <g id="node-0-6" data-name="Bola" transform="translate(80, 552)" filter="url(#fx1)">
+      <ellipse cx="130" cy="130" rx="130" ry="130" fill="#1AA673"/>
+    </g>
+    <g id="node-0-7" data-name="Selo" transform="translate(80, 860)">
+      <g id="node-0-8" data-name="Selo fundo">
+        <rect width="300" height="140" rx="70" ry="70" fill="#FACC1A"/>
+      </g>
+      <g id="node-0-9" data-name="Selo ponto" transform="translate(30, 30)">
+        <ellipse cx="40" cy="40" rx="40" ry="40" fill="#121726"/>
+      </g>
+    </g>
+  </g>
+</svg>

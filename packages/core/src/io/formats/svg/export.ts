@@ -380,6 +380,15 @@ function buildShapeChildren(
   return []
 }
 
+// Reducess: stable ids and layer names so the export stays editable downstream.
+function buildIdentityAttrs(node: SceneNode): Record<string, string> {
+  const attrs: Record<string, string> = {
+    id: `node-${node.id.replace(/[^A-Za-z0-9_-]/g, '-')}`
+  }
+  if (node.name) attrs['data-name'] = node.name
+  return attrs
+}
+
 function renderNode(node: SceneNode, ctx: SVGExportContext): SVGNode | null {
   if (!node.visible) return null
 
@@ -389,7 +398,7 @@ function renderNode(node: SceneNode, ctx: SVGExportContext): SVGNode | null {
     const firstFill = node.fills.find((f) => f.visible)
     const fillAttr = firstFill ? resolveFill(firstFill, node, ctx) : null
     const textEl = renderTextNode(node, fillAttr, ctx.colorSpace)
-    return svg('g', groupAttrs, textEl)
+    return svg('g', { ...buildIdentityAttrs(node), ...groupAttrs }, textEl)
   }
 
   const visibleFills = node.fills.filter((f) => f.visible)
@@ -428,11 +437,7 @@ function renderNode(node: SceneNode, ctx: SVGExportContext): SVGNode | null {
     return null
   }
 
-  if (validChildren.length === 1 && Object.keys(groupAttrs).length === 0) {
-    return validChildren[0]
-  }
-
-  return svg('g', groupAttrs, ...validChildren)
+  return svg('g', { ...buildIdentityAttrs(node), ...groupAttrs }, ...validChildren)
 }
 
 function isGroupLike(node: SceneNode): boolean {

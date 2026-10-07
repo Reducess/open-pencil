@@ -174,7 +174,7 @@
     "provenance": true
   },
   "scripts": {
-    "build": "bunx tsdown --config tsdown.config.ts",
+    "build": "bunx tsdown --config tsdown.config.ts && bun scripts/fix-worker-urls.ts",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {

@@ -1,0 +1,40 @@
+chunk do editor: _nuxt/BUVkWw2X.js | pagina: _nuxt/vLKsbrrN.js | entry: _nuxt/D42Tqvc_.js
+entry Nuxt (base do app, toda rota): 1 chunks, cru 167 KiB, gzip 63 KiB
+rota /editor estatico, sem a base: 6 chunks, cru 2233 KiB, gzip 687 KiB
+rota /editor estatico, total com base: 7 chunks, cru 2401 KiB, gzip 750 KiB
++ lazy (import() sob demanda), sem a base: 17 chunks, cru 1876 KiB, gzip 564 KiB
+-- ESTATICO: codigo-fonte renderizado (pre-minify) 4131 KiB
+   outros                          1111 KiB  26.9%
+   @open-pencil/core               1053 KiB  25.5%
+   opentype                         475 KiB  11.5%
+   fig+kiwi                         416 KiB  10.1%
+   acorn                            228 KiB   5.5%
+   yoga-layout                      163 KiB   3.9%
+   @open-pencil/scene-graph         121 KiB   2.9%
+   canvaskit-js                     119 KiB   2.9%
+   @open-pencil/vue                 103 KiB   2.5%
+   culori                           101 KiB   2.5%
+   valibot                           50 KiB   1.2%
+   fflate                            38 KiB   0.9%
+   unifont                           32 KiB   0.8%
+   @open-pencil/pen                  25 KiB   0.6%
+-- LAZY: codigo-fonte renderizado (pre-minify) 3076 KiB
+   pptxgenjs                        505 KiB  16.4%
+   outros                           475 KiB  15.4%
+   sucrase                          447 KiB  14.5%
+   html2canvas                      400 KiB  13.0%
+   jspdf                            335 KiB  10.9%
+   fontoxpath                       293 KiB   9.5%
+   canvg                            165 KiB   5.4%
+   canvaskit-js                     122 KiB   4.0%
+   jszip                             96 KiB   3.1%
+   dompurify                         81 KiB   2.6%
+   svg2pdf                           68 KiB   2.2%
+   @open-pencil/core                 67 KiB   2.2%
+   nuxt                              21 KiB   0.7%
+   lazy _nuxt/CyzJtKnM.js 370 KiB ['jspdf/dist/jspdf.es.min.js', 'pako/dist/pako.esm.mjs']
+   lazy _nuxt/Bg0UPu2q.js 363 KiB ['pptxgenjs/dist/pptxgen.es.js', 'jszip/dist/jszip.min.js']
+   lazy _nuxt/Cyc8kcJe.js 317 KiB ['fontoxpath/dist/fontoxpath.esm.js', 'xspattern/dist/xspattern.esm.js']
+   lazy _nuxt/Ch1DftPd.js 226 KiB ['sucrase/dist/esm/parser/plugins/typescript.js', 'sucrase/dist/esm/parser/tokenizer/readWordTree.js']
+   lazy _nuxt/DXEQVQnt.js 195 KiB ['html2canvas/dist/html2canvas.esm.js']
+   lazy _nuxt/D7Pdi4R8.js 155 KiB ['canvg/lib/index.es.js', 'svg-pathdata/lib/SVGPathData.module.js']

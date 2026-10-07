@@ -1,0 +1,35 @@
+diff -ru a/core/dist/io/formats/fig/export.js b/core/dist/io/formats/fig/export.js
+--- a/core/dist/io/formats/fig/export.js	1985-10-26 05:15:00.000000000 -0300
++++ b/core/dist/io/formats/fig/export.js	2026-10-07 12:40:02.509700311 -0300
+@@ -375,7 +375,7 @@
+ }
+ function compressViaWorker(schemaDeflated, kiwiData, thumbnailPNG, metaJSON, imageEntries, figKiwiVersion) {
+ 	return new Promise((resolve, reject) => {
+-		const worker = new Worker(new URL("./export-worker.ts", import.meta.url), { type: "module" });
++		const worker = new Worker(new URL("./export-worker.js", import.meta.url), { type: "module" });
+ 		worker.onmessage = (e) => {
+ 			resolve(e.data);
+ 			worker.terminate();
+diff -ru a/core/dist/kiwi/fig/parse/client.js b/core/dist/kiwi/fig/parse/client.js
+--- a/core/dist/kiwi/fig/parse/client.js	1985-10-26 05:15:00.000000000 -0300
++++ b/core/dist/kiwi/fig/parse/client.js	2026-10-07 12:40:02.508454930 -0300
+@@ -1,6 +1,6 @@
+ //#region src/kiwi/fig/parse/client.ts
+ function createFigParseWorker() {
+-	return new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
++	return new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
+ }
+ //#endregion
+ export { createFigParseWorker };
+diff -ru a/core/dist/kiwi/fig/session/client.js b/core/dist/kiwi/fig/session/client.js
+--- a/core/dist/kiwi/fig/session/client.js	1985-10-26 05:15:00.000000000 -0300
++++ b/core/dist/kiwi/fig/session/client.js	2026-10-07 12:40:02.508321036 -0300
+@@ -1,7 +1,7 @@
+ //#region src/kiwi/fig/session/client.ts
+ function createFigSessionWorker() {
+ 	if (typeof Worker === "undefined") throw new Error("FIG session workers are unavailable");
+-	return new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
++	return new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
+ }
+ //#endregion
+ export { createFigSessionWorker };

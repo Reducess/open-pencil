@@ -1,0 +1,29 @@
+{
+  "minima (self + inline do Nuxt + wasm-unsafe-eval)": {
+    "ready": "ok",
+    "png": 61327,
+    "pdf": 4149,
+    "fig": 57988,
+    "set_fill": "{\"id\":\"0:5\",\"color\":{\"r\":0,\"g\":1,\"b\":0,\"a\":1}}",
+    "render_jsx": "{\"error\":\"Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self' 'unsafe-inline' 'wasm-u",
+    "eval_tool": "1",
+    "fontFaces": [
+      "Inter 400 loaded",
+      "Inter 700 loaded",
+      "Inter 700 loaded",
+      "Inter 700 loaded"
+    ],
+    "console": []
+  },
+  "sem wasm-unsafe-eval": {
+    "erro": "TimeoutError: forFunction: Timeout 10000ms exceeded.",
+    "console": [
+      "wasm streaming compile failed: CompileError: WebAssembly.instantiateStreaming(): Compiling or instantiating WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script in the following Co",
+      "falling back to ArrayBuffer instantiation",
+      "failed to asynchronously prepare wasm: CompileError: WebAssembly.instantiate(): Compiling or instantiating WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script in the following Con",
+      "Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive:",
+      "RuntimeError: Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script in the following Content Security Pol",
+      "pageerror: RuntimeError: Aborted(CompileError: WebAssembly.instantiate(): Compiling or instantiating WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an al"
+    ]
+  }
+}

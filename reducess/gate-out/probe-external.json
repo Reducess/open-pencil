@@ -1,0 +1,67 @@
+{
+  "padrao": {
+    "passivo": [],
+    "roboto": true,
+    "aposWebFontFetch": [
+      [
+        "fonts.google.com/metadata/fonts",
+        "net::ERR_FAILED"
+      ],
+      [
+        "api.fontsource.org/v1/fonts",
+        200
+      ],
+      [
+        "api.fontsource.org/v1/fonts/roboto",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-400-normal.ttf",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-ext-400-normal.ttf",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/vietnamese-400-normal.ttf",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/cyrillic-400-normal.ttf",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/cyrillic-ext-400-normal.ttf",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/greek-400-normal.ttf",
+        200
+      ],
+      [
+        "cdn.jsdelivr.net/fontsource/fonts/roboto@latest/greek-ext-400-normal.ttf",
+        200
+      ]
+    ],
+    "search_icons": "{\"star\":{\"icons\":[\"material-symbols:star\",\"material-symbols:star-outline\",\"material-symbols:star-outline-rounded\",\"material-symbols:star-rounded\",\"material-symb",
+    "aposIcones": [
+      [
+        "api.iconify.design/search",
+        200
+      ]
+    ]
+  },
+  "online-off": {
+    "passivo": [],
+    "roboto": false,
+    "aposWebFontFetch": [],
+    "search_icons": "{\"star\":{\"icons\":[\"material-symbols:star\",\"material-symbols:star-outline\",\"material-symbols:star-outline-rounded\",\"material-symbols:star-rounded\",\"material-symb",
+    "aposIcones": [
+      [
+        "api.iconify.design/search",
+        200
+      ]
+    ]
+  }
+}

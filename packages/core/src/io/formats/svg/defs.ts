@@ -52,10 +52,11 @@ function createGradientDef(
   const id = nextDefId(ctx, 'grad')
 
   if (fill.type === 'GRADIENT_LINEAR') {
-    const startX = round(t.m02 * 100)
-    const startY = round(t.m12 * 100)
-    const endX = round((t.m00 + t.m02) * 100)
-    const endY = round((t.m10 + t.m12) * 100)
+    // Reducess: same start/end as canvas/fills.ts; upstream had them mirrored.
+    const startX = round((t.m00 + t.m02) * 100)
+    const startY = round((t.m10 + t.m12) * 100)
+    const endX = round(t.m02 * 100)
+    const endY = round(t.m12 * 100)
     return {
       id,
       node: svg(

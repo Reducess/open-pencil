@@ -7,9 +7,13 @@ import { useCanvasContext } from '#vue/canvas/context'
 const { canvasRef } = useCanvasContext()
 const surfaceRef = templateRef<HTMLCanvasElement>('surfaceRef')
 
-watchEffect(() => {
-  canvasRef.value = surfaceRef.value
-})
+// Reducess: sync flush so useCanvas sees the element before its own mount hook runs.
+watchEffect(
+  () => {
+    canvasRef.value = surfaceRef.value
+  },
+  { flush: 'sync' }
+)
 </script>
 
 <template>

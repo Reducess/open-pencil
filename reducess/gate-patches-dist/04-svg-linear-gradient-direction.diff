@@ -1,0 +1,17 @@
+--- a/core/dist/io/formats/svg/defs.js	1985-10-26 05:15:00.000000000 -0300
++++ b/core/dist/io/formats/svg/defs.js	2026-10-07 12:44:24.052439109 -0300
+@@ -26,10 +26,10 @@
+ 	}));
+ 	const id = nextDefId(ctx, "grad");
+ 	if (fill.type === "GRADIENT_LINEAR") {
+-		const startX = round(t.m02 * 100);
+-		const startY = round(t.m12 * 100);
+-		const endX = round((t.m00 + t.m02) * 100);
+-		const endY = round((t.m10 + t.m12) * 100);
++		const startX = round((t.m00 + t.m02) * 100);
++		const startY = round((t.m10 + t.m12) * 100);
++		const endX = round(t.m02 * 100);
++		const endY = round(t.m12 * 100);
+ 		return {
+ 			id,
+ 			node: svg("linearGradient", {

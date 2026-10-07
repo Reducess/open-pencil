@@ -1,0 +1,11 @@
+--- a/vue/dist/canvas/CanvasSurface.js	1985-10-26 05:15:00.000000000 -0300
++++ b/vue/dist/canvas/CanvasSurface.js	2026-10-07 12:40:53.793450994 -0300
+@@ -11,7 +11,7 @@
+ 		const surfaceRef = templateRef("surfaceRef");
+ 		watchEffect(() => {
+ 			canvasRef.value = surfaceRef.value;
+-		});
++		}, { flush: "sync" });
+ 		const __returned__ = {
+ 			canvasRef,
+ 			surfaceRef

@@ -1,0 +1,53 @@
+{
+  "label": "B-fix",
+  "query": "?fix=1",
+  "fonts": [
+    [
+      "Inter",
+      "Bold",
+      true
+    ]
+  ],
+  "status": "ready",
+  "layers": [
+    "+Post"
+  ],
+  "toolbar": 6,
+  "canvas": {
+    "w": 1044,
+    "h": 860,
+    "ready": "1"
+  },
+  "probe": {
+    "providers": [
+      "google",
+      "fontsource"
+    ],
+    "roboto": false,
+    "families": 1
+  },
+  "external": [],
+  "local": [
+    "200 /demo/editor text/html 1129",
+    "200 /demo/_nuxt/error-404.2GhCpCfF.css text/css 2430",
+    "200 /demo/_nuxt/Dng54nHs.js text/javascript 3812",
+    "200 /demo/_nuxt/BRqhO53T.js text/javascript 5106",
+    "200 /demo/_nuxt/Dx7wGRVA.js text/javascript 326",
+    "200 /demo/_nuxt/CGWGvRA5.js text/javascript 171325",
+    "200 /demo/_nuxt/error-500.DqdIhFrl.css text/css 1907",
+    "200 /demo/_nuxt/2yRi3Gtf.js text/javascript 3499",
+    "200 /demo/_nuxt/CsxEMCGt.js text/javascript 2210",
+    "200 /demo/_nuxt/builds/meta/e75b479f-eab0-400c-89a9-62131599f315.json application/json 139",
+    "200 /demo/_nuxt/D7Ct-6yo.js text/javascript 130",
+    "200 /demo/_nuxt/8iG5fIId.js text/javascript 6199",
+    "200 /demo/_nuxt/CMLTLlx2.js text/javascript 120663",
+    "200 /demo/_nuxt/3EVTcnRq.js text/javascript 768611",
+    "200 /demo/openpencil/canvaskit.wasm application/wasm 7159342",
+    "200 /demo/_nuxt/B1IxeT4V.js text/javascript 1388732",
+    "200 /demo/openpencil/fonts/Inter-Regular.ttf font/ttf 342408",
+    "200 /demo/openpencil/fonts/Inter-Bold.ttf font/ttf 344072",
+    "200 /demo/openpencil/fonts/Inter-Bold.ttf font/ttf 344072"
+  ],
+  "failed": [],
+  "console": []
+}

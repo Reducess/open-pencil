@@ -1,0 +1,11 @@
+--- a/core/dist/io/formats/svg/export.js	1985-10-26 05:15:00.000000000 -0300
++++ b/core/dist/io/formats/svg/export.js	2026-10-07 12:44:24.052310294 -0300
+@@ -193,6 +193,8 @@
+ }
+ function buildGroupAttrs(node, ctx) {
+ 	const attrs = {};
++	attrs.id = `node-${String(node.id).replace(/[^A-Za-z0-9_-]/g, "-")}`;
++	if (node.name) attrs["data-name"] = node.name;
+ 	const transform = buildTransformAttr(node);
+ 	if (transform) attrs.transform = transform;
+ 	if (node.opacity < 1) attrs.opacity = round(node.opacity);

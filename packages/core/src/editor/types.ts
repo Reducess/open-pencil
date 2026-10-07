@@ -200,6 +200,8 @@ export interface EditorContext {
   setActiveTool: (tool: Tool) => void
   setNavigationPhase: (phase: NavigationPhase, inputAt?: number) => void
   runLayoutForNode: (id: string) => void
+  /** Bring bound scalar fields up to date (whole document or a subtree) and lay them out. */
+  syncVariableBindings: (scopeId?: string) => string[]
   runMutationWithLayout: <T>(
     operation: () => T | Promise<T>,
     fallbackId?: string,

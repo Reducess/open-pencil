@@ -135,13 +135,16 @@ export async function prepareForExport(
   pageId: string,
   nodeIds: string[]
 ): Promise<() => void> {
-  const { getTextMeasurer, setTextMeasurer, computeAllLayouts } = await import('#core/layout')
+  const { getTextMeasurer, setTextMeasurer, computeAllLayouts, applyVariableBindings } =
+    await import('#core/layout')
 
   const previousTextMeasurer = getTextMeasurer()
   setTextMeasurer((node, maxWidth) => r.measureTextNode(node, maxWidth))
 
   await prepareGraphFonts(graph, nodeIds)
   syncFontGeneration(r)
+  // A graph built outside an editor (server render) may carry stale bound scalar fields.
+  applyVariableBindings(graph)
   computeAllLayouts(graph, pageId)
 
   return () => setTextMeasurer(previousTextMeasurer)

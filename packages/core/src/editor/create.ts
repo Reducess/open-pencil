@@ -11,7 +11,7 @@ import { IS_BROWSER } from '#core/constants'
 import { clearLazyFigImportContext } from '#core/kiwi/fig/lazy-import'
 import { releaseFigPopulationWorker } from '#core/kiwi/fig/population/client'
 import { releaseOriginalFigArchive } from '#core/kiwi/fig/session/original-archive'
-import { setTextMeasurer } from '#core/layout'
+import { applyVariableBindings, setTextMeasurer } from '#core/layout'
 import { emitNavigationTrace } from '#core/profiler'
 import { TextEditor } from '#core/text/editor'
 import { fontManager } from '#core/text/fonts'
@@ -173,10 +173,23 @@ export function createEditor(options?: EditorOptions) {
   const { runLayoutForNode, runMutationWithLayout } = createLayoutRunner(() => _graph)
   const { scheduleComponentSync } = createComponentSyncScheduler(() => _graph, requestRender)
 
+  /**
+   * Scalar fields bound to variables hold resolved values. This rewrites the stale ones (whole
+   * document, or the subtree under `scopeId`), runs layout for what changed and repaints —
+   * colour bindings are resolved while painting, so cached pictures go too.
+   */
+  function syncVariableBindings(scopeId?: string): string[] {
+    const changedIds = applyVariableBindings(_graph, scopeId)
+    for (const id of changedIds) runLayoutForNode(id)
+    for (const renderer of _renderers) renderer.invalidateAllPictures()
+    return changedIds
+  }
+
   const { subscribeToGraph, unsubscribeFromGraph } = createGraphEventSubscription({
     getGraph: () => _graph,
     getRenderers: () => _renderers,
     scheduleComponentSync,
+    syncVariableBindings,
     requestRender,
     emitEditorEvent
   })
@@ -211,6 +224,7 @@ export function createEditor(options?: EditorOptions) {
     setActiveTool,
     setNavigationPhase,
     runLayoutForNode,
+    syncVariableBindings,
     runMutationWithLayout,
     subscribeToGraph
   }
@@ -311,6 +325,7 @@ export function createEditor(options?: EditorOptions) {
 
     // Graph reads
     runLayoutForNode,
+    syncVariableBindings,
     runMutationWithLayout,
     ...graphReads,
 

@@ -8,6 +8,8 @@ type GraphEventOptions = {
   getGraph: () => SceneGraph
   getRenderers: () => Iterable<SkiaRenderer>
   scheduleComponentSync: (nodeId: string) => void
+  /** Re-resolve the scalar variable bindings of a subtree whose mode scope changed. */
+  syncVariableBindings?: (scopeId: string) => void
   requestRender: () => void
   emitEditorEvent: <K extends EmittedGraphEventName>(
     event: K,
@@ -80,6 +82,8 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
     invalidateRenderersForChange(options.getGraph(), options.getRenderers(), id, changes, true)
     options.emitEditorEvent('node:updated', id, changes)
     options.scheduleComponentSync(id)
+    // A mode pinned on a node applies to everything under it.
+    if ('variableModes' in changes) options.syncVariableBindings?.(id)
     options.requestRender()
   }
 
@@ -120,6 +124,8 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
       reparented: (nodeId, oldParentId, newParentId) => {
         options.emitEditorEvent('node:reparented', nodeId, oldParentId, newParentId)
         onNodeStructureChanged(nodeId)
+        // The new ancestors may pin another mode.
+        options.syncVariableBindings?.(nodeId)
       },
       reordered: (nodeId, parentId, index, previousParentId) => {
         options.emitEditorEvent('node:reordered', nodeId, parentId, index, previousParentId)

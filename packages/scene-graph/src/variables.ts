@@ -4,7 +4,13 @@ import { BLACK } from './constants'
 import type { SceneGraph } from './index'
 import { setInstanceOverride } from './instance-overrides'
 import type { Color } from './primitives'
-import type { Variable, VariableCollection, VariableType, VariableValue } from './types'
+import type {
+  SceneNode,
+  Variable,
+  VariableCollection,
+  VariableType,
+  VariableValue
+} from './types'
 
 export function addVariable(graph: SceneGraph, variable: Variable): void {
   graph.variables.set(variable.id, variable)
@@ -299,6 +305,79 @@ const SCALAR_BINDING_FIELDS: ReadonlySet<string> = new Set([
   'gridRowGap',
   'gridColumnGap'
 ])
+
+const CORNER_RADIUS_FIELDS = [
+  'topLeftRadius',
+  'topRightRadius',
+  'bottomRightRadius',
+  'bottomLeftRadius'
+] as const
+
+function isFlexMode(mode: SceneNode['layoutMode']): boolean {
+  return mode === 'HORIZONTAL' || mode === 'VERTICAL'
+}
+
+/** The parent whose auto layout positions `node`, if any. */
+function flowParent(graph: SceneGraph, node: SceneNode): SceneNode | undefined {
+  if (node.layoutPositioning === 'ABSOLUTE' || !node.parentId) return undefined
+  const parent = graph.nodes.get(node.parentId)
+  return parent && parent.layoutMode !== 'NONE' ? parent : undefined
+}
+
+/** A size the layout computes (hug, fill, text auto-resize) is not the binding's to write. */
+function sizeIsDerived(graph: SceneGraph, node: SceneNode, axis: 'width' | 'height'): boolean {
+  if (node.type === 'TEXT') {
+    if (node.textAutoResize === 'WIDTH_AND_HEIGHT') return true
+    if (node.textAutoResize === 'HEIGHT' && axis === 'height') return true
+  }
+  if (isFlexMode(node.layoutMode)) {
+    const primary = (axis === 'width') === (node.layoutMode === 'HORIZONTAL')
+    if ((primary ? node.primaryAxisSizing : node.counterAxisSizing) !== 'FIXED') return true
+  }
+  const parent = flowParent(graph, node)
+  if (!parent || !isFlexMode(parent.layoutMode)) return false
+  const alongParent = (axis === 'width') === (parent.layoutMode === 'HORIZONTAL')
+  if (alongParent) return node.layoutGrow > 0
+  return (
+    node.layoutAlignSelf === 'STRETCH' ||
+    (node.layoutAlignSelf === 'AUTO' && parent.counterAxisAlign === 'STRETCH')
+  )
+}
+
+function bindingIsOverruledByLayout(graph: SceneGraph, node: SceneNode, field: string): boolean {
+  if (field === 'width' || field === 'height') return sizeIsDerived(graph, node, field)
+  if (field === 'x' || field === 'y') return flowParent(graph, node) !== undefined
+  return false
+}
+
+/**
+ * What has to change on the node for its scalar fields to hold the current value of the FLOAT
+ * variables bound to them, resolved in the node's mode scope. Empty when it is up to date.
+ *
+ * Node fields store resolved values (as in a .fig file); layout and rendering read the fields.
+ * A binding that does not resolve, or that targets a size or position the layout computes,
+ * leaves the field alone.
+ */
+export function boundScalarChanges(graph: SceneGraph, nodeId: string): Partial<SceneNode> {
+  const node = graph.nodes.get(nodeId)
+  if (!node) return {}
+  const current = node as unknown as Record<string, unknown>
+  const changes: Record<string, number> = {}
+  for (const [field, variableId] of Object.entries(node.boundVariables)) {
+    if (!SCALAR_BINDING_FIELDS.has(field)) continue
+    if (bindingIsOverruledByLayout(graph, node, field)) continue
+    const value = resolveNumberVariableForNode(graph, nodeId, variableId)
+    if (value === undefined || !Number.isFinite(value)) continue
+    if (current[field] !== value) changes[field] = value
+    // A uniform radius is stored on the four corners too; keep them in step.
+    if (field === 'cornerRadius' && !node.independentCorners) {
+      for (const corner of CORNER_RADIUS_FIELDS) {
+        if (!(corner in node.boundVariables) && node[corner] !== value) changes[corner] = value
+      }
+    }
+  }
+  return changes as Partial<SceneNode>
+}
 
 const STRING_BINDING_FIELDS: ReadonlySet<string> = new Set(['fontFamily'])
 

@@ -244,6 +244,11 @@ export class SceneGraph {
     return Variables.resolveNumberVariableForNode(this, nodeId, variableId)
   }
 
+  /** Field changes that bring a node's bound scalar fields up to date with their variables. */
+  boundScalarChanges(nodeId: string): Partial<SceneNode> {
+    return Variables.boundScalarChanges(this, nodeId)
+  }
+
   getVariablesForCollection(collectionId: string): Variable[] {
     return Variables.getVariablesForCollection(this, collectionId)
   }

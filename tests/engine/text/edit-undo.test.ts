@@ -37,6 +37,7 @@ function setup() {
     getTextEditor: () => textEditor,
     getRenderer: () => null,
     runLayoutForNode: () => undefined,
+    syncVariableBindings: () => [],
     getCk: () => null,
     loadFont: async () => undefined,
     getViewportSize: () => ({ width: 800, height: 600 }),

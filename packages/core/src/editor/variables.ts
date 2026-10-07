@@ -12,6 +12,7 @@ import type { EditorContext } from './types'
 export function createVariableActions(ctx: EditorContext) {
   /** Every change to variables, collections or modes ends here, undo and redo included. */
   function changed() {
+    ctx.syncVariableBindings()
     ctx.requestRender()
     ctx.emitEditorEvent('variables:changed')
   }

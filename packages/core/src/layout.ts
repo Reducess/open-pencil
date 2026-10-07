@@ -22,6 +22,7 @@ export {
   setTextMeasurer,
   type TextMeasurer
 } from './layout/text-measurement'
+export { applyVariableBindings } from './layout/variable-bindings'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
 import { estimateTextSize, getTextMeasurer } from './layout/text-measurement'

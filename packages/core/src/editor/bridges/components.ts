@@ -26,6 +26,9 @@ export function createComponentBridge(
         structure.wrapSelectionInContainer
       ),
     createInstanceFromComponent: components.createInstanceFromComponent,
+    revertComponent: components.revertComponent,
+    instanceHasOverrides: components.instanceHasOverrides,
+    resetInstanceOverrides: components.resetInstanceOverrides,
     detachInstance: () => components.detachInstance(selection.getSelectedNode()),
     focusComponent: (componentId: string) =>
       components.focusComponent(componentId, pages.switchPage),

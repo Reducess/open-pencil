@@ -1,3 +1,4 @@
+import { cloneInstanceOverrideState } from '@open-pencil/scene-graph'
 import type { SceneNode } from '@open-pencil/scene-graph'
 import { deriveSlashVariantProperties } from '@open-pencil/scene-graph/variant-properties'
 
@@ -71,6 +72,45 @@ export function createComponentActions(ctx: EditorContext) {
     ctx.graph.updateNode(containerId, { componentPropertyDefinitions: derived.definitions })
   }
 
+  /**
+   * Turns a main component back into a plain frame. Its instances cannot follow a frame, so
+   * they are detached in the same step; one undo brings the component and its instances back.
+   */
+  function revertComponent(componentId: string): boolean {
+    const component = ctx.graph.getNode(componentId)
+    if (component?.type !== 'COMPONENT') return false
+    const parent = component.parentId ? ctx.graph.getNode(component.parentId) : undefined
+    // A variant only exists inside its component set.
+    if (parent?.type === 'COMPONENT_SET') return false
+
+    const instances = ctx.graph.getInstances(componentId).map((instance) => ({
+      id: instance.id,
+      instanceOverrides: cloneInstanceOverrideState(instance.instanceOverrides)
+    }))
+    const revert = () => {
+      for (const instance of instances) ctx.graph.detachInstance(instance.id)
+      // Detaching rewrites the node in place: publish it.
+      for (const instance of instances) ctx.graph.updateNode(instance.id, { type: 'FRAME' })
+      ctx.graph.updateNode(componentId, { type: 'FRAME' })
+      ctx.requestRender()
+    }
+    const restore = () => {
+      ctx.graph.updateNode(componentId, { type: 'COMPONENT' })
+      for (const instance of instances) {
+        if (!ctx.graph.getNode(instance.id)) continue
+        ctx.graph.updateNode(instance.id, {
+          type: 'INSTANCE',
+          componentId,
+          instanceOverrides: cloneInstanceOverrideState(instance.instanceOverrides)
+        })
+      }
+      ctx.requestRender()
+    }
+    revert()
+    ctx.undo.push({ label: 'Revert component', forward: revert, inverse: restore })
+    return true
+  }
+
   const focusActions = createComponentFocusActions(ctx)
   const instanceActions = createComponentInstanceActions(ctx)
   const variantActions = createVariantActions(ctx)
@@ -82,6 +122,7 @@ export function createComponentActions(ctx: EditorContext) {
   return {
     createComponentFromSelection,
     createComponentSetFromComponents,
+    revertComponent,
     ...instanceActions,
     ...focusActions,
     ...variantActions,

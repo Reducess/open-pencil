@@ -2,6 +2,7 @@ import { pick } from 'es-toolkit/object'
 
 import { styleDetachmentChanges, type SceneNode } from '@open-pencil/scene-graph'
 
+import { createInstanceOverrideRecorder } from './instance-overrides'
 import { createLayoutModeActions } from './layout-mode'
 import { createNodePreviewActions } from './node-preview'
 import { createNudgeActions } from './nudge'
@@ -23,6 +24,7 @@ export function createNodeActions(ctx: EditorContext) {
   const layoutModeActions = createLayoutModeActions(ctx)
   const nudgeActions = createNudgeActions(ctx)
   const variableBindingActions = createVariableBindingActions(ctx)
+  const { recordInstanceOverrides } = createInstanceOverrideRecorder(ctx)
 
   function updateNode(id: string, changes: Partial<SceneNode>) {
     const node = ctx.graph.getNode(id)
@@ -35,6 +37,7 @@ export function createNodeActions(ctx: EditorContext) {
       ...pathTextEditChanges(node, changes)
     })
     ctx.graph.updateNode(id, nextChanges)
+    recordInstanceOverrides(id, Object.keys(changes))
     ctx.runLayoutForNode(id)
   }
 
@@ -52,15 +55,18 @@ export function createNodeActions(ctx: EditorContext) {
       Object.keys(nextChanges) as (keyof SceneNode)[]
     ) as Partial<SceneNode>
     ctx.graph.updateNode(id, nextChanges)
+    const overrides = recordInstanceOverrides(id, Object.keys(changes))
     ctx.runLayoutForNode(id)
     ctx.undo.push({
       label,
       forward: () => {
         ctx.graph.updateNode(id, nextChanges)
+        overrides?.redo()
         ctx.runLayoutForNode(id)
       },
       inverse: () => {
         ctx.graph.updateNode(id, previous)
+        overrides?.undo()
         ctx.runLayoutForNode(id)
       }
     })

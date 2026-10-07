@@ -9,6 +9,7 @@ import type { UndoEntry } from '@open-pencil/scene-graph/undo'
 import { assertNodeEditable } from './capabilities'
 import { restoreSubtree, snapshotSubtree } from './clipboard/subtree-history'
 import { collectNodePositions, pushPositionUndo } from './history/position'
+import { createInstanceOverrideRecorder } from './instance-overrides'
 import {
   restorePageFromSnapshot as restorePageSnapshot,
   snapshotPage as createPageSnapshot,
@@ -32,6 +33,8 @@ type ResizeOriginal = Rect &
   >
 
 export function createUndoActions(ctx: EditorContext) {
+  const { recordInstanceOverrides } = createInstanceOverrideRecorder(ctx)
+
   function commitMove(originals: Map<string, Vector>) {
     for (const id of originals.keys()) assertNodeEditable(ctx.graph, id)
     pushPositionUndo(ctx, 'Move', originals, collectNodePositions(ctx, originals.keys()))
@@ -114,17 +117,21 @@ export function createUndoActions(ctx: EditorContext) {
     const final: ResizeOriginal = hasGeometry
       ? createResizeSnapshot(node)
       : { x: node.x, y: node.y, width: node.width, height: node.height }
+    // A resized instance keeps its size when the main component changes.
+    const overrides = recordInstanceOverrides(nodeId, ['width', 'height'])
     ctx.undo.push({
       label: 'Resize',
       forward: () => {
         assertNodeEditable(ctx.graph, nodeId)
         // Geometric replay — keep the raw Figma payload (see commitResizePreview).
         ctx.graph.preserveSourceMetadataDuring(() => ctx.graph.updateNode(nodeId, final))
+        overrides?.redo()
         ctx.runLayoutForNode(nodeId)
       },
       inverse: () => {
         assertNodeEditable(ctx.graph, nodeId)
         ctx.graph.preserveSourceMetadataDuring(() => ctx.graph.updateNode(nodeId, original))
+        overrides?.undo()
         ctx.runLayoutForNode(nodeId)
       }
     })
@@ -195,14 +202,17 @@ export function createUndoActions(ctx: EditorContext) {
       Object.keys(restoredPrevious) as (keyof SceneNode)[]
     ) as Partial<SceneNode>
     if (isEqual(current, restoredPrevious)) return
+    const overrides = recordInstanceOverrides(nodeId, Object.keys(previous))
     ctx.undo.push({
       label,
       forward: () => {
         ctx.graph.updateNode(nodeId, current)
+        overrides?.redo()
         ctx.runLayoutForNode(nodeId)
       },
       inverse: () => {
         ctx.graph.updateNode(nodeId, restoredPrevious)
+        overrides?.undo()
         ctx.runLayoutForNode(nodeId)
       }
     })

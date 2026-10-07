@@ -1,5 +1,5 @@
 import type { SkiaRenderer } from '#core/canvas/renderer'
-import { clearSubtreePictureCache } from '#core/canvas/renderer/state'
+import { clearSubtreePictureCache, invalidateAllPictures } from '#core/canvas/renderer/state'
 import { fontManager } from '#core/text/fonts'
 
 function clearRetainedSceneState(r: SkiaRenderer): void {
@@ -26,12 +26,30 @@ function disposePathCaches(r: SkiaRenderer): void {
   r.glyphSilhouetteCache.clear()
 }
 
+function disposeImageCache(r: SkiaRenderer): void {
+  for (const img of r.imageCache.values()) img.delete()
+  r.imageCache.clear()
+}
+
+/**
+ * Drops everything derived from the documents rendered so far. `invalidateAllPictures` keeps
+ * the decoded images (keyed by image hash) and the vector and geometry paths (keyed by node
+ * id); a renderer reused for another document would paint it from them.
+ */
+export function clearDocumentCaches(r: SkiaRenderer): void {
+  if (r.destroyed) return
+  invalidateAllPictures(r)
+  disposeImageCache(r)
+  disposePathCaches(r)
+  r.textPictureGenerations.clear()
+  r.pendingFontNodes.clear()
+}
+
 export function destroyRenderer(r: SkiaRenderer): void {
   if (r.destroyed) return
   r.destroyed = true
 
-  for (const img of r.imageCache.values()) img.delete()
-  r.imageCache.clear()
+  disposeImageCache(r)
   disposePathCaches(r)
   r.fillPaint.delete()
   r.diamondGradientEffect?.delete()

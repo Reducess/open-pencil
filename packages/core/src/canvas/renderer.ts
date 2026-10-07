@@ -26,7 +26,7 @@ import { LabelParagraphCache } from './labels/paragraph-cache'
 import { labelHitOptions } from './labels/style'
 import * as RenderColors from './renderer/colors'
 import * as RendererFonts from './renderer/fonts'
-import { destroyRenderer } from './renderer/lifecycle'
+import { clearDocumentCaches, destroyRenderer } from './renderer/lifecycle'
 import { installRendererDomainMethods } from './renderer/methods'
 import { initializeRendererPaints } from './renderer/paints'
 import * as RenderPipeline from './renderer/pipeline'
@@ -487,6 +487,14 @@ export class SkiaRenderer {
 
   invalidateAllPictures(): void {
     RendererState.invalidateAllPictures(this)
+  }
+
+  /**
+   * Forgets every document rendered so far, including the image and path caches that
+   * `invalidateAllPictures` keeps. Call it before reusing the renderer for another document.
+   */
+  clearDocumentCaches(): void {
+    clearDocumentCaches(this)
   }
 
   invalidateNodePicture(nodeId: string): void {

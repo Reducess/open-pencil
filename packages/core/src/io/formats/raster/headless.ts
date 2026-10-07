@@ -44,7 +44,8 @@ export async function headlessRenderNodes(
   } = {}
 ): Promise<Uint8Array | null> {
   const { ck, renderer } = await getRenderer()
-  renderer.invalidateAllPictures()
+  // One renderer serves every document of the process: start each render from a clean slate.
+  renderer.clearDocumentCaches()
   const restoreTextMeasurer = await renderer.prepareForExport(graph, pageId, nodeIds)
   try {
     return renderNodesToImage(ck, renderer, graph, pageId, nodeIds, {
@@ -65,6 +66,7 @@ export async function headlessRenderThumbnail(
   height: number
 ): Promise<Uint8Array | null> {
   const { ck, renderer } = await getRenderer()
-  renderer.invalidateAllPictures()
+  // One renderer serves every document of the process: start each render from a clean slate.
+  renderer.clearDocumentCaches()
   return renderThumbnail(ck, renderer, graph, pageId, width, height)
 }

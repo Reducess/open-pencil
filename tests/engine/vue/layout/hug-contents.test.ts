@@ -85,4 +85,45 @@ describe('layout sizing controls', () => {
       layoutAlignSelf: 'AUTO'
     })
   })
+
+  test('fill follows the parent direction: grow along its primary axis, stretch across it', () => {
+    const child = node({})
+
+    expect(axisSizingPatchForNode(child, 'width', 'FILL', true, 'HORIZONTAL')).toEqual({
+      layoutGrow: 1
+    })
+    expect(axisSizingPatchForNode(child, 'height', 'FILL', true, 'HORIZONTAL')).toEqual({
+      layoutAlignSelf: 'STRETCH'
+    })
+    expect(axisSizingPatchForNode(child, 'width', 'FILL', true, 'VERTICAL')).toEqual({
+      layoutAlignSelf: 'STRETCH'
+    })
+    expect(axisSizingPatchForNode(child, 'height', 'FILL', true, 'VERTICAL')).toEqual({
+      layoutGrow: 1
+    })
+  })
+
+  test('reading fill follows the parent direction too', () => {
+    const growing = node({ layoutGrow: 1 })
+    const stretched = node({ layoutAlignSelf: 'STRETCH' })
+
+    expect(widthSizingForNode(growing, true, 'VERTICAL')).toBe('FIXED')
+    expect(heightSizingForNode(growing, true, 'VERTICAL')).toBe('FILL')
+    expect(widthSizingForNode(stretched, true, 'VERTICAL')).toBe('FILL')
+    expect(heightSizingForNode(stretched, true, 'VERTICAL')).toBe('FIXED')
+    expect(widthSizingForNode(growing, true, 'HORIZONTAL')).toBe('FILL')
+    expect(heightSizingForNode(stretched, true, 'HORIZONTAL')).toBe('FILL')
+  })
+
+  test('leaving fill in a vertical parent clears the field the engine reads', () => {
+    const filled = node({ childIds: ['child'], layoutGrow: 1, layoutAlignSelf: 'STRETCH' })
+
+    expect(axisSizingPatchForNode(filled, 'width', 'FIXED', true, 'VERTICAL')).toEqual({
+      layoutAlignSelf: 'AUTO'
+    })
+    expect(axisSizingPatchForNode(filled, 'height', 'HUG', true, 'VERTICAL')).toEqual({
+      primaryAxisSizing: 'HUG',
+      layoutGrow: 0
+    })
+  })
 })

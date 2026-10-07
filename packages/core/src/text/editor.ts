@@ -65,11 +65,22 @@ export class TextEditor {
     return s
   }
 
-  private currentLineMetrics() {
+  /**
+   * Bounds of the line the caret is on. CanvasKit has no line for the position after the last
+   * character (`getLineNumberAt(text.length)` is -1), which is where the caret sits when editing
+   * starts and after End: that position belongs to the last line, or to the empty line a
+   * trailing line break opens.
+   */
+  private currentLineMetrics(): { startIndex: number; endExcludingWhitespaces: number } | null {
     const s = this._state
     if (!s?.paragraph) return null
     const lineNum = s.paragraph.getLineNumberAt(s.cursor)
-    return lineNum < 0 ? null : s.paragraph.getLineMetricsAt(lineNum)
+    if (lineNum >= 0) return s.paragraph.getLineMetricsAt(lineNum)
+    if (s.cursor < s.text.length) return null
+    const end = s.text.length
+    if (end === 0 || s.text.endsWith('\n')) return { startIndex: end, endExcludingWhitespaces: end }
+    const last = s.paragraph.getLineMetrics().at(-1)
+    return last ? { startIndex: last.startIndex, endExcludingWhitespaces: end } : null
   }
 
   private collapseSelectionTo(edge: 0 | 1): boolean {

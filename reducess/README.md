@@ -18,6 +18,7 @@ Patches carried on top of upstream:
 | 10 | `packages/vue/src/canvas/surface/kit-loader.ts`, `lifecycle.ts`, `use.ts`, `types.ts` | `onReady` fired even when no WebGL surface could be created, and a CanvasKit load failure was an unhandled rejection. `useCanvas` now takes `onError({ reason: 'canvaskit' \| 'surface', cause? })`, returns `status` / `error` refs, and calls `onReady` only when a surface exists |
 | 11 | `packages/core/src/editor/types.ts` (`EditorOptions.naming`), `shapes.ts`, `shapes/pen.ts`, `structure/container-wrap.ts`, `structure/auto-layout-wrap.ts`, `clipboard.ts`, `packages/vue/src/shared/input/duplicate-drag.ts` | layer names were hard-coded in English (`Rectangle`, `Frame`, `Group`, the `Vector` that `penCommit` wrote after creating the node, the ` copy` suffix). `createEditor({ naming: { defaultName(type), copyName(name) } })` lets the host supply them; without it nothing changes. Not covered: boolean operation and flatten labels |
 | 12 | `packages/core/src/canvas/renderer/lifecycle.ts` (`SkiaRenderer.clearDocumentCaches`), `packages/core/src/io/formats/raster/headless.ts` | `headlessRenderNodes` / `headlessRenderThumbnail` reuse one renderer per process and `invalidateAllPictures` keeps its image cache (by hash) and path caches (by node id), so a document was painted from the previous one's content. The headless entry points now start from `clearDocumentCaches()`, which is public for anyone holding a renderer |
+| 13 | `packages/core/src/canvas/text/render-issues.ts` (`SkiaRenderer.textRenderIssues`, `headlessRenderNodes({ onTextIssues })`) | text whose font or glyph coverage is missing is substituted or left out of the render without an error. The renderer now lists those nodes with their readiness (`pending`, `substituted`, `exhausted`) and the faces they ask for; rendering itself is unchanged |
 
 Building needs Node >= 22 on PATH (tsdown) even when driven by bun.
 
@@ -39,12 +40,10 @@ Fork-only package `@open-pencil/cena`: the JSON envelope Mineer stores for a des
 - On an engine upgrade, `packages/cena/tests/node-fields.test.ts` fails until `MOTOR_VERSAO` is
   bumped and the migration step is written in `packages/cena/src/migrate.ts`.
 
-No engine source was patched for this. Engine behaviour found along the way that a server has to
-work around (candidates for patches 05+):
+No engine source was patched for this. Engine behaviour found along the way that a server still
+has to work around (the renderer cache leak and the silent text skip are now patches 12 and 13):
 
 | Where | What |
 |---|---|
 | `packages/core/src/canvas/renderer/fonts.ts` (`loadFonts`) | The `Typeface` from `MakeFreeTypeFaceFromData` is never deleted: ~0.4 MB of WASM memory leaks per `SkiaRenderer` created and destroyed |
-| `packages/core/src/io/formats/raster/headless.ts` | The process-wide renderer keeps `imageCache` (by image hash) and the vector/geometry path caches (by node id) between calls; `invalidateAllPictures` does not clear them, so a second document with the same ids or hashes is painted from the first one's caches |
 | `packages/core/src/text/fonts.ts` (`FontManager`) | Fonts can be registered but not unregistered; a second file for the same family and style is added next to the first instead of replacing it |
-| `packages/core/src/canvas/scene.ts` (`renderText`) | A text node whose font or glyph coverage is missing is skipped without any error |

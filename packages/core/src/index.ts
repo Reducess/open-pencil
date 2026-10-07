@@ -134,7 +134,7 @@ export type {
   AnalyzeClustersResult,
   TypographyStyle
 } from './rpc'
-export { SkiaRenderer, type RenderOverlays } from './canvas'
+export { SkiaRenderer, type RenderOverlays, type TextRenderIssue } from './canvas'
 export { LabelCache, type CachedSection, type CachedComponent } from './canvas/labels/cache'
 export {
   RenderProfiler,

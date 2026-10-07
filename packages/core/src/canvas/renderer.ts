@@ -35,6 +35,7 @@ import * as RendererState from './renderer/state'
 import * as RenderText from './text'
 import { createGlyphSilhouetteCache } from './text/derived'
 import { TextPreparationCache } from './text/preparation-cache'
+import { collectTextRenderIssues, type TextRenderIssue } from './text/render-issues'
 export type { MeasurementMode, RenderOverlays, RulerTheme } from './renderer/types'
 import type {
   Image as CKImage,
@@ -649,6 +650,14 @@ export class SkiaRenderer {
 
   nodeFontReadiness(node: SceneNode): RenderText.NodeFontReadiness {
     return RenderText.nodeFontReadiness(this, node)
+  }
+
+  /**
+   * Visible text nodes under `rootIds` that this renderer cannot draw with the fonts they ask
+   * for. Such text is skipped or substituted without an error; ask after a render.
+   */
+  textRenderIssues(graph: SceneGraph, rootIds: string | readonly string[]): TextRenderIssue[] {
+    return collectTextRenderIssues(this, graph, rootIds)
   }
 
   isNodeFontLoaded(node: SceneNode): boolean {

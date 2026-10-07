@@ -1,8 +1,16 @@
 import { DEFAULT_TEXT_HEIGHT, DEFAULT_TEXT_WIDTH } from '@open-pencil/core/constants'
 import type { DrawParent, Editor } from '@open-pencil/core/editor'
+import type { Vector } from '@open-pencil/scene-graph/primitives'
 
 import { TOOL_TO_NODE } from '#vue/shared/input/types'
 import type { DragDraw, DragState } from '#vue/shared/input/types'
+
+/** Canvas point in the parent's space, on the pixel grid when that preference is enabled. */
+function drawPoint(editor: Editor, parent: DrawParent, cx: number, cy: number): Vector {
+  const point = parent.toLocal({ x: cx, y: cy })
+  if (!editor.state.snappingPreferences.pixelGrid) return point
+  return { x: Math.round(point.x), y: Math.round(point.y) }
+}
 
 export function startTextDraw(
   cx: number,
@@ -11,7 +19,7 @@ export function startTextDraw(
   setDrag: (d: DragState) => void
 ) {
   const parent = editor.resolveDrawParent(cx, cy, 'TEXT')
-  const origin = parent.toLocal({ x: cx, y: cy })
+  const origin = drawPoint(editor, parent, cx, cy)
   editor.undo.beginBatch('Create text')
   const nodeId = editor.createShape('TEXT', origin.x, origin.y, 0, 0, parent.parentId)
   editor.graph.updateNode(nodeId, { text: '' })
@@ -29,7 +37,7 @@ export function startShapeDraw(
   if (!nodeType) return
 
   const parent = editor.resolveDrawParent(cx, cy, nodeType)
-  const origin = parent.toLocal({ x: cx, y: cy })
+  const origin = drawPoint(editor, parent, cx, cy)
   editor.undo.beginBatch('Create shape')
   const nodeId = editor.createShape(nodeType, origin.x, origin.y, 0, 0, parent.parentId)
   editor.select([nodeId])
@@ -65,7 +73,7 @@ function createDraw(
   parent: DrawParent
 ): DragDraw {
   const graph = editor.graph
-  const toParent = (cx: number, cy: number) => parent.toLocal({ x: cx, y: cy })
+  const toParent = (cx: number, cy: number) => drawPoint(editor, parent, cx, cy)
   const preview = editor.beginNodePreview('Draw dimensions')
   let finished = false
 

@@ -326,6 +326,8 @@ describe('draw creation previews', () => {
     test('follows the pointer inside rotated and nested frames', () => {
       const editor = createEditor()
       try {
+        // Whole pixels in a rotated parent are not whole pixels on the canvas.
+        editor.state.snappingPreferences = { ...editor.state.snappingPreferences, pixelGrid: false }
         const page = editor.state.currentPageId
         const outer = editor.graph.createNode('FRAME', page, {
           x: 100,
@@ -355,6 +357,71 @@ describe('draw creation previews', () => {
         expect(corners[0].y).toBeCloseTo(400, 6)
         expect(corners[1].x).toBeCloseTo(430, 6)
         expect(corners[1].y).toBeCloseTo(460, 6)
+      } finally {
+        editor.dispose()
+      }
+    })
+  })
+
+  describe('pixel grid', () => {
+    test('snaps creation position and size to whole pixels in the parent space', () => {
+      const editor = createEditor()
+      try {
+        const frame = editor.graph.createNode('FRAME', editor.state.currentPageId, {
+          x: 40.5,
+          y: 60.25,
+          width: 400,
+          height: 400
+        })
+        const drag = start(editor, 'RECTANGLE', 100.4, 100.6)
+        expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+          parentId: frame.id,
+          x: 60,
+          y: 40
+        })
+        handleDrawMove(drag, 220.3, 170.7, false)
+        expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+          x: 60,
+          y: 40,
+          width: 120,
+          height: 70
+        })
+        handleDrawMove(drag, 70.2, 80.9, true)
+        drag.commit()
+        expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+          x: 30,
+          y: 10,
+          width: 30,
+          height: 30
+        })
+      } finally {
+        editor.dispose()
+      }
+    })
+
+    test('keeps sub-pixel geometry when the preference is off', () => {
+      const editor = createEditor()
+      try {
+        editor.state.snappingPreferences = { ...editor.state.snappingPreferences, pixelGrid: false }
+        const drag = start(editor, 'RECTANGLE', 100.4, 100.6)
+        handleDrawMove(drag, 220.5, 170.75, false)
+        drag.commit()
+        const node = editor.graph.getNode(drag.nodeId)
+        expect(node?.x).toBeCloseTo(100.4, 9)
+        expect(node?.y).toBeCloseTo(100.6, 9)
+        expect(node?.width).toBeCloseTo(120.1, 9)
+        expect(node?.height).toBeCloseTo(70.15, 9)
+      } finally {
+        editor.dispose()
+      }
+    })
+
+    test('snaps the click position of point text', () => {
+      const editor = createEditor()
+      try {
+        const drag = start(editor, 'TEXT', 12.7, 48.2)
+        drag.commit()
+        expect(editor.graph.getNode(drag.nodeId)).toMatchObject({ x: 13, y: 48 })
       } finally {
         editor.dispose()
       }

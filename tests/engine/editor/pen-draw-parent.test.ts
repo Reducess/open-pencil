@@ -64,4 +64,27 @@ describe('pen commit parent', () => {
       editor.dispose()
     }
   })
+
+  test('pen vertices follow the pixel grid preference', () => {
+    const editor = createEditor()
+    try {
+      editor.penAddVertex(10.4, 20.6)
+      editor.penAddVertex(110.2, 60.7)
+      editor.penSetKnotPosition(120.6, 70.2)
+      editor.penCommit(false)
+      const [id] = [...editor.state.selectedIds]
+      expect(editor.graph.getNode(id)).toMatchObject({ x: 10, y: 21, width: 111, height: 49 })
+
+      editor.state.snappingPreferences = { ...editor.state.snappingPreferences, pixelGrid: false }
+      editor.setTool('PEN')
+      editor.penAddVertex(10.4, 20.6)
+      editor.penAddVertex(110.2, 60.7)
+      editor.penCommit(false)
+      const [free] = [...editor.state.selectedIds]
+      expect(editor.graph.getNode(free)?.x).toBeCloseTo(10.4, 9)
+      expect(editor.graph.getNode(free)?.width).toBeCloseTo(99.8, 9)
+    } finally {
+      editor.dispose()
+    }
+  })
 })

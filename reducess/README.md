@@ -11,6 +11,7 @@ Patches carried on top of upstream:
 | 03 | `packages/core/src/io/formats/svg/export.ts` | exported groups carry `id` and `data-name` |
 | 04 | `packages/core/src/io/formats/svg/defs.ts` | linear gradient start/end were mirrored relative to the canvas renderer |
 | 05 | `packages/core/src/editor/shapes/draw-parent.ts`, `packages/vue/src/shared/input/draw.ts`, `packages/core/src/editor/shapes/pen.ts` | a shape, text, frame or pen path drawn over a frame was created as a page child; it is now created inside the innermost unlocked, visible frame of the frontmost stack under the start point, with geometry in that parent's space (`editor.resolveDrawParent`) |
+| 06 | `packages/vue/src/shared/input/draw.ts`, `packages/core/src/editor/shapes/pen.ts` | drawing ignored `snappingPreferences.pixelGrid`: created nodes got fractional position and size at any zoom other than 100%; creation points and pen anchors now land on whole pixels while the preference is on |
 
 Building needs Node >= 22 on PATH (tsdown) even when driven by bun.
 

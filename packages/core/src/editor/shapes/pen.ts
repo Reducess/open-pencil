@@ -61,7 +61,14 @@ function applyAnchorTangent(
 }
 
 export function createPenActions(ctx: EditorContext, createShape: CreateShape) {
-  function penAddVertex(x: number, y: number) {
+  /** Anchors land on whole pixels when the pixel grid preference is enabled. */
+  function anchorPoint(x: number, y: number): Vector {
+    if (!ctx.state.snappingPreferences.pixelGrid) return { x, y }
+    return { x: Math.round(x), y: Math.round(y) }
+  }
+
+  function penAddVertex(rawX: number, rawY: number) {
+    const { x, y } = anchorPoint(rawX, rawY)
     if (!ctx.state.penState) {
       ctx.state.penState = {
         vertices: [{ x, y }],
@@ -145,8 +152,9 @@ export function createPenActions(ctx: EditorContext, createShape: CreateShape) {
     const ps = ctx.state.penState
     const isClosing = !!ps.pendingClose && ps.vertices.length > 2
     const anchorIndex = isClosing ? 0 : ps.vertices.length - 1
-    ps.vertices[anchorIndex].x = x
-    ps.vertices[anchorIndex].y = y
+    const anchor = anchorPoint(x, y)
+    ps.vertices[anchorIndex].x = anchor.x
+    ps.vertices[anchorIndex].y = anchor.y
     ctx.requestRender()
   }
 

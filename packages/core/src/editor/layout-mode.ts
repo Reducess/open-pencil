@@ -12,6 +12,7 @@ export function createLayoutModeActions(ctx: EditorContext) {
     if (!node) return
 
     const previous = captureLayoutState(node)
+    const previousChildren = captureChildGeometry(ctx, id)
     const updates = layoutModeUpdates(ctx, node, id, mode)
 
     ctx.graph.updateNode(id, updates)
@@ -31,6 +32,10 @@ export function createLayoutModeActions(ctx: EditorContext) {
       },
       inverse: () => {
         ctx.graph.updateNode(id, previous)
+        // Layout moved (and may have resized) the children; the frame alone is not the old state.
+        for (const child of previousChildren) {
+          if (ctx.graph.getNode(child.id)) ctx.graph.updateNode(child.id, child.geometry)
+        }
         ctx.runLayoutForNode(id)
       }
     })
@@ -58,6 +63,15 @@ function captureLayoutState(node: SceneNode): Partial<SceneNode> {
     width: node.width,
     height: node.height
   }
+}
+
+type ChildGeometry = { id: string; geometry: Pick<SceneNode, 'x' | 'y' | 'width' | 'height'> }
+
+function captureChildGeometry(ctx: EditorContext, id: string): ChildGeometry[] {
+  return ctx.graph.getChildren(id).map((child) => ({
+    id: child.id,
+    geometry: { x: child.x, y: child.y, width: child.width, height: child.height }
+  }))
 }
 
 function pickState(node: SceneNode, keys: (keyof SceneNode)[]): Partial<SceneNode> {

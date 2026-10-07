@@ -20,6 +20,8 @@ export interface DragDraw {
   startX: number
   startY: number
   nodeId: string
+  /** Maps a canvas point into the drawn node's parent space. Defaults to canvas space. */
+  toParent?: (cx: number, cy: number) => Vector
   update: (changes: Partial<SceneNode>) => void
   commit: () => void
   cancel: () => void

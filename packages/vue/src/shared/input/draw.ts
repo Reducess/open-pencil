@@ -1,5 +1,5 @@
 import { DEFAULT_TEXT_HEIGHT, DEFAULT_TEXT_WIDTH } from '@open-pencil/core/constants'
-import type { Editor } from '@open-pencil/core/editor'
+import type { DrawParent, Editor } from '@open-pencil/core/editor'
 
 import { TOOL_TO_NODE } from '#vue/shared/input/types'
 import type { DragDraw, DragState } from '#vue/shared/input/types'
@@ -10,11 +10,13 @@ export function startTextDraw(
   editor: Editor,
   setDrag: (d: DragState) => void
 ) {
+  const parent = editor.resolveDrawParent(cx, cy, 'TEXT')
+  const origin = parent.toLocal({ x: cx, y: cy })
   editor.undo.beginBatch('Create text')
-  const nodeId = editor.createShape('TEXT', cx, cy, 0, 0)
+  const nodeId = editor.createShape('TEXT', origin.x, origin.y, 0, 0, parent.parentId)
   editor.graph.updateNode(nodeId, { text: '' })
   editor.select([nodeId])
-  setDrag(createDraw(editor, nodeId, cx, cy))
+  setDrag(createDraw(editor, nodeId, cx, cy, parent))
 }
 
 export function startShapeDraw(
@@ -26,15 +28,20 @@ export function startShapeDraw(
   const nodeType = TOOL_TO_NODE[editor.state.activeTool]
   if (!nodeType) return
 
+  const parent = editor.resolveDrawParent(cx, cy, nodeType)
+  const origin = parent.toLocal({ x: cx, y: cy })
   editor.undo.beginBatch('Create shape')
-  const nodeId = editor.createShape(nodeType, cx, cy, 0, 0)
+  const nodeId = editor.createShape(nodeType, origin.x, origin.y, 0, 0, parent.parentId)
   editor.select([nodeId])
-  setDrag(createDraw(editor, nodeId, cx, cy))
+  setDrag(createDraw(editor, nodeId, cx, cy, parent))
 }
 
 export function handleDrawMove(d: DragDraw, cx: number, cy: number, shiftKey: boolean) {
-  let w = cx - d.startX
-  let h = cy - d.startY
+  // Geometry is written in the parent's space, so the box follows a rotated or nested frame.
+  const start = d.toParent?.(d.startX, d.startY) ?? { x: d.startX, y: d.startY }
+  const current = d.toParent?.(cx, cy) ?? { x: cx, y: cy }
+  let w = current.x - start.x
+  let h = current.y - start.y
 
   if (shiftKey) {
     const size = Math.max(Math.abs(w), Math.abs(h))
@@ -43,15 +50,22 @@ export function handleDrawMove(d: DragDraw, cx: number, cy: number, shiftKey: bo
   }
 
   d.update({
-    x: w < 0 ? d.startX + w : d.startX,
-    y: h < 0 ? d.startY + h : d.startY,
+    x: w < 0 ? start.x + w : start.x,
+    y: h < 0 ? start.y + h : start.y,
     width: Math.abs(w),
     height: Math.abs(h)
   })
 }
 
-function createDraw(editor: Editor, nodeId: string, startX: number, startY: number): DragDraw {
+function createDraw(
+  editor: Editor,
+  nodeId: string,
+  startX: number,
+  startY: number,
+  parent: DrawParent
+): DragDraw {
   const graph = editor.graph
+  const toParent = (cx: number, cy: number) => parent.toLocal({ x: cx, y: cy })
   const preview = editor.beginNodePreview('Draw dimensions')
   let finished = false
 
@@ -96,7 +110,7 @@ function createDraw(editor: Editor, nodeId: string, startX: number, startY: numb
 
   // Creation itself is already an edit: avoid rebuilding the backing on the first held frame.
   try {
-    preview.update(nodeId, { x: startX, y: startY })
+    preview.update(nodeId, toParent(startX, startY))
   } catch (error) {
     cancel()
     throw error
@@ -107,6 +121,7 @@ function createDraw(editor: Editor, nodeId: string, startX: number, startY: numb
     startX,
     startY,
     nodeId,
+    toParent,
     update: (changes) => {
       if (!finished) preview.update(nodeId, changes)
     },

@@ -10,6 +10,7 @@ Patches carried on top of upstream:
 | 02 | `packages/vue/src/canvas/CanvasSurface.vue` | canvas ref was handed over after `useCanvas` mounted, so `CanvasRoot`/`CanvasSurface` never initialised |
 | 03 | `packages/core/src/io/formats/svg/export.ts` | exported groups carry `id` and `data-name` |
 | 04 | `packages/core/src/io/formats/svg/defs.ts` | linear gradient start/end were mirrored relative to the canvas renderer |
+| 05 | `packages/core/src/editor/shapes/draw-parent.ts`, `packages/vue/src/shared/input/draw.ts`, `packages/core/src/editor/shapes/pen.ts` | a shape, text, frame or pen path drawn over a frame was created as a page child; it is now created inside the innermost unlocked, visible frame of the frontmost stack under the start point, with geometry in that parent's space (`editor.resolveDrawParent`) |
 
 Building needs Node >= 22 on PATH (tsdown) even when driven by bun.
 

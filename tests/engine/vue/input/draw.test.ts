@@ -2,18 +2,20 @@ import { describe, expect, test } from 'bun:test'
 
 import { createEditor, type Editor, type Tool } from '@open-pencil/core/editor'
 import { SceneGraph } from '@open-pencil/scene-graph'
+import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+import Matrix from '@open-pencil/scene-graph/matrix'
 
 import { handleDrawMove, startShapeDraw, startTextDraw } from '#vue/shared/input/draw'
 import type { DragState } from '#vue/shared/input/types'
 
-function start(editor: Editor, tool: Tool = 'FRAME') {
+function start(editor: Editor, tool: Tool = 'FRAME', x = 100, y = 100) {
   const state: { drag: DragState | null } = { drag: null }
   editor.setTool(tool)
   const setDrag = (drag: DragState) => {
     state.drag = drag
   }
-  if (tool === 'TEXT') startTextDraw(100, 100, editor, setDrag)
-  else startShapeDraw(100, 100, editor, setDrag)
+  if (tool === 'TEXT') startTextDraw(x, y, editor, setDrag)
+  else startShapeDraw(x, y, editor, setDrag)
   const drag = state.drag
   if (drag?.type !== 'draw') throw new Error('Expected drawing interaction')
   return drag
@@ -157,5 +159,205 @@ describe('draw creation previews', () => {
     } finally {
       editor.dispose()
     }
+  })
+
+  describe('drawing over a frame', () => {
+    function worldCorners(editor: Editor, nodeId: string) {
+      const node = editor.graph.getNode(nodeId)
+      if (!node) throw new Error('Expected drawn node')
+      const matrix = getWorldMatrix(node, editor.graph)
+      return {
+        start: Matrix.mapPoint(matrix, { x: 0, y: 0 }),
+        end: Matrix.mapPoint(matrix, { x: node.width, y: node.height })
+      }
+    }
+
+    test('creates the node inside the frame with parent-relative geometry', () => {
+      for (const tool of ['RECTANGLE', 'FRAME', 'TEXT'] as const) {
+        const editor = createEditor()
+        try {
+          const page = editor.state.currentPageId
+          const frame = editor.graph.createNode('FRAME', page, {
+            x: 40,
+            y: 60,
+            width: 400,
+            height: 400
+          })
+          const drag = start(editor, tool)
+          expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+            parentId: frame.id,
+            x: 60,
+            y: 40
+          })
+          handleDrawMove(drag, 220, 170, false)
+          expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+            parentId: frame.id,
+            x: 60,
+            y: 40
+          })
+          handleDrawMove(drag, 70, 80, false)
+          drag.commit()
+          // A text box takes its dragged size on commit; shapes preview it live.
+          expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+            x: 30,
+            y: 20,
+            width: 30,
+            height: 20
+          })
+          expect(frame.childIds).toContain(drag.nodeId)
+          expect(editor.graph.getNode(page)?.childIds).not.toContain(drag.nodeId)
+        } finally {
+          editor.dispose()
+        }
+      }
+    })
+
+    test('undo and redo keep the drawn node in the frame', () => {
+      const editor = createEditor()
+      try {
+        const frame = editor.graph.createNode('FRAME', editor.state.currentPageId, {
+          x: 40,
+          y: 60,
+          width: 400,
+          height: 400
+        })
+        const drag = start(editor, 'RECTANGLE')
+        handleDrawMove(drag, 220, 170, false)
+        drag.commit()
+        editor.undoAction()
+        expect(editor.graph.getNode(drag.nodeId)).toBeUndefined()
+        expect(frame.childIds).toEqual([])
+        expect(editor.undo.canUndo).toBe(false)
+        editor.redoAction()
+        expect(editor.graph.getNode(drag.nodeId)).toMatchObject({
+          parentId: frame.id,
+          x: 60,
+          y: 40,
+          width: 120,
+          height: 70
+        })
+      } finally {
+        editor.dispose()
+      }
+    })
+
+    test('picks the innermost frame of the frontmost stack', () => {
+      const editor = createEditor()
+      try {
+        const page = editor.state.currentPageId
+        editor.graph.createNode('FRAME', page, { x: 0, y: 0, width: 500, height: 500 })
+        const front = editor.graph.createNode('FRAME', page, {
+          x: 50,
+          y: 50,
+          width: 300,
+          height: 300
+        })
+        const inner = editor.graph.createNode('FRAME', front.id, {
+          x: 20,
+          y: 20,
+          width: 200,
+          height: 200
+        })
+        const group = editor.graph.createNode('GROUP', inner.id, {
+          x: 10,
+          y: 10,
+          width: 100,
+          height: 100
+        })
+        editor.graph.createNode('RECTANGLE', group.id, { x: 0, y: 0, width: 100, height: 100 })
+
+        const nested = start(editor, 'RECTANGLE')
+        expect(editor.graph.getNode(nested.nodeId)).toMatchObject({
+          parentId: inner.id,
+          x: 30,
+          y: 30
+        })
+        nested.commit()
+
+        const outside = start(editor, 'ELLIPSE', 320, 320)
+        expect(editor.graph.getNode(outside.nodeId)).toMatchObject({
+          parentId: front.id,
+          x: 270,
+          y: 270
+        })
+        outside.commit()
+      } finally {
+        editor.dispose()
+      }
+    })
+
+    test('skips hidden and locked frames, and never nests a section in a frame', () => {
+      const editor = createEditor()
+      try {
+        const page = editor.state.currentPageId
+        const back = editor.graph.createNode('FRAME', page, { x: 0, y: 0, width: 500, height: 500 })
+        const locked = editor.graph.createNode('FRAME', page, {
+          x: 50,
+          y: 50,
+          width: 300,
+          height: 300,
+          locked: true
+        })
+        editor.graph.createNode('FRAME', locked.id, { x: 0, y: 0, width: 300, height: 300 })
+        editor.graph.createNode('FRAME', page, {
+          x: 50,
+          y: 50,
+          width: 300,
+          height: 300,
+          visible: false
+        })
+
+        const shape = start(editor, 'RECTANGLE')
+        expect(editor.graph.getNode(shape.nodeId)?.parentId).toBe(back.id)
+        shape.commit()
+
+        const section = start(editor, 'SECTION')
+        expect(editor.graph.getNode(section.nodeId)).toMatchObject({
+          parentId: page,
+          x: 100,
+          y: 100
+        })
+        section.commit()
+      } finally {
+        editor.dispose()
+      }
+    })
+
+    test('follows the pointer inside rotated and nested frames', () => {
+      const editor = createEditor()
+      try {
+        const page = editor.state.currentPageId
+        const outer = editor.graph.createNode('FRAME', page, {
+          x: 100,
+          y: 100,
+          width: 600,
+          height: 600,
+          rotation: 30
+        })
+        const inner = editor.graph.createNode('FRAME', outer.id, {
+          x: 100,
+          y: 100,
+          width: 400,
+          height: 400,
+          rotation: -75,
+          flipX: true
+        })
+        const drag = start(editor, 'RECTANGLE', 400, 400)
+        expect(editor.graph.getNode(drag.nodeId)?.parentId).toBe(inner.id)
+        handleDrawMove(drag, 430, 460, false)
+        drag.commit()
+
+        const node = editor.graph.getNode(drag.nodeId)
+        expect(node?.rotation).toBe(0)
+        const { start: first, end: last } = worldCorners(editor, drag.nodeId)
+        const corners = [first, last].sort((a, b) => a.x - b.x)
+        expect(corners[0].x).toBeCloseTo(400, 6)
+        expect(corners[0].y).toBeCloseTo(400, 6)
+        expect(corners[1].x).toBeCloseTo(430, 6)
+        expect(corners[1].y).toBeCloseTo(460, 6)
+      } finally {
+        editor.dispose()
+      }
+    })
   })
 })

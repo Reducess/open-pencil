@@ -8,6 +8,7 @@ import {
   SECTION_DEFAULT_STROKE
 } from '#core/constants'
 
+import { findDrawParent, type DrawParent } from './shapes/draw-parent'
 import { createFramePresetActions } from './shapes/frame-presets'
 import { createPenActions } from './shapes/pen'
 import { adoptNodesIntoSection as adoptNodesIntoSectionImpl } from './shapes/section-adopt'
@@ -81,6 +82,11 @@ export function createShapeActions(ctx: EditorContext) {
     return id
   }
 
+  /** Container that adopts a node of `type` drawn starting at a canvas point. */
+  function resolveDrawParent(x: number, y: number, type: NodeType): DrawParent {
+    return findDrawParent(ctx.graph, ctx.state.currentPageId, { x, y }, type)
+  }
+
   const penActions = createPenActions(ctx, createShape)
   const framePresetActions = createFramePresetActions(ctx, createShape)
 
@@ -90,6 +96,7 @@ export function createShapeActions(ctx: EditorContext) {
 
   return {
     createShape,
+    resolveDrawParent,
     ...penActions,
     ...framePresetActions,
     adoptNodesIntoSection: (sectionId: string) => adoptNodesIntoSectionImpl(ctx, sectionId),

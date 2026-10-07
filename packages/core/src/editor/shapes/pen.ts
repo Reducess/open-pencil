@@ -7,6 +7,7 @@ import type {
 import type { Vector } from '@open-pencil/scene-graph/primitives'
 
 import { BLACK } from '#core/constants'
+import { findDrawParent } from '#core/editor/shapes/draw-parent'
 import type { EditorContext } from '#core/editor/types'
 import { computeAccurateBounds } from '#core/vector'
 
@@ -172,12 +173,21 @@ export function createPenActions(ctx: EditorContext, createShape: CreateShape) {
       ? [{ windingRule: 'NONZERO', loops: [ps.segments.map((_, i) => i)] }]
       : []
 
+    // The path is drawn in canvas space; the node is born inside the container under its first
+    // vertex, so vertices and tangents move into that container's local space.
+    const parent = findDrawParent(ctx.graph, ctx.state.currentPageId, ps.vertices[0], 'VECTOR')
+    const localOrigin = parent.toLocal({ x: 0, y: 0 })
+    const toLocalVector = (vector: Vector): Vector => {
+      const mapped = parent.toLocal(vector)
+      return { x: mapped.x - localOrigin.x, y: mapped.y - localOrigin.y }
+    }
+
     const network: VectorNetwork = {
-      vertices: ps.vertices.map((v) => ({ ...v })),
+      vertices: ps.vertices.map((v) => ({ ...v, ...parent.toLocal(v) })),
       segments: ps.segments.map((s) => ({
         ...s,
-        tangentStart: { ...s.tangentStart },
-        tangentEnd: { ...s.tangentEnd }
+        tangentStart: toLocalVector(s.tangentStart),
+        tangentEnd: toLocalVector(s.tangentEnd)
       })),
       regions
     }
@@ -201,7 +211,14 @@ export function createPenActions(ctx: EditorContext, createShape: CreateShape) {
       ? ps.resumedStrokes.map((s) => ({ ...s }))
       : [{ ...PEN_DEFAULT_STROKE }]
 
-    const nodeId = createShape('VECTOR', bounds.x, bounds.y, bounds.width, bounds.height)
+    const nodeId = createShape(
+      'VECTOR',
+      bounds.x,
+      bounds.y,
+      bounds.width,
+      bounds.height,
+      parent.parentId
+    )
     ctx.graph.updateNode(nodeId, {
       vectorNetwork: normalizedNetwork,
       name: 'Vector',

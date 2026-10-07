@@ -453,6 +453,26 @@ export class SceneGraph {
     if (node) this.applyNodeChanges(node, changes, absent)
   }
 
+  /**
+   * Keeps `instanceIndex` in step with a change of `componentId` or of `type` — a detached
+   * instance that becomes an instance again (undo) has to be found by its component.
+   */
+  private reindexInstance(node: SceneNode, changes: Partial<SceneNode>): void {
+    const previous = node.type === 'INSTANCE' ? node.componentId : null
+    const nextType = changes.type ?? node.type
+    const nextComponentId = 'componentId' in changes ? changes.componentId : node.componentId
+    const next = nextType === 'INSTANCE' ? (nextComponentId ?? null) : null
+    if (previous === next) return
+    if (previous) this.instanceIndex.get(previous)?.delete(node.id)
+    if (!next) return
+    let set = this.instanceIndex.get(next)
+    if (!set) {
+      set = new Set()
+      this.instanceIndex.set(next, set)
+    }
+    set.add(node.id)
+  }
+
   private applyNodeChanges(
     node: SceneNode,
     changes: Partial<SceneNode>,
@@ -469,21 +489,7 @@ export class SceneGraph {
     // Fills, strokes, effects, plugin data changes do NOT affect absolute position.
     const affectsLayout = Object.keys(changes).some((k) => SceneGraph.LAYOUT_AFFECTING_KEYS.has(k))
     if (affectsLayout) this.absPosCache.clear()
-    if (
-      node.type === 'INSTANCE' &&
-      'componentId' in changes &&
-      changes.componentId !== node.componentId
-    ) {
-      if (node.componentId) this.instanceIndex.get(node.componentId)?.delete(id)
-      if (changes.componentId) {
-        let set = this.instanceIndex.get(changes.componentId)
-        if (!set) {
-          set = new Set()
-          this.instanceIndex.set(changes.componentId, set)
-        }
-        set.add(id)
-      }
-    }
+    this.reindexInstance(node, changes)
     if (node.type === 'TEXT') invalidateTextCaches(node, changes)
     if (this.sourceMetadataPreservationDepth === 0) {
       markSourceFieldsEdited(node, Object.keys(changes))

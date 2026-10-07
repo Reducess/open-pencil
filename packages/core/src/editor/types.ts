@@ -127,6 +127,8 @@ export interface EditorEvents extends SceneGraphEvents {
   'graph:replaced': (graph: SceneGraph) => void
   'document:color-space-changed': (colorSpace: DocumentColorSpace) => void
   'history:changed': () => void
+  /** A variable, collection or mode changed, or another mode became active. */
+  'variables:changed': () => void
   'selection:changed': (selectedIds: string[], previousIds: string[]) => void
   'rotation:preview-changed': (preview: RotationPreview | null) => void
   'tool:changed': (tool: Tool, previousTool: Tool) => void

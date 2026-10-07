@@ -1,5 +1,6 @@
 export { CODEGEN_PROMPT } from './tools/prompts'
 export { JSX_REFERENCE } from './design-jsx/reference'
+export { selectionToHTML, type HTMLCodeFormat, type HTMLCodeResult } from './io/formats/html'
 
 export { randomHex, randomInt, randomIndex } from './random'
 

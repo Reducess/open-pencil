@@ -13,6 +13,7 @@ export {
 export { exportFigFile, parseFigFile, readFigFile, type ParseFigFileOptions } from './formats/fig'
 export { parsePenFile, readPenFile } from '@open-pencil/pen'
 export { sceneNodeToJSX, selectionToJSX, type JSXFormat } from './formats/jsx'
+export { selectionToHTML, type HTMLCodeFormat, type HTMLCodeResult } from './formats/html'
 export {
   computeContentBounds,
   renderNodesToImage,

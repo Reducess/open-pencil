@@ -147,7 +147,8 @@ function applyTextStyle(style: Record<string, string>, node: SceneNode): void {
   if (textColor) style.color = textColor
 }
 
-function nodeToStyle(node: SceneNode, graph: SceneGraph): Record<string, string> {
+/** CSS declarations (camelCase) for a node, as the Tailwind classes are derived from them. */
+export function nodeToStyle(node: SceneNode, graph: SceneGraph): Record<string, string> {
   const style: Record<string, string> = {}
   applyLayoutStyle(style, node, graph)
   applyAppearanceStyle(style, node)
@@ -155,8 +156,12 @@ function nodeToStyle(node: SceneNode, graph: SceneGraph): Record<string, string>
   return style
 }
 
-export function collectTailwindClasses(node: SceneNode, graph: SceneGraph): string[] {
-  const style = nodeToStyle(node, graph)
+export function collectTailwindClasses(
+  node: SceneNode,
+  graph: SceneGraph,
+  extraStyle: Record<string, string> = {}
+): string[] {
+  const style = { ...nodeToStyle(node, graph), ...extraStyle }
   const ctx = getNodeContext(node, graph)
 
   const extraClasses: string[] = []

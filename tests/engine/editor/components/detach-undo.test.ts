@@ -20,3 +20,23 @@ test('an instance detached and restored by undo follows its component again', as
   expect(editor.graph.getNode(instanceId)?.cornerRadius).toBe(16)
   editor.dispose()
 })
+
+test('detaching an instance, and redoing it, publishes the node change', () => {
+  const editor = createEditor()
+  const pageId = editor.graph.getPages()[0].id
+  const component = editor.graph.createNode('COMPONENT', pageId, { width: 200, height: 100 })
+  const instanceId = editor.createInstanceFromComponent(component.id) ?? ''
+  const updates: string[] = []
+  const off = editor.onEditorEvent('node:updated', (id, changes) => {
+    if (id === instanceId && 'type' in changes) updates.push(String(changes.type))
+  })
+
+  editor.select([instanceId])
+  editor.detachInstance()
+  editor.undo.undo()
+  editor.undo.redo()
+
+  expect(updates).toEqual(['FRAME', 'INSTANCE', 'FRAME'])
+  off()
+  editor.dispose()
+})

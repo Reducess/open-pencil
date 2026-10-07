@@ -406,6 +406,8 @@ export function detachInstance(graph: SceneGraph, instanceId: string): void {
   node.type = 'FRAME'
   node.componentId = null
   clearInstanceOverrides(node.instanceOverrides)
+  // The node changed in place: tell whoever follows the document (autosave, layer tree, renderer).
+  graph.emitter.emit('node:updated', instanceId, { type: 'FRAME', componentId: null })
 }
 
 export function getMainComponent(graph: SceneGraph, instanceId: string): SceneNode | undefined {

@@ -89,8 +89,6 @@ export function createComponentActions(ctx: EditorContext) {
     }))
     const revert = () => {
       for (const instance of instances) ctx.graph.detachInstance(instance.id)
-      // Detaching rewrites the node in place: publish it.
-      for (const instance of instances) ctx.graph.updateNode(instance.id, { type: 'FRAME' })
       ctx.graph.updateNode(componentId, { type: 'FRAME' })
       ctx.requestRender()
     }

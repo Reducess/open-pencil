@@ -37,7 +37,7 @@ export function createClipboardActions(ctx: EditorContext) {
     for (const node of topLevel) {
       const parentId = node.parentId ?? ctx.state.currentPageId
       const clone = ctx.graph.cloneTree(node.id, parentId, {
-        name: node.name + ' copy',
+        name: ctx.naming.copyName?.(node.name) ?? node.name + ' copy',
         x: node.x + 20,
         y: node.y + 20
       })

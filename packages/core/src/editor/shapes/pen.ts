@@ -229,7 +229,7 @@ export function createPenActions(ctx: EditorContext, createShape: CreateShape) {
     )
     ctx.graph.updateNode(nodeId, {
       vectorNetwork: normalizedNetwork,
-      name: 'Vector',
+      name: ctx.naming.defaultName?.('VECTOR') ?? 'Vector',
       fills,
       strokes
     })

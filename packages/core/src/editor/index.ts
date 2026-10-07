@@ -36,5 +36,6 @@ export type {
   EditorSharedState,
   EditorViewState,
   FigmaClipboardImageResolver,
+  NodeNaming,
   Tool
 } from './types'

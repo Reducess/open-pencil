@@ -38,14 +38,21 @@ export function wrapSelectionInContainer(
   const firstIndex = Math.min(...nodeIds.map((id) => parent.childIds.indexOf(id)))
 
   const padding = containerType === 'COMPONENT_SET' ? 40 : 0
-  const containerNames: Record<string, string> = {
-    COMPONENT_SET: selectedNodes[0].name.split('/')[0]?.trim() || 'Component Set',
+  const builtInNames: Record<string, string> = {
+    COMPONENT_SET: 'Component Set',
     COMPONENT: 'Component',
     GROUP: 'Group',
     FRAME: 'Frame'
   }
+  // A component set is named after its variants; the default name is only its fallback.
+  const variantSetName =
+    containerType === 'COMPONENT_SET' ? selectedNodes[0].name.split('/')[0]?.trim() : ''
+  const containerName =
+    variantSetName ||
+    ctx.naming.defaultName?.(containerType) ||
+    (builtInNames[containerType] ?? containerType)
   const containerNode = ctx.graph.createNode(containerType, parentId, {
-    name: containerNames[containerType] ?? containerType,
+    name: containerName,
     x: minX - parentAbs.x - padding,
     y: minY - parentAbs.y - padding,
     width: maxX - minX + padding * 2,

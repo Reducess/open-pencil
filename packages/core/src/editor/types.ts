@@ -2,6 +2,7 @@ import type { CanvasKit } from 'canvaskit-wasm'
 
 import type {
   DocumentColorSpace,
+  NodeType,
   SceneGraph,
   SceneGraphEvents,
   SceneNode,
@@ -142,9 +143,21 @@ export interface EditorEvents extends SceneGraphEvents {
 
 export type EditorEventName = keyof EditorEvents
 
+/**
+ * Layer names supplied by the host, for products whose interface is not in English.
+ * Names already on a document are never rewritten.
+ */
+export interface NodeNaming {
+  /** Name for a layer the editor creates. Return undefined to keep the built-in name. */
+  defaultName?: (type: NodeType) => string | undefined
+  /** Name for a duplicate of the layer called `name`. Defaults to `${name} copy`. */
+  copyName?: (name: string) => string
+}
+
 export interface EditorOptions {
   graph?: SceneGraph
   state?: EditorState
+  naming?: NodeNaming
   loadFont?: (
     family: string,
     style: string,
@@ -161,6 +174,7 @@ export interface EditorContext {
   set graph(g: SceneGraph)
   undo: UndoManager
   state: EditorState
+  naming: NodeNaming
   loadFont: (
     family: string,
     style: string,

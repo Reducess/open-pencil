@@ -195,6 +195,7 @@ export function createEditor(options?: EditorOptions) {
     },
     undo,
     state,
+    naming: options?.naming ?? {},
     loadFont: _loadFont,
     resolveFigmaClipboardImages: options?.resolveFigmaClipboardImages ?? null,
     getViewportSize: _getViewportSize,
@@ -305,6 +306,8 @@ export function createEditor(options?: EditorOptions) {
     },
     undo,
     state,
+    /** Host-provided layer names; empty when the built-in names are in use. */
+    naming: ctx.naming,
 
     // Graph reads
     runLayoutForNode,

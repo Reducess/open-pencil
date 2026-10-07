@@ -45,13 +45,14 @@ export function createShapeActions(ctx: EditorContext) {
   ): string {
     const fill = DEFAULT_FILLS[type] ?? DEFAULT_FILLS.RECTANGLE
     const pid = parentId ?? ctx.state.currentPageId
+    const layerName = name || ctx.naming.defaultName?.(type)
     const overrides: Partial<SceneNode> = {
       x,
       y,
       width: w,
       height: h,
       fills: [{ ...fill }],
-      ...(name ? { name } : {})
+      ...(layerName ? { name: layerName } : {})
     }
     if (type === 'SECTION') {
       overrides.strokes = [{ ...SECTION_DEFAULT_STROKE }]

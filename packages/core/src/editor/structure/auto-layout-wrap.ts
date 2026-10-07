@@ -28,7 +28,7 @@ export function wrapInAutoLayout(
     selectedNodes.length <= 1 || bounds.height > bounds.width ? 'VERTICAL' : 'HORIZONTAL'
 
   const frame = ctx.graph.createNode('FRAME', parentId, {
-    name: 'Frame',
+    name: ctx.naming.defaultName?.('FRAME') ?? 'Frame',
     x: bounds.x - parentAbs.x,
     y: bounds.y - parentAbs.y,
     width: bounds.width,

@@ -230,7 +230,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        group: [app, cli, core, dom, fig, mcp, render, scene-graph, vue]
+        group: [app, cena, cli, core, dom, fig, mcp, render, scene-graph, vue]
     name: Unit tests — ${{ matrix.group }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

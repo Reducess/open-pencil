@@ -25,6 +25,7 @@ export const UNIT_TEST_GROUPS = {
     'tests/engine/collab',
     'tests/engine/tauri'
   ],
+  cena: ['packages/cena/tests'],
   cli: ['packages/cli/tests', 'tests/engine/cli'],
   core: [
     'packages/core/tests',

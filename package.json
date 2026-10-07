@@ -9,6 +9,7 @@
     "packages/kiwi",
     "packages/fig",
     "packages/core",
+    "packages/cena",
     "packages/dom-css",
     "packages/vue",
     "packages/cli",

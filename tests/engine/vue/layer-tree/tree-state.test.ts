@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'bun:test'
 
-import { computed, effectScope } from 'vue'
+import { computed, effectScope, nextTick, ref } from 'vue'
 
 import { createEditor, type Editor } from '@open-pencil/core/editor'
 
 import { useLayerTreeModel } from '#vue/primitives/LayerTree/useLayerTreeModel'
 
-function mountTree(editor: Editor) {
+function mountTree(editor: Editor, frontOnTop?: () => boolean) {
   const scope = effectScope()
-  const tree = scope.run(() => useLayerTreeModel(editor))
+  const tree = scope.run(() => useLayerTreeModel(editor, frontOnTop))
   if (!tree) throw new Error('Expected layer tree model')
   return { tree, stop: () => scope.stop() }
 }
@@ -104,6 +104,33 @@ describe('layer tree model state', () => {
       await flushRebuild()
       expect(tree.items.value).toEqual([])
     } finally {
+      editor.dispose()
+    }
+  })
+
+  test('lists the front layer first when asked to, and follows the option', async () => {
+    const editor = createEditor()
+    const page = editor.state.currentPageId
+    const back = editor.graph.createNode('RECTANGLE', page, { name: 'Back' })
+    const front = editor.graph.createNode('RECTANGLE', page, { name: 'Front' })
+    const frontOnTop = ref(true)
+    const { tree, stop } = mountTree(editor, () => frontOnTop.value)
+    try {
+      const order = () => tree.items.value.map((node) => node.id)
+      expect(order()).toEqual([front.id, back.id])
+
+      const newest = editor.graph.createNode('RECTANGLE', page, { name: 'Newest' })
+      await flushRebuild()
+      expect(order()).toEqual([newest.id, front.id, back.id])
+
+      editor.toggleNodeVisibility(newest.id)
+      expect(tree.items.value[0]?.visible).toBe(false)
+
+      frontOnTop.value = false
+      await nextTick()
+      expect(order()).toEqual([back.id, front.id, newest.id])
+    } finally {
+      stop()
       editor.dispose()
     }
   })

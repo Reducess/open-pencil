@@ -14,6 +14,7 @@ import { onScopeDispose, ref, watchEffect, type Ref } from 'vue'
 import type { Editor } from '@open-pencil/core/editor'
 
 import type { LayerDragInstruction } from '#vue/primitives/LayerTree/context'
+import { applyLayerDrop } from '#vue/primitives/LayerTree/drop'
 
 interface DragItem {
   id: string
@@ -27,7 +28,8 @@ type TreeInstruction = LayerDragInstruction
 export function useLayerDrag(
   editor: Editor,
   indentPerLevel = 16,
-  onMakeChildDrop?: (targetId: string) => void
+  onMakeChildDrop?: (targetId: string) => void,
+  frontOnTop: () => boolean = () => false
 ) {
   const draggingId = ref<string | null>(null)
   const instruction = ref<TreeInstruction | null>(null)
@@ -104,28 +106,14 @@ export function useLayerDrag(
       const targetId = target.data.id as string
       const rawInstruction = extractInstruction(target.data)
       if (!rawInstruction || rawInstruction.type === 'instruction-blocked') return
-      const inst = rawInstruction as TreeInstruction
-      if (!sourceId || !targetId) return
-
-      if (editor.graph.isDescendant(targetId, sourceId)) return
-
-      const targetNode = editor.graph.getNode(targetId)
-      if (!targetNode) return
-      const targetParentId = targetNode.parentId ?? editor.state.currentPageId
-      const targetParent = editor.graph.getNode(targetParentId)
-      if (!targetParent) return
-      const targetIndex = targetParent.childIds.indexOf(targetId)
-
-      if (inst.type === 'reorder-above') {
-        editor.reorderChildWithUndo(sourceId, targetParentId, targetIndex)
-      } else if (inst.type === 'reorder-below') {
-        editor.reorderChildWithUndo(sourceId, targetParentId, targetIndex + 1)
-      } else {
-        const container = editor.graph.getNode(targetId)
-        if (!container || !editor.graph.isContainer(targetId)) return
-        editor.reorderChildWithUndo(sourceId, targetId, container.childIds.length)
-        onMakeChildDrop?.(targetId)
-      }
+      const nestedInto = applyLayerDrop(
+        editor,
+        sourceId,
+        targetId,
+        rawInstruction as TreeInstruction,
+        frontOnTop()
+      )
+      if (nestedInto) onMakeChildDrop?.(nestedInto)
 
       draggingId.value = null
       instruction.value = null

@@ -14,6 +14,7 @@ Patches carried on top of upstream:
 | 06 | `packages/vue/src/shared/input/draw.ts`, `packages/core/src/editor/shapes/pen.ts` | drawing ignored `snappingPreferences.pixelGrid`: created nodes got fractional position and size at any zoom other than 100%; creation points and pen anchors now land on whole pixels while the preference is on |
 | 07 | `packages/core/src/editor/structure/state.ts` | `toggleNodeVisibility` / `toggleNodeLock` (layer tree eye and padlock) and the selection-wide `toggleVisibility` / `toggleLock` changed the node without an undo entry |
 | 08 | `packages/vue/src/primitives/LayerTree/useLayerTreeModel.ts` (state moved out of `LayerTreeRoot.vue` so it can be unit tested) | the tree patched raw objects indexed outside Vue reactivity, so rows kept the old name, eye and padlock until a rebuild; and a selected layer reparented into a collapsed container (`node:reparented`) vanished from the visible rows |
+| 09 | `packages/vue/src/primitives/LayerTree/` (`LayerTreeRoot.vue` prop `frontOnTop`, `model.ts`, `drop.ts`, `useLayerDrag.ts`) | the tree could only list layers in `childIds` order (back to front); `front-on-top` lists the front layer first, default unchanged. The drop index is now computed without the dragged layer, which also fixes an upstream off-by-one when a row was dragged down inside the same parent |
 
 Building needs Node >= 22 on PATH (tsdown) even when driven by bun.
 

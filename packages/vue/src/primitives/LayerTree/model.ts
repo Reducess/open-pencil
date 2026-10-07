@@ -18,7 +18,19 @@ export interface LayerTreeModel {
   byId: Map<string, LayerNode>
 }
 
-export function buildLayerTreeModel(graph: SceneGraph, parentId: string): LayerTreeModel {
+export interface LayerTreeModelOptions {
+  /**
+   * Lists the front layer first, as design tools do. Defaults to scene order (`childIds`),
+   * which runs from the back to the front.
+   */
+  frontOnTop?: boolean
+}
+
+export function buildLayerTreeModel(
+  graph: SceneGraph,
+  parentId: string,
+  { frontOnTop = false }: LayerTreeModelOptions = {}
+): LayerTreeModel {
   const byId = new Map<string, LayerNode>()
 
   const buildChildren = (id: string): LayerNode[] => {
@@ -33,7 +45,7 @@ export function buildLayerTreeModel(graph: SceneGraph, parentId: string): LayerT
       if (sceneNode.childIds.length > 0) node.children = buildChildren(node.id)
       children.push(node)
     }
-    return children
+    return frontOnTop ? children.reverse() : children
   }
 
   return { items: buildChildren(parentId), byId }

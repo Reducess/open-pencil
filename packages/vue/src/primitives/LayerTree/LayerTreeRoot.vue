@@ -13,8 +13,12 @@ import { layerSelectionForTarget, visibleLayerRows } from '#vue/primitives/Layer
 import { useLayerDrag } from '#vue/primitives/LayerTree/useLayerDrag'
 import { useLayerTreeModel } from '#vue/primitives/LayerTree/useLayerTreeModel'
 
-const { indentPerLevel = 16 } = defineProps<{
+const { indentPerLevel = 16, frontOnTop = false } = defineProps<{
   indentPerLevel?: number
+  /**
+   * Lists the front layer first, as design tools do. Defaults to scene order, back to front.
+   */
+  frontOnTop?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -26,7 +30,10 @@ const emit = defineEmits<{
 }>()
 
 const editor = useEditor()
-const { items, expanded, treeVersion, expandNode, expandAncestors } = useLayerTreeModel(editor)
+const { items, expanded, treeVersion, expandNode, expandAncestors } = useLayerTreeModel(
+  editor,
+  () => frontOnTop
+)
 const selectedIds = computed(() => editor.state.selectedIds)
 const focused = ref(false)
 const visibleRows = computed(() => visibleLayerRows(items.value, new Set(expanded.value)))
@@ -37,7 +44,8 @@ let applyingSelection = false
 const { draggingId, instruction, instructionTargetId, setupItem } = useLayerDrag(
   editor,
   indentPerLevel,
-  expandNode
+  expandNode,
+  () => frontOnTop
 )
 
 const rowRefs = new Map<string, HTMLElement>()

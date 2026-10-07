@@ -1,4 +1,4 @@
-import { onScopeDispose, ref } from 'vue'
+import { onScopeDispose, ref, watch } from 'vue'
 
 import type { Editor } from '@open-pencil/core/editor'
 import type { SceneNode } from '@open-pencil/scene-graph'
@@ -22,7 +22,7 @@ const PATCHABLE_NODE_KEYS = new Set<keyof SceneNode>([
  * Keeps the layer tree items and expansion state in sync with the editor's current page.
  * Call inside a component setup or an effect scope; subscriptions stop with the scope.
  */
-export function useLayerTreeModel(editor: Editor) {
+export function useLayerTreeModel(editor: Editor, frontOnTop: () => boolean = () => false) {
   const items = ref<LayerNode[]>([])
   const expanded = ref<string[]>([])
   const treeVersion = ref(0)
@@ -37,7 +37,9 @@ export function useLayerTreeModel(editor: Editor) {
   function rebuildTree() {
     rebuildPending = false
     rebuildToken++
-    const model = buildLayerTreeModel(editor.graph, editor.state.currentPageId)
+    const model = buildLayerTreeModel(editor.graph, editor.state.currentPageId, {
+      frontOnTop: frontOnTop()
+    })
     items.value = model.items
     // Index the reactive items, not the raw model: patches must notify the rows that read them.
     nodesById = indexLayerNodes(items.value)
@@ -91,7 +93,7 @@ export function useLayerTreeModel(editor: Editor) {
     if (moved.length > 0) expandAncestors(moved)
   }
 
-  rebuildTree()
+  watch(frontOnTop, rebuildTree, { immediate: true })
 
   const unsubscribe = [
     editor.onEditorEvent('graph:replaced', rebuildTree),

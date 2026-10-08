@@ -2,7 +2,7 @@ import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 
 import type { Editor } from '@open-pencil/core/editor'
-import { FONT_WEIGHT_NAMES, weightToStyle } from '@open-pencil/core/text'
+import { collectNodeFontFaces, FONT_WEIGHT_NAMES } from '@open-pencil/core/text'
 import type { SceneNode, TextDecoration } from '@open-pencil/scene-graph'
 
 import type { UseTypographyOptions } from '#vue/controls/typography/use'
@@ -63,7 +63,6 @@ type TypographyActionOptions = {
 export function createTypographyActions({
   editor,
   node,
-  currentWeightLabel,
   activeFormatting,
   options
 }: TypographyActionOptions) {
@@ -71,22 +70,55 @@ export function createTypographyActions({
     | { key: keyof SceneNode; value: SceneNode[keyof SceneNode]; textStyleId: string | null }
     | undefined
 
-  async function doLoadFont(family: string, style: string) {
-    await options.fontLoader?.load(family, style)
+  const latestFontRequest = new Map<string, number>()
+
+  /**
+   * Applies a change that makes the text ask for other font faces — family, weight, italic — once
+   * those faces are loaded, so no frame is painted with a stand-in. The faces are the ones the
+   * changed node asks for: weight and slant together, plus the ranges that inherit the change.
+   * Without a font loader the change is applied at once, as it always was.
+   */
+  async function applyWithFonts(
+    change: Pick<Partial<SceneNode>, 'fontFamily' | 'fontWeight' | 'italic'>,
+    label: string,
+    { applyOnLoadFailure }: { applyOnLoadFailure: boolean }
+  ) {
+    const current = node.value
+    if (!current) return
+    const { id } = current
+    const apply = () => {
+      if (editor.graph.getNode(id)) editor.updateNodeWithUndo(id, change, label)
+    }
+    const loader = options.fontLoader
+    if (!loader) {
+      apply()
+      return
+    }
+    // A new family leaves the ranges that name their own family as they are.
+    const faces = collectNodeFontFaces({ ...current, ...change }).filter(
+      (face) => change.fontFamily === undefined || face.family === change.fontFamily
+    )
+    // A face that arrives late must not write over a newer pick of the same property.
+    const key = Object.keys(change).join(',')
+    const request = (latestFontRequest.get(key) ?? 0) + 1
+    latestFontRequest.set(key, request)
+    let loaded = false
+    try {
+      await Promise.all(faces.map((face) => loader.load(face.family, face.style)))
+      loaded = true
+    } finally {
+      if ((loaded || applyOnLoadFailure) && latestFontRequest.get(key) === request) apply()
+    }
   }
 
   async function setFamily(family: string) {
-    if (!node.value) return
-    await doLoadFont(family, currentWeightLabel.value)
-    editor.updateNodeWithUndo(node.value.id, { fontFamily: family }, 'Change font')
+    await applyWithFonts({ fontFamily: family }, 'Change font', { applyOnLoadFailure: false })
   }
 
   async function setWeight(weight: number) {
-    if (!node.value) return
-    const { id, fontFamily } = node.value
-    const style = weightToStyle(weight)
-    editor.updateNodeWithUndo(id, { fontWeight: weight }, 'Change font weight')
-    await doLoadFont(fontFamily, style)
+    await applyWithFonts({ fontWeight: weight }, 'Change font weight', {
+      applyOnLoadFailure: true
+    })
   }
 
   function setAlign(align: TextAlign) {
@@ -136,7 +168,11 @@ export function createTypographyActions({
 
   function toggleItalic() {
     if (!node.value) return
-    editor.updateNodeWithUndo(node.value.id, { italic: !node.value.italic }, 'Toggle italic')
+    // Many families have no italic face: the toggle still applies and the engine reports the
+    // stand-in, so a loader that rejects must not become an unhandled rejection here.
+    void applyWithFonts({ italic: !node.value.italic }, 'Toggle italic', {
+      applyOnLoadFailure: true
+    }).catch(() => undefined)
   }
 
   function toggleDecoration(deco: 'UNDERLINE' | 'STRIKETHROUGH') {

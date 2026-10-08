@@ -8,6 +8,7 @@ import {
   setInstanceOverride,
   type InstanceOverrideState
 } from './instance-overrides'
+import { removeOrphanedChildren, restoreRemovedChild } from './instance-removed-layers'
 
 export type { NodeCloneMode } from './copy'
 
@@ -263,6 +264,22 @@ function sortInstanceChildren(
   instParent.childIds.sort((left, right) => (ranks.get(left) ?? 0) - (ranks.get(right) ?? 0))
 }
 
+/** Gives the instance the layer it lacks: the one sync removed earlier, or a fresh clone. */
+function addMissingChild(
+  graph: SceneGraph,
+  compChildId: string,
+  instParentId: string,
+  overrides: InstanceOverrideState
+): SceneNode | undefined {
+  const src = graph.nodes.get(compChildId)
+  if (!src) return undefined
+  const restored = restoreRemovedChild(graph, instParentId, compChildId, overrides)
+  if (restored) return restored
+  const clone = graph.createNode(src.type, instParentId, cloneNodeProps(src, compChildId))
+  if (src.childIds.length > 0) cloneChildrenWithMapping(graph, compChildId, clone.id)
+  return clone
+}
+
 /** True when syncing `compParentId` into `instParentId` would form a cycle. */
 function isCyclicSync(graph: SceneGraph, compParentId: string, instParentId: string): boolean {
   return compParentId === instParentId || graph.isDescendant(instParentId, compParentId)
@@ -317,18 +334,16 @@ function syncChildren(
     usedInstChildIds
   )
 
+  // A layer deleted from the component leaves the instance too.
+  removeOrphanedChildren(graph, instParent, overrides, usedInstChildIds)
+
   // Pass 3: Clone only genuinely missing component children
   for (const compChildId of compParent.childIds) {
-    if (!instChildMap.has(compChildId)) {
-      const src = graph.nodes.get(compChildId)
-      if (!src) continue
-      const clone = graph.createNode(src.type, instParentId, cloneNodeProps(src, compChildId))
-      if (src.childIds.length > 0) {
-        cloneChildrenWithMapping(graph, compChildId, clone.id)
-      }
-      instChildMap.set(compChildId, clone)
-      usedInstChildIds.add(clone.id)
-    }
+    if (instChildMap.has(compChildId)) continue
+    const added = addMissingChild(graph, compChildId, instParentId, overrides)
+    if (!added) continue
+    instChildMap.set(compChildId, added)
+    usedInstChildIds.add(added.id)
   }
 
   // Pass 4: Synchronize properties and recurse

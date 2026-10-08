@@ -148,6 +148,7 @@ export {
 } from './profiler'
 export type { FrameCapture, NodeProfile } from './profiler'
 export { computeLayout, computeAllLayouts, setTextMeasurer } from './layout'
+export { applyVariableBindings } from './layout/variable-bindings'
 export type { TextMeasurer } from './layout'
 export { getCanvasKit, type CanvasKitOptions } from './canvaskit'
 export {

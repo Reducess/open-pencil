@@ -96,9 +96,16 @@ function transformedSourceOffsets(node: SceneNode): number[] {
 
 export type NodeFontReadiness = 'ready' | 'substituted' | 'pending' | 'exhausted'
 
-function requiredFacesReadiness(r: FontReadinessRenderer, node: SceneNode): NodeFontReadiness {
+interface RequiredFacesReadiness {
+  readiness: NodeFontReadiness
+  /** Every face settled, but at least one is drawn with another face of its own family. */
+  standIn: boolean
+}
+
+function requiredFacesReadiness(r: FontReadinessRenderer, node: SceneNode): RequiredFacesReadiness {
   let pending = false
   let exhausted = false
+  let standIn = false
   for (const { family, style } of requiredNodeFaces(node)) {
     if (fontManager.isStyleLoaded(family, style)) continue
     const demand = fontFaceDemand(family, style, node.text)
@@ -106,16 +113,20 @@ function requiredFacesReadiness(r: FontReadinessRenderer, node: SceneNode): Node
     demandFace(r, node, family, style)
     if (state === 'failed' || state === 'exhausted') {
       // CanvasKit can synthesize a missing slant or weight from another loaded face in the same
-      // family. Keep the text visible when an exact face (for example, Italic) is unavailable.
-      if (fontManager.isLoaded(family)) continue
-      exhausted = true
+      // family. Keep the text visible when an exact face (for example, Italic) is unavailable,
+      // and report it as substituted: it is not the face the node asks for.
+      if (fontManager.isLoaded(family)) standIn = true
+      else exhausted = true
     } else {
       pending = true
     }
   }
-  if (pending) return 'pending'
-  if (exhausted && fontManager.isStyleLoaded(DEFAULT_FONT_FAMILY, 'Regular')) return 'substituted'
-  return exhausted ? 'exhausted' : 'ready'
+  if (pending) return { readiness: 'pending', standIn }
+  if (exhausted) {
+    const fallback = fontManager.isStyleLoaded(DEFAULT_FONT_FAMILY, 'Regular')
+    return { readiness: fallback ? 'substituted' : 'exhausted', standIn }
+  }
+  return { readiness: 'ready', standIn }
 }
 
 function demandRemoteCoverage(r: TextRenderer, node: SceneNode, characters: string[]): boolean {
@@ -203,9 +214,13 @@ function canObserveGlyphCoverage(r: FontReadinessRenderer): r is TextRenderer {
 export function nodeFontReadiness(r: FontReadinessRenderer, node: SceneNode): NodeFontReadiness {
   if (node.type !== 'TEXT') return 'ready'
   const faces = requiredFacesReadiness(r, node)
-  if (faces !== 'ready') return faces
-  if (!node.text || !canObserveGlyphCoverage(r)) return 'ready'
-  return observedGlyphReadiness(r, node)
+  if (faces.readiness !== 'ready') return faces.readiness
+  // Glyph coverage is observed as for a node with every face loaded: a stand-in face must not
+  // stop missing glyphs from being fetched or reported.
+  const glyphs =
+    !node.text || !canObserveGlyphCoverage(r) ? 'ready' : observedGlyphReadiness(r, node)
+  if (glyphs !== 'ready') return glyphs
+  return faces.standIn ? 'substituted' : 'ready'
 }
 
 export function isNodeFontLoaded(r: FontReadinessRenderer, node: SceneNode): boolean {

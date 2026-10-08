@@ -10,6 +10,9 @@ import {
 import type { SceneNode } from '@open-pencil/scene-graph'
 
 import { collectTextRenderIssues } from '#core/canvas'
+import { isNodeFontLoaded } from '#core/canvas/text'
+import { fontManager } from '#core/text/fonts'
+import { fontFaceDemand, fontResolver } from '#core/text/resolver'
 
 import { expectDefined } from '#tests/helpers/assert'
 
@@ -51,6 +54,8 @@ describe('text render issues', () => {
     const empty = text(graph, frame.id, { name: 'Empty', fontFamily: 'Poppins', text: '' })
     const elsewhere = text(graph, pageId, { name: 'Elsewhere', fontFamily: 'Poppins' })
 
+    // Roboto is loaded and lacks the glyphs; the other families are not loaded at all.
+    fontManager.markLoaded('Roboto', 'Regular', new ArrayBuffer(12))
     const renderer = readinessByFamily({
       Poppins: 'substituted',
       Roboto: 'exhausted',
@@ -66,19 +71,25 @@ describe('text render issues', () => {
         fonts: [
           { family: 'Poppins', style: 'SemiBold' },
           { family: 'Lora', style: 'SemiBold Italic' }
+        ],
+        missingFaces: [
+          { family: 'Poppins', style: 'SemiBold' },
+          { family: 'Lora', style: 'SemiBold Italic' }
         ]
       },
       {
         nodeId: glyphs.id,
         nodeName: 'CJK',
         readiness: 'exhausted',
-        fonts: [{ family: 'Roboto', style: 'Regular' }]
+        fonts: [{ family: 'Roboto', style: 'Regular' }],
+        missingFaces: []
       },
       {
         nodeId: loading.id,
         nodeName: 'Loading',
         readiness: 'pending',
-        fonts: [{ family: 'Slow', style: 'Regular' }]
+        fonts: [{ family: 'Slow', style: 'Regular' }],
+        missingFaces: [{ family: 'Slow', style: 'Regular' }]
       }
     ])
     for (const skipped of [hidden, insideHidden, empty, elsewhere]) {
@@ -128,6 +139,49 @@ describe('text render issues', () => {
         }
       } finally {
         renderer.destroy()
+      }
+    })
+
+    test('a face missing from a loaded family is reported as substituted, with the face', async () => {
+      const partial = `OnlyRegular${Date.now()}`
+      const regular = await Bun.file(
+        new URL('../../../../packages/core/assets/Inter-Regular.ttf', import.meta.url)
+      ).arrayBuffer()
+      // The lookup for the missing face has run out: nothing is fetched by this test.
+      const demand = fontFaceDemand(partial, 'Bold Italic', 'Hello')
+      fontResolver.reset(demand)
+      fontResolver.exhaust(demand)
+
+      const graph = new SceneGraph()
+      const frame = graph.createNode('FRAME', graph.getPages()[0].id, { width: 200, height: 80 })
+      const whole = text(graph, frame.id, { name: 'Body', fontFamily: partial })
+      const node = text(graph, frame.id, {
+        name: 'Emphasis',
+        fontFamily: partial,
+        fontWeight: 700,
+        italic: true
+      })
+      const renderer = new SkiaRenderer(ck, expectDefined(ck.MakeSurface(1, 1), 'surface'))
+      try {
+        await renderer.loadFonts()
+        fontManager.markLoaded(partial, 'Regular', regular)
+
+        expect(renderer.nodeFontReadiness(whole)).toBe('ready')
+        expect(renderer.nodeFontReadiness(node)).toBe('substituted')
+        // Still drawn: the family's Regular stands in for the face.
+        expect(isNodeFontLoaded(renderer, node)).toBe(true)
+        expect(renderer.textRenderIssues(graph, [frame.id])).toEqual([
+          {
+            nodeId: node.id,
+            nodeName: 'Emphasis',
+            readiness: 'substituted',
+            fonts: [{ family: partial, style: 'Bold Italic' }],
+            missingFaces: [{ family: partial, style: 'Bold Italic' }]
+          }
+        ])
+      } finally {
+        renderer.destroy()
+        fontResolver.reset(demand)
       }
     })
 

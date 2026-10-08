@@ -6,7 +6,7 @@ import { FontManager, fontManager } from '@open-pencil/core/text'
 import { SceneGraph } from '@open-pencil/scene-graph'
 
 import { isTextPictureCurrent } from '#core/canvas/renderer/fonts'
-import { nodeFontReadiness } from '#core/canvas/text'
+import { isNodeFontLoaded, nodeFontReadiness } from '#core/canvas/text'
 import { fontFaceDemand, fontResolver } from '#core/text/resolver'
 
 function pageId(graph: SceneGraph): string {
@@ -87,7 +87,7 @@ describe('font lifecycle', () => {
     expect(isTextPictureCurrent(renderer, node)).toBe(false)
   })
 
-  test('keeps text visible when an unavailable italic face can use a loaded family face', () => {
+  test('keeps text visible, and says so, when an unavailable face uses a loaded family face', () => {
     const family = 'Missing Italic Regression'
     const demand = fontFaceDemand(family, 'Regular Italic', 'Hello')
     fontResolver.reset(demand)
@@ -106,7 +106,30 @@ describe('font lifecycle', () => {
       italic: true
     })
 
+    // Drawn with the family's other face: not hidden, but not the face the node asks for.
+    expect(nodeFontReadiness({}, node)).toBe('substituted')
+    expect(isNodeFontLoaded({}, node)).toBe(true)
+
+    fontManager.markLoaded(family, 'Regular Italic', new ArrayBuffer(12))
     expect(nodeFontReadiness({}, node)).toBe('ready')
+    fontResolver.reset(demand)
+  })
+
+  test('a missing face in a style run is reported the same way', () => {
+    const family = 'Missing Run Face Regression'
+    const demand = fontFaceDemand(family, 'Bold Italic', 'Hello')
+    fontResolver.reset(demand)
+    fontResolver.exhaust(demand)
+    fontManager.markLoaded(family, 'Regular', new ArrayBuffer(12))
+
+    const graph = new SceneGraph()
+    const node = graph.createNode('TEXT', pageId(graph), {
+      text: 'Hello',
+      fontFamily: family,
+      styleRuns: [{ start: 0, length: 2, style: { fontWeight: 700, italic: true } }]
+    })
+
+    expect(nodeFontReadiness({}, node)).toBe('substituted')
     fontResolver.reset(demand)
   })
 })

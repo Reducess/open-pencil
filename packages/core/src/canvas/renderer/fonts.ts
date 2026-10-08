@@ -135,8 +135,8 @@ export async function prepareForExport(
   pageId: string,
   nodeIds: string[]
 ): Promise<() => void> {
-  const { getTextMeasurer, setTextMeasurer, computeAllLayouts, applyVariableBindings } =
-    await import('#core/layout')
+  const { getTextMeasurer, setTextMeasurer, computeAllLayouts } = await import('#core/layout')
+  const { applyVariableBindings } = await import('#core/layout/variable-bindings')
 
   const previousTextMeasurer = getTextMeasurer()
   setTextMeasurer((node, maxWidth) => r.measureTextNode(node, maxWidth))

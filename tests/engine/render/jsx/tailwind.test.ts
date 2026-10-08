@@ -591,4 +591,25 @@ describe('Tailwind JSX export', () => {
     expect(jsx).toContain('col-span-2')
     expect(jsx).not.toContain('row-span')
   })
+
+  test('radii twirlwind puts on the spacing scale become arbitrary values', () => {
+    const graph = makeGraph()
+    const classesFor = (cornerRadius: number) => {
+      const node = graph.createNode('RECTANGLE', pageId(graph), {
+        width: 100,
+        height: 100,
+        cornerRadius
+      })
+      return tw(graph, node.id)
+    }
+
+    // `rounded-3`, `rounded-4` and `rounded-6` are not Tailwind utilities.
+    expect(classesFor(12)).toContain('rounded-[12px]')
+    expect(classesFor(16)).toContain('rounded-[16px]')
+    expect(classesFor(24)).toContain('rounded-[24px]')
+    expect(classesFor(24)).not.toMatch(/rounded-\d/)
+    // Named and already-arbitrary radii are left alone.
+    expect(classesFor(8)).toContain('rounded-lg')
+    expect(classesFor(10)).toContain('rounded-[10px]')
+  })
 })

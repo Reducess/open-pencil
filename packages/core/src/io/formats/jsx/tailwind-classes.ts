@@ -156,6 +156,18 @@ export function nodeToStyle(node: SceneNode, graph: SceneGraph): Record<string, 
   return style
 }
 
+const SPACING_SCALE_RADIUS = /^(rounded(?:-(?:[trblse]{1,2}))?)-(\d+(?:\.\d+)?)$/
+
+/**
+ * twirlwind 0.3 writes some radii on the spacing scale (`rounded-6` for 24px, `rounded-3` for
+ * 12px). Tailwind has no such utility — radius has its own scale — so the corner came out square.
+ * Those become arbitrary values, which every Tailwind version reads.
+ */
+function radiusOffTheSpacingScale(className: string): string {
+  const match = SPACING_SCALE_RADIUS.exec(className)
+  return match ? `${match[1]}-[${Number(match[2]) * 4}px]` : className
+}
+
 export function collectTailwindClasses(
   node: SceneNode,
   graph: SceneGraph,
@@ -173,7 +185,7 @@ export function collectTailwindClasses(
     extraClasses.push('[direction:rtl]')
 
   const twirlClasses = twirl(style)
-  const combined = twirlClasses ? twirlClasses.split(' ') : []
+  const combined = twirlClasses ? twirlClasses.split(' ').map(radiusOffTheSpacingScale) : []
 
   if (style.display === 'grid') {
     const filtered = combined.filter((c) => c !== 'grid')

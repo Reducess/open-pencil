@@ -9,6 +9,20 @@ export const TRANSPARENT: Color = { r: 0, g: 0, b: 0, a: 0 }
 export const DEFAULT_SHADOW_COLOR: Color = { r: 0, g: 0, b: 0, a: 0.25 }
 export const SELECTION_COLOR = { r: 0.23, g: 0.51, b: 0.96, a: 1 } satisfies Color
 export const COMPONENT_COLOR = { r: 0.592, g: 0.278, b: 1, a: 1 } satisfies Color
+/** Instances share the component colour unless a host sets `canvasColors.instance`. */
+export const INSTANCE_COLOR: Color = COMPONENT_COLOR
+
+/** Accent colours the canvas draws outlines, size pills and labels with, by kind of node. */
+export interface CanvasColors {
+  /** Main components and component sets. */
+  component: Color
+  instance: Color
+}
+
+export const DEFAULT_CANVAS_COLORS: Readonly<CanvasColors> = {
+  component: COMPONENT_COLOR,
+  instance: INSTANCE_COLOR
+}
 export const SNAP_COLOR = { r: 1.0, g: 0.0, b: 0.56, a: 1 } satisfies Color
 export const MEASUREMENT_COLOR = { r: 0.949, g: 0.282, b: 0.133, a: 1 } satisfies Color
 export const MEASUREMENT_PILL_PADDING_X = 5

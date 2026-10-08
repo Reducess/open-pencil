@@ -17,6 +17,7 @@ import type { UndoManager } from '@open-pencil/scene-graph/undo'
 import type { GuideOverlayState } from '#core/canvas/guides/types'
 import type { RulerTheme, SkiaRenderer } from '#core/canvas/renderer'
 import type { MeasurementMode, RenderOverlays } from '#core/canvas/renderer/types'
+import type { CanvasColors } from '#core/constants'
 import type { SnappingPreferences } from '#core/editor/preferences'
 import type { RotationPreview } from '#core/geometry'
 import type { TextEditor } from '#core/text/editor'
@@ -160,6 +161,11 @@ export interface EditorOptions {
   graph?: SceneGraph
   state?: EditorState
   naming?: NodeNaming
+  /**
+   * Accent colours of main components and instances on the canvas. A colour left out keeps the
+   * default, where both share `COMPONENT_COLOR`.
+   */
+  canvasColors?: Partial<CanvasColors>
   loadFont?: (
     family: string,
     style: string,

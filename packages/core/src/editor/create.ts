@@ -7,7 +7,7 @@ import { UndoManager } from '@open-pencil/scene-graph/undo'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { prefetchFigmaSchema } from '#core/clipboard'
-import { IS_BROWSER } from '#core/constants'
+import { DEFAULT_CANVAS_COLORS, IS_BROWSER, type CanvasColors } from '#core/constants'
 import { clearLazyFigImportContext } from '#core/kiwi/fig/lazy-import'
 import { releaseFigPopulationWorker } from '#core/kiwi/fig/population/client'
 import { releaseOriginalFigArchive } from '#core/kiwi/fig/session/original-archive'
@@ -66,6 +66,7 @@ export function createEditor(options?: EditorOptions) {
   let _ck: CanvasKit | null = null
   let _renderer: SkiaRenderer | null = null
   const _renderers = new Set<SkiaRenderer>()
+  let _canvasColors: CanvasColors = { ...DEFAULT_CANVAS_COLORS, ...options?.canvasColors }
   const interactiveEdits = new Set<symbol>()
   let _textEditor: TextEditor | null = null
   const events: Emitter<EditorEvents> = createNanoEvents()
@@ -255,12 +256,21 @@ export function createEditor(options?: EditorOptions) {
     _ck = ck
     _renderer = renderer
     _renderers.add(renderer)
+    renderer.canvasColors = _canvasColors
     _textEditor ??= new TextEditor(ck)
     setTextMeasurer(
       typeof renderer.measureTextNode === 'function'
         ? (node, maxWidth) => renderer.measureTextNode(node, maxWidth)
         : null
     )
+  }
+
+  /** Changes the accent colours of components and instances on every canvas of this editor. */
+  function setCanvasColors(colors: Partial<CanvasColors>) {
+    _canvasColors = { ..._canvasColors, ...colors }
+    for (const renderer of _renderers) renderer.canvasColors = _canvasColors
+    // The component set border is part of the recorded scene, not an overlay.
+    requestRender()
   }
 
   function removeCanvasRenderer(renderer: SkiaRenderer) {
@@ -337,6 +347,7 @@ export function createEditor(options?: EditorOptions) {
     requestRepaint,
     onEditorEvent,
     setCanvasKit,
+    setCanvasColors,
     setNavigationPhase,
     removeCanvasRenderer,
     replaceGraph,

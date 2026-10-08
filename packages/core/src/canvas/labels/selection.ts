@@ -112,7 +112,7 @@ export function drawSingleSelectionSize(
   sizeFont: NonNullable<SkiaRenderer['sizeFont']>
 ): void {
   const sizeText = `${Math.round(node.width)} × ${Math.round(node.height)}`
-  const pillColor = r.isComponentType(node.type) ? r.compColor() : r.selColor()
+  const pillColor = r.accentColor(node.type)
   const transform = frameLabelPlacement(node, graph, overlays.rotationPreview, {
     x: 0.5,
     y: 1
@@ -141,7 +141,9 @@ function drawMultiSelectionSize(
   const sy2 = maxY * r.zoom + r.panY
   const smx = (sx1 + sx2) / 2
   const allComponents = nodes.length > 0 && nodes.every((n) => r.isComponentType(n.type))
-  const pillColor = allComponents ? r.compColor() : r.selColor()
+  const allInstances = nodes.length > 0 && nodes.every((n) => n.type === 'INSTANCE')
+  const componentColor = allInstances ? r.instColor() : r.compColor()
+  const pillColor = allComponents ? componentColor : r.selColor()
 
   drawSizePill(r, canvas, sizeFont, sizeText, smx, sy2, pillColor)
 }

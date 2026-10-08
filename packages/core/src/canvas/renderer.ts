@@ -7,13 +7,14 @@ import type { RenderColorSpace, ResolvedRenderColor } from '#core/color/manageme
 /* eslint-disable max-lines -- SkiaRenderer facade owns CanvasKit state and delegates domain drawing */
 import {
   SELECTION_COLOR,
-  COMPONENT_COLOR,
+  DEFAULT_CANVAS_COLORS,
   CANVAS_BG_COLOR,
   DEFAULT_FONT_SIZE,
   COMPONENT_SET_DASH,
   COMPONENT_SET_DASH_GAP,
   COMPONENT_SET_BORDER_WIDTH,
-  IS_BROWSER
+  IS_BROWSER,
+  type CanvasColors
 } from '#core/constants'
 import type { EditorState } from '#core/editor/types'
 import { RenderProfiler } from '#core/profiler'
@@ -128,6 +129,8 @@ export class SkiaRenderer {
   navigationGeneration = 0
   tiledSceneEnabled = false
   tracksSceneSettlement = true
+  /** Accent colours for components and instances; an editor passes its `canvasColors` here. */
+  canvasColors: CanvasColors = DEFAULT_CANVAS_COLORS
   /** Colour space this renderer's surface presents; colours convert into it when painting. */
   presentationColorSpace: RenderColorSpace = 'srgb'
   tiledScenePending = false
@@ -403,7 +406,19 @@ export class SkiaRenderer {
   }
 
   compColor(alpha = 1) {
-    return this.ck.Color4f(COMPONENT_COLOR.r, COMPONENT_COLOR.g, COMPONENT_COLOR.b, alpha)
+    const { r, g, b } = this.canvasColors.component
+    return this.ck.Color4f(r, g, b, alpha)
+  }
+
+  instColor(alpha = 1) {
+    const { r, g, b } = this.canvasColors.instance
+    return this.ck.Color4f(r, g, b, alpha)
+  }
+
+  /** Colour of the outline, hover and size pill of a node of this type. */
+  accentColor(type: string, alpha = 1) {
+    if (type === 'INSTANCE') return this.instColor(alpha)
+    return this.isComponentType(type) ? this.compColor(alpha) : this.selColor(alpha)
   }
 
   isComponentType(type: string): boolean {

@@ -1,4 +1,5 @@
 import type { SceneGraph } from '@open-pencil/scene-graph'
+import { findComponentAncestor } from '@open-pencil/scene-graph/instances'
 
 import { computeAllLayouts } from '#core/layout'
 
@@ -30,9 +31,18 @@ function affectedPageIds(
   }
 
   for (const id of editedIds) addPageOf(id)
-  for (const componentId of componentIds) {
+  // Sync also reaches the components that hold an instance of an edited one, and their instances.
+  const pending = [...componentIds]
+  const seen = new Set<string>()
+  for (let componentId = pending.pop(); componentId; componentId = pending.pop()) {
+    if (seen.has(componentId)) continue
+    seen.add(componentId)
     addPageOf(componentId)
-    for (const instance of graph.getInstances(componentId)) addPageOf(instance.id)
+    for (const instance of graph.getInstances(componentId)) {
+      addPageOf(instance.id)
+      const owner = findComponentAncestor(graph, instance.id)
+      if (owner) pending.push(owner.id)
+    }
   }
   return pageIds
 }

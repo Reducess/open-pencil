@@ -9,12 +9,12 @@ import type { UndoEntry } from '@open-pencil/scene-graph/undo'
 import { assertNodeEditable } from './capabilities'
 import { restoreSubtree, snapshotSubtree } from './clipboard/subtree-history'
 import { collectNodePositions, pushPositionUndo } from './history/position'
-import { createInstanceOverrideRecorder } from './instance-overrides'
 import {
   restorePageFromSnapshot as restorePageSnapshot,
   snapshotPage as createPageSnapshot,
   type PageSnapshot
 } from './history/snapshot'
+import { createInstanceOverrideRecorder } from './instance-overrides'
 import { textAutoResizeChanges } from './text/auto-resize'
 import type { EditorContext } from './types'
 
@@ -118,7 +118,13 @@ export function createUndoActions(ctx: EditorContext) {
       ? createResizeSnapshot(node)
       : { x: node.x, y: node.y, width: node.width, height: node.height }
     // A resized instance keeps its size when the main component changes.
-    const overrides = recordInstanceOverrides(nodeId, ['width', 'height'])
+    const overrides = recordInstanceOverrides(nodeId, [
+      'width',
+      'height',
+      // Dragging a left or top handle also moves the node.
+      ...(node.x === original.x ? [] : ['x']),
+      ...(node.y === original.y ? [] : ['y'])
+    ])
     ctx.undo.push({
       label: 'Resize',
       forward: () => {
@@ -181,13 +187,16 @@ export function createUndoActions(ctx: EditorContext) {
     const node = ctx.graph.getNode(nodeId)
     if (!node) return
     const finalRotation = node.rotation
+    const overrides = recordInstanceOverrides(nodeId, ['rotation'])
     ctx.undo.push({
       label: 'Rotate',
       forward: () => {
         ctx.graph.updateNode(nodeId, { rotation: finalRotation })
+        overrides?.redo()
       },
       inverse: () => {
         ctx.graph.updateNode(nodeId, { rotation: origRotation })
+        overrides?.undo()
       }
     })
   }

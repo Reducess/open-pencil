@@ -1,3 +1,5 @@
+import { isEqual } from 'es-toolkit'
+
 import {
   cloneInstanceOverrideState,
   setInstanceOverride,
@@ -9,6 +11,7 @@ import { copyDerivedGlyphs, copyGeometryPaths } from '@open-pencil/scene-graph/c
 import { weightToStyle } from '#core/text/fonts'
 import { hasGlyphOutlines } from '#core/text/opentype'
 
+import { createInstanceOverrideRecorder } from './instance-overrides'
 import { pathTextEditChanges } from './text/path-edit'
 import {
   createTextEditSession,
@@ -101,6 +104,7 @@ function applyTextInstanceOverride(
 }
 
 export function createTextActions(ctx: EditorContext) {
+  const { recordInstanceOverrides } = createInstanceOverrideRecorder(ctx)
   let activeSession: TextEditSession | null = null
 
   function updateTextEditNode(nodeId: string, changes: Partial<SceneNode>) {
@@ -173,6 +177,10 @@ export function createTextActions(ctx: EditorContext) {
     )
     if (before.text !== after.text) {
       applyTextInstanceOverride(ctx, containingInstances, result.nodeId, after.text)
+    }
+    // Restyling a range without retyping is an override too; the snapshots below carry its undo.
+    if (!isEqual(before.styleRuns, after.styleRuns)) {
+      recordInstanceOverrides(result.nodeId, ['styleRuns'])
     }
     const instanceOverridesAfter = snapshotInstanceOverrides(ctx, containingInstances)
     ctx.state.editingTextId = null

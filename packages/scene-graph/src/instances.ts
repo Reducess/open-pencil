@@ -67,6 +67,54 @@ export const INSTANCE_SYNC_PROPS: (keyof SceneNode)[] = [
 
 export const INSTANCE_SYNC_FIELDS = [...INSTANCE_SYNC_PROPS, ...INSTANCE_SYNC_TEXT_PROPS] as const
 
+/**
+ * Fields a layer inside an instance also takes from its source layer. They are kept out of
+ * INSTANCE_SYNC_PROPS because that list describes the instance root too, and where an instance
+ * sits, how it is rotated and whether it shows belong to whoever placed it.
+ */
+export const INSTANCE_SYNC_LAYER_PROPS = [
+  'x',
+  'y',
+  'rotation',
+  'visible',
+  'textAlignHorizontal',
+  'textAlignVertical',
+  'lineHeight',
+  'letterSpacing',
+  'italic',
+  'textDecoration',
+  'styleRuns'
+] as const satisfies readonly (keyof SceneNode)[]
+
+/** Everything component sync writes on a layer inside an instance. */
+export const INSTANCE_SYNC_LAYER_FIELDS = [
+  ...INSTANCE_SYNC_FIELDS,
+  ...INSTANCE_SYNC_LAYER_PROPS
+] as const
+
+/** True when the parent's auto layout, not the node, decides where the node sits. */
+export function isPositionedByLayout(graph: SceneGraph, node: SceneNode): boolean {
+  if (node.layoutPositioning === 'ABSOLUTE') return false
+  const parent = node.parentId ? graph.nodes.get(node.parentId) : undefined
+  return parent !== undefined && parent.layoutMode !== 'NONE'
+}
+
+function skipsLayerSync(
+  graph: SceneGraph,
+  overrides: InstanceOverrideState,
+  instParentId: string,
+  instChild: SceneNode,
+  key: (typeof INSTANCE_SYNC_LAYER_FIELDS)[number]
+): boolean {
+  if (hasNodeInstanceOverride(overrides, instParentId, instChild.id, key)) return true
+  if (key === 'x' || key === 'y') return isPositionedByLayout(graph, instChild)
+  // Style runs are ranges of the text: they only fit the text they were written for.
+  if (key === 'styleRuns') {
+    return hasNodeInstanceOverride(overrides, instParentId, instChild.id, 'text')
+  }
+  return false
+}
+
 function setSceneProp<K extends keyof SceneNode>(
   target: Partial<SceneNode>,
   key: K,
@@ -289,8 +337,8 @@ function syncChildren(
     const instChild = instChildMap.get(compChildId)
     if (!compChild || !instChild) continue
 
-    for (const key of INSTANCE_SYNC_FIELDS) {
-      if (hasNodeInstanceOverride(overrides, instParentId, instChild.id, key)) continue
+    for (const key of INSTANCE_SYNC_LAYER_FIELDS) {
+      if (skipsLayerSync(graph, overrides, instParentId, instChild, key)) continue
 
       copyProp(instChild, compChild, key)
     }
@@ -384,6 +432,7 @@ export function syncInstances(graph: SceneGraph, componentId: string): void {
   if (syncing.has(componentId)) return
   syncing.add(componentId)
   try {
+    const owners = new Set<string>()
     for (const instance of getInstances(graph, componentId)) {
       for (const key of INSTANCE_SYNC_PROPS) {
         if (hasNodeInstanceOverride(instance.instanceOverrides, instance.id, instance.id, key))
@@ -391,7 +440,12 @@ export function syncInstances(graph: SceneGraph, componentId: string): void {
         copyProp(instance, component, key)
       }
       syncChildren(graph, component.id, instance.id, instance.instanceOverrides)
+      const owner = findComponentAncestor(graph, instance.id)
+      if (owner) owners.add(owner.id)
     }
+    // An instance nested in another component is a layer of that component: its copies inside
+    // the outer component's instances are reached through the outer component only.
+    for (const ownerId of owners) syncInstances(graph, ownerId)
   } finally {
     syncing.delete(componentId)
   }
@@ -425,6 +479,16 @@ export function getInstances(graph: SceneGraph, componentId: string): SceneNode[
     if (node) instances.push(node)
   }
   return instances
+}
+
+/** Nearest COMPONENT above `nodeId`: the main component the node is a layer of. */
+export function findComponentAncestor(graph: SceneGraph, nodeId: string): SceneNode | undefined {
+  let current = graph.nodes.get(nodeId)
+  while (current?.parentId) {
+    current = graph.nodes.get(current.parentId)
+    if (current?.type === 'COMPONENT') return current
+  }
+  return undefined
 }
 
 /** Nearest INSTANCE at or above `nodeId` — self, parent, grandparent, etc. */
@@ -462,21 +526,59 @@ export function recordInstanceOverrideValue(
   setInstanceOverride(instance.instanceOverrides, instance.id, nodeId, field, value)
   graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
 }
+const SYNC_FIELD_SET: ReadonlySet<string> = new Set(INSTANCE_SYNC_FIELDS)
+const LAYER_PROP_SET: ReadonlySet<string> = new Set(INSTANCE_SYNC_LAYER_PROPS)
+
+export interface InstanceOverrideTarget {
+  instance: SceneNode
+  fields: string[]
+}
+
+/**
+ * Which of `fields`, once edited on `nodeId`, are overrides, and of which instance.
+ *
+ * The fields in INSTANCE_SYNC_FIELDS belong to the nearest instance, the node itself included.
+ * The layer fields (position, rotation, visibility, text layout) only count for a layer inside an
+ * instance, so a nested instance that is moved is an override of the instance around it; they are
+ * listed on every instance around the layer, because each one syncs it from its own component.
+ * A position computed by auto layout is never an override.
+ */
+export function instanceOverrideTargets(
+  graph: SceneGraph,
+  nodeId: string,
+  fields: Iterable<string>
+): InstanceOverrideTarget[] {
+  const node = graph.nodes.get(nodeId)
+  if (!node) return []
+  const positionedByLayout = isPositionedByLayout(graph, node)
+  const edited = [...fields]
+  const synced = edited.filter((field) => SYNC_FIELD_SET.has(field))
+  const layer = edited.filter(
+    (field) =>
+      LAYER_PROP_SET.has(field) && !((field === 'x' || field === 'y') && positionedByLayout)
+  )
+
+  const targets: InstanceOverrideTarget[] = []
+  let nearest = true
+  for (let current: SceneNode | undefined = node; current;) {
+    if (current.type === 'INSTANCE') {
+      const owned = [...(nearest ? synced : []), ...(current.id === nodeId ? [] : layer)]
+      if (owned.length > 0) targets.push({ instance: current, fields: owned })
+      nearest = false
+    }
+    current = current.parentId ? graph.nodes.get(current.parentId) : undefined
+  }
+  return targets
+}
+
 export function recordInstanceOverride(
   graph: SceneGraph,
   nodeId: string,
   fields: Iterable<string>
 ): void {
-  const instance = findInstanceAncestor(graph, nodeId)
-  if (!instance) return
-
-  const relevant = [...fields].filter((field) =>
-    (INSTANCE_SYNC_FIELDS as readonly string[]).includes(field)
-  )
-
-  if (relevant.length === 0) return
-
-  for (const field of relevant)
-    setInstanceOverride(instance.instanceOverrides, instance.id, nodeId, field)
-  graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
+  for (const { instance, fields: owned } of instanceOverrideTargets(graph, nodeId, fields)) {
+    for (const field of owned)
+      setInstanceOverride(instance.instanceOverrides, instance.id, nodeId, field)
+    graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
+  }
 }

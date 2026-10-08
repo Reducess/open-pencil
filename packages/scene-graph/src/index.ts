@@ -8,8 +8,11 @@ export {
   copyInstanceComponentProps,
   hasInstanceOverride,
   INSTANCE_SYNC_FIELDS,
+  INSTANCE_SYNC_LAYER_FIELDS,
+  INSTANCE_SYNC_LAYER_PROPS,
   INSTANCE_SYNC_PROPS,
   INSTANCE_SYNC_TEXT_PROPS,
+  instanceOverrideTargets,
   recordInstanceOverride
 } from './instances'
 export {

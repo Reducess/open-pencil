@@ -1,7 +1,10 @@
 import { assertNodeEditable } from '#core/editor/capabilities'
+import { createInstanceOverrideRecorder } from '#core/editor/instance-overrides'
 import type { EditorContext } from '#core/editor/types'
 
 export function createStructureStateActions(ctx: EditorContext) {
+  const { recordInstanceOverrides } = createInstanceOverrideRecorder(ctx)
+
   function setNodeVisible(id: string, visible: boolean) {
     ctx.graph.updateNode(id, { visible })
     const parentId = ctx.graph.getNode(id)?.parentId
@@ -14,10 +17,18 @@ export function createStructureStateActions(ctx: EditorContext) {
     if (!node) return
     const visible = !node.visible
     setNodeVisible(id, visible)
+    // A layer hidden or shown inside an instance keeps that state when the component changes.
+    const overrides = recordInstanceOverrides(id, ['visible'])
     ctx.undo.push({
       label: visible ? 'Show' : 'Hide',
-      forward: () => setNodeVisible(id, visible),
-      inverse: () => setNodeVisible(id, !visible)
+      forward: () => {
+        setNodeVisible(id, visible)
+        overrides?.redo()
+      },
+      inverse: () => {
+        setNodeVisible(id, !visible)
+        overrides?.undo()
+      }
     })
   }
 

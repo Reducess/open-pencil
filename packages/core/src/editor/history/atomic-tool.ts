@@ -14,7 +14,11 @@ import { isAtomicTool, type ToolDef } from '#core/tools/schema'
 // Capture property changes across pages. Component synchronization remains editor-owned.
 const MAX_TRANSACTION_NODES = 10_000
 
-type MutationEditor = Pick<Editor, 'graph' | 'runLayoutForNode' | 'requestRender' | 'pushUndoEntry'>
+type MutationEditor = Pick<
+  Editor,
+  'graph' | 'runLayoutForNode' | 'requestRender' | 'pushUndoEntry'
+> &
+  Partial<Pick<Editor, 'syncVariableBindings' | 'notifyVariablesChanged'>>
 type Changes<T> = {
   id: string
   before: Partial<T>
@@ -99,6 +103,8 @@ export function executeAtomicTool(
       variableChanges.length > 0,
       nodeChanges.map((change) => change.id)
     )
+    // The bound fields were replayed with the nodes; cached pictures and listeners still follow.
+    if (variableChanges.length > 0) editor.notifyVariablesChanged?.()
     editor.requestRender()
   }
 
@@ -110,12 +116,14 @@ export function executeAtomicTool(
     }
     checkpoint.assertPropertiesOnly()
     const variableChanges = changes(variables, graph.variables)
+    const touched = changes(nodes, graph.nodes)
+    resolveBindings(editor, variableChanges, touched)
     layout(
       graph,
       editor,
       pageId,
       variableChanges.length > 0,
-      changes(nodes, graph.nodes).map((change) => change.id)
+      touched.map((change) => change.id)
     )
     const nodeChanges = changes(nodes, graph.nodes)
     const contentChanged =
@@ -135,6 +143,21 @@ export function executeAtomicTool(
     checkpoint.restore()
     editor.requestRender()
     throw error
+  }
+}
+
+/**
+ * A tool writes variables and bindings straight on the graph. Scalar fields hold resolved values,
+ * so they are brought up to date before the undo entry is taken, which then carries them.
+ */
+function resolveBindings(
+  editor: MutationEditor,
+  variableChanges: Changes<Variable>[],
+  nodeChanges: Changes<SceneNode>[]
+): void {
+  if (variableChanges.length > 0) editor.notifyVariablesChanged?.()
+  else if (nodeChanges.some((change) => 'boundVariables' in change.after)) {
+    editor.syncVariableBindings?.()
   }
 }
 

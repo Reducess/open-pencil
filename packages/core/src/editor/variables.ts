@@ -17,6 +17,15 @@ export function createVariableActions(ctx: EditorContext) {
     ctx.emitEditorEvent('variables:changed')
   }
 
+  /**
+   * For whoever changed variables, collections or modes on the graph without going through the
+   * actions below (an agent tool, an import): re-resolves the bound fields, lays out, repaints
+   * and emits `variables:changed`.
+   */
+  function notifyVariablesChanged() {
+    changed()
+  }
+
   function getVariablesByType(type: VariableType) {
     return ctx.graph.getVariablesByType(type)
   }
@@ -355,6 +364,7 @@ export function createVariableActions(ctx: EditorContext) {
     renameMode,
     setDefaultMode,
     duplicateMode,
-    setActiveMode
+    setActiveMode,
+    notifyVariablesChanged
   }
 }

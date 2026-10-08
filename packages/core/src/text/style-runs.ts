@@ -157,6 +157,26 @@ export function adjustRunsForDelete(
   return result
 }
 
+/**
+ * Gives a range the value `value` for one style key. A run only says where a range differs from
+ * its node, so the override is dropped when the node already has that value and written
+ * otherwise — including the "off" value (`italic: false`, `textDecoration: 'NONE'`) that turns
+ * the style off for a range of a node that has it on.
+ */
+function setOrInheritInRange<K extends keyof CharacterStyleOverride>(
+  runs: StyleRun[],
+  start: number,
+  end: number,
+  key: K,
+  value: NonNullable<CharacterStyleOverride[K]>,
+  nodeValue: NonNullable<CharacterStyleOverride[K]>,
+  textLength: number
+): StyleRun[] {
+  if (value === nodeValue) return removeStyleFromRange(runs, start, end, [key], textLength)
+  const patch: CharacterStyleOverride = { [key]: value }
+  return applyStyleToRange(runs, start, end, patch, textLength)
+}
+
 export function toggleBoldInRange(
   runs: StyleRun[],
   start: number,
@@ -166,9 +186,12 @@ export function toggleBoldInRange(
 ): { runs: StyleRun[]; newWeight: number } {
   const allBold = selectionAllBold(runs, start, end, nodeWeight)
   const targetWeight = allBold ? 400 : 700
-  const newRuns = allBold
+  // A bold node needs an explicit regular run to un-bold a range; a lighter node goes back to
+  // its own weight when the override is dropped.
+  const inherits = allBold ? nodeWeight < 700 : nodeWeight === 700
+  const newRuns = inherits
     ? removeStyleFromRange(runs, start, end, ['fontWeight'], textLength)
-    : applyStyleToRange(runs, start, end, { fontWeight: 700 }, textLength)
+    : applyStyleToRange(runs, start, end, { fontWeight: targetWeight }, textLength)
   return { runs: newRuns, newWeight: targetWeight }
 }
 
@@ -193,11 +216,11 @@ export function toggleItalicInRange(
   nodeItalic: boolean,
   textLength: number
 ): { runs: StyleRun[]; newItalic: boolean } {
-  const allItalic = selectionAllItalic(runs, start, end, nodeItalic)
-  const newRuns = allItalic
-    ? removeStyleFromRange(runs, start, end, ['italic'], textLength)
-    : applyStyleToRange(runs, start, end, { italic: true }, textLength)
-  return { runs: newRuns, newItalic: !allItalic }
+  const newItalic = !selectionAllItalic(runs, start, end, nodeItalic)
+  return {
+    runs: setOrInheritInRange(runs, start, end, 'italic', newItalic, nodeItalic, textLength),
+    newItalic
+  }
 }
 
 function selectionAllItalic(
@@ -222,10 +245,11 @@ export function toggleDecorationInRange(
   textLength: number
 ): { runs: StyleRun[]; newDeco: TextDecoration } {
   const allHave = selectionAllHasDecoration(runs, start, end, deco, nodeDeco)
-  const newRuns = allHave
-    ? removeStyleFromRange(runs, start, end, ['textDecoration'], textLength)
-    : applyStyleToRange(runs, start, end, { textDecoration: deco }, textLength)
-  return { runs: newRuns, newDeco: allHave ? 'NONE' : deco }
+  const newDeco: TextDecoration = allHave ? 'NONE' : deco
+  return {
+    runs: setOrInheritInRange(runs, start, end, 'textDecoration', newDeco, nodeDeco, textLength),
+    newDeco
+  }
 }
 
 function selectionAllHasDecoration(

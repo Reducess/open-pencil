@@ -2,6 +2,7 @@ export { CENA_FORMATO, MOTOR_NOME, MOTOR_VERSAO } from './types'
 export type {
   AvisoCena,
   Cena,
+  CenaCompactacao,
   CenaImagemRef,
   CenaMotor,
   GravidadeProblema,
@@ -20,3 +21,11 @@ export { cenaValida, validarCena } from './validate'
 export { MIGRACOES, migrarCena, type Migracao } from './migrate'
 export { coletarHashesDeImagem, imagensReferenciadas, tipoDeImagem } from './images'
 export { codificarValor, decodificarValor } from './json-safe'
+export {
+  compactarNos,
+  expandirCena,
+  MODO_PADROES_OMITIDOS,
+  TABELA_DE_PADROES_ATUAL,
+  TABELAS_DE_PADROES,
+  type TabelaDePadroes
+} from './defaults'

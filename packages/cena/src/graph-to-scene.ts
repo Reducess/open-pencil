@@ -1,6 +1,7 @@
 import { populateAllLazyFigImportRoots } from '@open-pencil/core/kiwi'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
+import { compactarNos } from './defaults'
 import { CenaError } from './errors'
 import { imagensReferenciadas, tipoDeImagem } from './images'
 import { codificarValor } from './json-safe'
@@ -74,6 +75,8 @@ async function mapearImagens(
  *   node changes, blobs — is not stored, so nothing is left to populate after loading.
  * - Image bytes go through `resolverArquivo`; only the returned storage references are written.
  * - `.fig`-only state (`figKiwiVersion`, `figSchemaDeflated`) is dropped.
+ * - Node fields holding the engine default are omitted and `compactacao` is stamped, unless
+ *   `compactar: false`.
  *
  * The result is plain JSON: `JSON.parse(JSON.stringify(cena))` is deeply equal to `cena`.
  */
@@ -84,11 +87,18 @@ export async function grafoParaCena(graph: SceneGraph, options: OpcoesGrafoParaC
   const pares = (entries: Iterable<[string, unknown]>, campo: string): Array<[string, JSONObjeto]> =>
     Array.from(entries, ([id, value]) => [id, encodeObject(value, `${campo}/${id}`)])
 
+  const completos: Array<[string, JSONObjeto]> = Array.from(graph.nodes, ([id, node]) => [
+    id,
+    encodeNode(node, options.manterTextPicture === true)
+  ])
+  const armazenados = options.compactar === false ? { nos: completos } : compactarNos(completos)
+
   const cena: Cena = {
     formato: CENA_FORMATO,
     motor: { nome: MOTOR_NOME, versao: MOTOR_VERSAO },
+    ...('compactacao' in armazenados ? { compactacao: armazenados.compactacao } : {}),
     raiz: graph.rootId,
-    nos: Array.from(graph.nodes, ([id, node]) => [id, encodeNode(node, options.manterTextPicture === true)]),
+    nos: armazenados.nos,
     variaveis: pares(graph.variables, 'variaveis'),
     colecoes: pares(graph.variableCollections, 'colecoes'),
     modoAtivo: [...graph.activeMode],

@@ -4,6 +4,7 @@ export type CodigoErroCena =
   | 'cena-invalida'
   | 'formato-desconhecido'
   | 'motor-desconhecido'
+  | 'compactacao-desconhecida'
   | 'imagem-sem-arquivo'
   | 'valor-nao-serializavel'
 

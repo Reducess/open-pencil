@@ -1,3 +1,4 @@
+import { expandirCena, lerCompactacao } from './defaults'
 import { CenaError } from './errors'
 import { CENA_FORMATO, MOTOR_NOME, MOTOR_VERSAO } from './types'
 import type { Cena } from './types'
@@ -30,7 +31,9 @@ function temMotor(cena: Record<string, unknown>): cena is Record<string, unknown
 
 /**
  * Brings a stored scene to the current engine version. Today that is the identity for
- * `MOTOR_VERSAO`; any other version without a registered path is refused rather than guessed.
+ * `MOTOR_VERSAO` (a compact scene stays compact, a full one stays full — both are read); any
+ * other version without a registered path is refused rather than guessed, and so is a
+ * `compactacao` stamp this package does not know.
  * `migracoes` exists so the chaining can be tested before the first real step is written.
  */
 export function migrarCena(
@@ -53,7 +56,13 @@ export function migrarCena(
     )
   }
 
-  let atual: Cena = cena
+  // An unknown compaction mode or defaults table is refused here, before anything reads a node.
+  lerCompactacao(cena)
+
+  // Steps rewrite nodes of the version they come from, so they are handed full nodes: the fields
+  // a compact scene omits are filled in from the table *it* names. The result stays expanded; it
+  // is compacted again, against the current table, the next time the document is saved.
+  let atual: Cena = cena.motor.versao === MOTOR_VERSAO ? cena : expandirCena(cena)
   const visited = new Set<string>()
   while (atual.motor.versao !== MOTOR_VERSAO) {
     const versao = atual.motor.versao

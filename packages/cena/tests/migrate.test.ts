@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 
-import { cenaParaGrafo, CenaError, MIGRACOES, migrarCena, MOTOR_VERSAO } from '../src'
+import { cenaParaGrafo, CenaError, expandirCena, MIGRACOES, migrarCena, MOTOR_VERSAO } from '../src'
 import type { Cena, Migracao } from '../src'
 
 import { buildRichScene } from './helpers/rich-scene'
@@ -63,7 +63,10 @@ describe('migrarCena', () => {
     expect(migrated.motor).toEqual({ nome: 'open-pencil', versao: MOTOR_VERSAO })
     expect(migrated.meta).toEqual({ a: 1, b: 2 })
     expect(old.motor.versao).toBe('0.13.0')
-    expect(migrated.nos).toBe(current.nos)
+    // Steps see full nodes: what the compact scene omitted is filled in from the table it names.
+    expect(migrated.compactacao).toBeUndefined()
+    expect(migrated.nos).toStrictEqual(expandirCena(current).nos)
+    expect(current.compactacao).toEqual({ modo: 'padroes-omitidos', tabela: '0.15.1' })
   })
 
   test('steps that loop are refused instead of spinning', () => {

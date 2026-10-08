@@ -31,6 +31,19 @@ export interface CenaImagemRef {
   tipo: string
 }
 
+/**
+ * How the nodes in `nos` are stored. Absent: every node carries every field (the only layout
+ * before compaction existed, still read). Present: a field equal to the engine default of the
+ * node's type is omitted and restored on load from the table named here (see `defaults.ts`).
+ */
+export interface CenaCompactacao {
+  modo: 'padroes-omitidos'
+  /** Id of the defaults table the omitted fields are read from. Fixed for the life of the scene. */
+  tabela: string
+  /** Ids of nodes stored whole because they lacked a field of the table. Usually absent. */
+  completos?: string[]
+}
+
 export interface CenaMotor {
   nome: string
   versao: string
@@ -44,9 +57,11 @@ export interface CenaMotor {
 export interface Cena {
   formato: typeof CENA_FORMATO
   motor: CenaMotor
+  /** Absent on scenes that store every field of every node. */
+  compactacao?: CenaCompactacao
   /** Id of the document root node. */
   raiz: string
-  /** `[id, SceneNode]` in the engine's own order. */
+  /** `[id, SceneNode]` in the engine's own order; fields at their default omitted per `compactacao`. */
   nos: Array<[string, JSONObjeto]>
   /** `[id, Variable]`. */
   variaveis: Array<[string, JSONObjeto]>
@@ -108,6 +123,11 @@ export interface OpcoesGrafoParaCena {
    * when the node's font cannot be loaded, and it embeds font data.
    */
   manterTextPicture?: boolean
+  /**
+   * `false` writes every field of every node, as scenes were stored before compaction. On by
+   * default: a field holding the engine default is omitted and `compactacao` is stamped.
+   */
+  compactar?: boolean
 }
 
 export interface OpcoesCenaParaGrafo {

@@ -1,3 +1,5 @@
+import { nosExpandidos } from './defaults'
+import { CenaError } from './errors'
 import { imagensReferenciadas } from './images'
 import { CENA_FORMATO, MOTOR_NOME } from './types'
 import type { GravidadeProblema, ProblemaCena } from './types'
@@ -295,6 +297,22 @@ function validarVariaveis(relatorio: Relatorio, cena: Registro): void {
 }
 
 /**
+ * The checks below read `parentId`, `childIds` and `componentId`, which a compact scene omits
+ * when they hold the default. They run on a view with the nodes expanded; positions in `nos` are
+ * the same, so the reported paths still point into the stored scene.
+ */
+function verComNosCompletos(relatorio: Relatorio, cena: Registro): Registro {
+  if (cena['compactacao'] === undefined) return cena
+  try {
+    return { ...cena, nos: nosExpandidos(cena) }
+  } catch (error) {
+    if (!(error instanceof CenaError)) throw error
+    relatorio.erro('compactacao-invalida', 'compactacao', error.message)
+    return cena
+  }
+}
+
+/**
  * Structural checks on a stored scene. Never throws: whatever it is handed, it answers with the
  * list of problems. Only `gravidade: 'erro'` entries make the scene unusable; `'aviso'` entries
  * describe things the engine tolerates.
@@ -310,7 +328,7 @@ export function validarCena(cena: unknown): ProblemaCena[] {
   }
   try {
     validarCabecalho(relatorio, cena)
-    const nos = validarNos(relatorio, cena)
+    const nos = validarNos(relatorio, verComNosCompletos(relatorio, cena))
     validarVariaveis(relatorio, cena)
     validarInstancias(relatorio, cena, nos)
     validarImagens(relatorio, cena, nos)

@@ -5,7 +5,7 @@ import { populateAllLazyFigImportRoots } from '@open-pencil/core/kiwi'
 import { setLazyFigImportContext } from '@open-pencil/core/kiwi/fig/lazy-import'
 import { SceneGraph, setInstanceOverride } from '@open-pencil/scene-graph'
 
-import { MOTOR_VERSAO } from '../src'
+import { expandirCena, MOTOR_VERSAO } from '../src'
 
 import { buildTextPicture, renderPNG, sha256 } from './helpers/render'
 import { buildRichScene, solid } from './helpers/rich-scene'
@@ -111,7 +111,7 @@ describe('SceneNode fields JSON cannot carry', () => {
 
     const storage = new FakeStorage()
     const cena = await save(scene.graph, storage)
-    const stored = cena.nos.find(([id]) => id === scene.ids.title)?.[1]
+    const stored = expandirCena(cena).nos.find(([id]) => id === scene.ids.title)?.[1]
     expect(stored?.['textPicture']).toBeNull()
     // The caller's node is not touched by the save.
     expect(title.textPicture).toBe(picture)

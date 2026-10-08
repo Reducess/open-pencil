@@ -51,10 +51,18 @@ Fork-only package `@open-pencil/cena`: the JSON envelope Mineer stores for a des
   packages it needs with `design-render/scripts/vendor-open-pencil.sh`.
 - Wiring outside the package: the `packages/cena` entry in the root `package.json` workspaces, the
   `cena` shard in `tools/unit-tests/src/shards.ts` and the matching entry in the CI matrix.
-- Tests: `bun test packages/cena/tests` (118 tests). The round trip requires a byte-identical
+- Tests: `bun test packages/cena/tests` (148 tests). The round trip requires a byte-identical
   headless PNG.
 - On an engine upgrade, `packages/cena/tests/node-fields.test.ts` fails until `MOTOR_VERSAO` is
   bumped and the migration step is written in `packages/cena/src/migrate.ts`.
+
+- Stored nodes are compact since 2026-10-08: fields at the engine default are omitted and the
+  envelope is stamped `compactacao: { modo: "padroes-omitidos", tabela: "0.15.1" }` (2,684 nodes:
+  8.92 MB → 0.66 MB). The defaults live in a frozen, versioned table inside the package
+  (`packages/cena/src/padroes/`), so a default changed by a later engine cannot change an old
+  scene. Scenes without the stamp are still read. When `createDefaultNode` changes,
+  `packages/cena/tests/defaults.test.ts` fails until a NEW table is generated with
+  `packages/cena/scripts/gerar-padroes.ts` and registered — never edit an existing one.
 
 No engine source was patched for this. Engine behaviour found along the way that a server still
 has to work around (the renderer cache leak and the silent text skip are now patches 12 and 13):

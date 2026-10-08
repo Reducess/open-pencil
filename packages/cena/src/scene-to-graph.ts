@@ -6,6 +6,7 @@ import type {
   VariableCollection
 } from '@open-pencil/scene-graph'
 
+import { expandirCena } from './defaults'
 import { CenaError } from './errors'
 import { imagensReferenciadas } from './images'
 import { decodificarValor } from './json-safe'
@@ -103,7 +104,8 @@ export async function cenaParaGrafo(
 
   const graph = new SceneGraph()
   graph.rootId = cena.raiz
-  graph.nodes = new Map(cena.nos.map(([id, node]) => [id, decodeNode(id, node)]))
+  // Omitted fields come back from the defaults table the scene names, not the running engine's.
+  graph.nodes = new Map(expandirCena(cena).nos.map(([id, node]) => [id, decodeNode(id, node)]))
   graph.variables = decodePairs<Variable>(cena.variaveis, 'variaveis')
   graph.variableCollections = decodePairs<VariableCollection>(cena.colecoes, 'colecoes')
   graph.activeMode = new Map(cena.modoAtivo)

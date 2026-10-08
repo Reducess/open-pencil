@@ -17,6 +17,10 @@ if (problems.length > 0) {
   throw new Error(`Expected a valid scene from the built package: ${JSON.stringify(problems)}`)
 }
 
+if (cena.compactacao?.modo !== 'padroes-omitidos' || mod.expandirCena(cena).compactacao !== undefined) {
+  throw new Error('Expected the built @open-pencil/cena package to write compact scenes')
+}
+
 const { grafo } = await mod.cenaParaGrafo(JSON.parse(JSON.stringify(cena)), {
   carregarImagem: () => null
 })

@@ -361,14 +361,13 @@ function bindingIsOverruledByLayout(graph: SceneGraph, node: SceneNode, field: s
 export function boundScalarChanges(graph: SceneGraph, nodeId: string): Partial<SceneNode> {
   const node = graph.nodes.get(nodeId)
   if (!node) return {}
-  const current = node as unknown as Record<string, unknown>
   const changes: Record<string, number> = {}
   for (const [field, variableId] of Object.entries(node.boundVariables)) {
     if (!SCALAR_BINDING_FIELDS.has(field)) continue
     if (bindingIsOverruledByLayout(graph, node, field)) continue
     const value = resolveNumberVariableForNode(graph, nodeId, variableId)
     if (value === undefined || !Number.isFinite(value)) continue
-    if (current[field] !== value) changes[field] = value
+    if (Reflect.get(node, field) !== value) changes[field] = value
     // A uniform radius is stored on the four corners too; keep them in step.
     if (field === 'cornerRadius' && !node.independentCorners) {
       for (const corner of CORNER_RADIUS_FIELDS) {
